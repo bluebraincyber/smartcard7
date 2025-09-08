@@ -1,3 +1,7 @@
-import { sql } from '@vercel/postgres';
+import { Pool } from 'pg';
 
-export { sql };
+const pool = new Pool({
+  connectionString: process.env.POSTGRES_URL,
+});
+
+export default pool;
