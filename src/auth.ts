@@ -112,6 +112,5 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     
     // Habilita debug exceto em produção (alinhado ao novidades.md)
-    debug: process.env.NODE_ENV !== 'production',
-  }
+    debug: process.env.NODE_ENV !== 'production'
 });
