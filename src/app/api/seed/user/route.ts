@@ -37,7 +37,7 @@ export async function POST() {
         password: 'admin123'
       }
     });
-  } catch (e: any) {
+  } catch (e: ) {
     return Response.json({ 
       ok: false, 
       error: e.message 

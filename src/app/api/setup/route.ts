@@ -126,7 +126,7 @@ export async function POST() {
       success: true, 
       message: 'Tabelas criadas/validadas com sucesso (mutações idempotentes aplicadas)'
     });
-  } catch (error: any) {
+  } catch (error: ) {
     console.error('Setup error:', error);
     return Response.json({ 
       error: error.message 

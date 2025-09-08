@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { sql } from '@vercel/postgres'
-import { auth } from '@/auth'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/authOptions'
 import StorePageClient from './store-page-client'
 
 interface Store {
@@ -36,7 +37,7 @@ interface Item {
 
 export default async function StorePage({ params }: { params: { id: string } }) {
   // 1. Obter a sessão do usuário NO SERVIDOR
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     notFound()
   }
@@ -73,7 +74,7 @@ export default async function StorePage({ params }: { params: { id: string } }) 
         GROUP BY c.id, c.name, c.isactive, c.storeid
       ) c ON s.id = c.storeid
       WHERE s.id = ${params.id} AND s."userid" = ${session.user.id}
-      GROUP BY s.id, s.name, s.slug, s.description, s.whatsapp, s.address, s.primarycolor, s.isactive
+      GROUP BY s.id, s.name, s.slug, s.description, s.whatsapp, s.address, s.primary_color, s.isactive
     `
 
     // 3. Se a consulta não retornar NADA, significa que a loja não existe OU não pertence a este usuário
@@ -89,7 +90,7 @@ export default async function StorePage({ params }: { params: { id: string } }) 
       description: storeData.description,
       whatsapp: storeData.whatsapp,
       address: storeData.address,
-      primaryColor: storeData.primarycolor,
+      primaryColor: storeData.primary_color,
       isactive: storeData.isactive,
       categories: storeData.categories || []
     }

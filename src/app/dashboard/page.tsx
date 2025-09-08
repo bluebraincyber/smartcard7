@@ -1,10 +1,11 @@
 import { redirect } from 'next/navigation'
-import { auth } from '@/auth'
-import { sql } from '@vercel/postgres'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/authOptions'
+import pool from '@/lib/db'
 import DashboardClient from './dashboard-client'
 
 export default async function DashboardPage() {
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   
   if (!session) {
     redirect('/auth/login')
@@ -12,12 +13,10 @@ export default async function DashboardPage() {
 
   // Buscar lojas do usuário e redirecionar automaticamente
   try {
-    const storesResult = await sql`
-      SELECT id, name, slug FROM stores 
-      WHERE "userid" = ${session.user.id} AND isactive = true
-      ORDER BY created_at ASC
-      LIMIT 1
-    `
+    const storesResult = await pool.query(
+      'SELECT id, name, slug FROM stores WHERE "userid" = $1 AND isactive = true ORDER BY created_at ASC LIMIT 1',
+      [session.user.id]
+    )
     
     if (storesResult.rows.length > 0) {
       const firstStore = storesResult.rows[0]

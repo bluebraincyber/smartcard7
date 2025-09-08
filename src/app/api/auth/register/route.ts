@@ -23,7 +23,7 @@ export async function POST(req: Request) {
     `;
 
     return NextResponse.json({ ok: true }, { status: 201 });
-  } catch (e: any) {
+  } catch (e: ) {
     console.error('register error', e);
     return NextResponse.json({ ok: false, error: 'REGISTER_FAILED' }, { status: 500 });
   }

@@ -127,7 +127,7 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
       ORDER BY day ASC
     `;
 
-    const dailyAggregates = dailyAggregatesResult.rows.reduce((acc: Record<string, { visits: number; whatsappClicks: number }>, row: any) => {
+    const dailyAggregates = dailyAggregatesResult.rows.reduce<Record<string, { visits: number; whatsappClicks: number }>>((acc, row: any) => {
       const dateKey = new Date(row.day).toISOString().split('T')[0];
       acc[dateKey] = { visits: parseInt(row.visits), whatsappClicks: parseInt(row.whatsapp_clicks) };
       return acc;
@@ -185,7 +185,7 @@ export async function getGlobalAnalytics(userid: string) {
     const totalVisitsResult = await sql`
       SELECT COUNT(*) as count
       FROM analytics 
-      WHERE "storeid" = ANY(${storeids}) 
+      WHERE "storeid" = (${sql.array(storeids)})
         AND event = 'visit' 
         AND timestamp >= ${last30Days.toISOString()}
     `;
@@ -195,7 +195,7 @@ export async function getGlobalAnalytics(userid: string) {
     const totalClicksResult = await sql`
       SELECT COUNT(*) as count
       FROM analytics 
-      WHERE "storeid" = ANY(${storeids}) 
+      WHERE "storeid" = (${sql.array(storeids)})
         AND event = 'whatsapp_click' 
         AND timestamp >= ${last30Days.toISOString()}
     `;
@@ -208,7 +208,7 @@ export async function getGlobalAnalytics(userid: string) {
     const activestoreidsResult = await sql`
       SELECT DISTINCT "storeid"
       FROM analytics 
-      WHERE "storeid" = ANY(${storeids}) 
+      WHERE "storeid" = (${sql.array(storeids)})
         AND event = 'whatsapp_click' 
         AND timestamp >= ${lastWeek.toISOString()}
     `;

@@ -9,10 +9,7 @@ interface ProvidersProps {
 
 export function Providers({ children }: ProvidersProps) {
   return (
-    <SessionProvider 
-      refetchInterval={0} // Desabilitar refetch automático
-      refetchOnWindowFocus={false} // Não refetch ao focar a janela
-    >
+    <SessionProvider>
       {children}
     </SessionProvider>
   )

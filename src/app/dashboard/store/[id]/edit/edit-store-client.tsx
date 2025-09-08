@@ -39,10 +39,10 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
     name: store.name,
     slug: store.slug,
     description: store.description || '',
-    phone: store.phone,
+    phone: store.phone || '',
     address: store.address || '',
-    businessType: store.businessType,
-    requiresAddress: store.requiresAddress,
+    businessType: store.businessType || 'general',
+    requiresAddress: store.requiresAddress || false,
     coverImage: '',
     profileImage: ''
   })

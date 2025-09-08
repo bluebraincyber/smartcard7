@@ -19,12 +19,12 @@ export async function POST(request: Request) {
     
     // Encontrar o provider de credentials
     const credentialsProvider = authOptions.providers?.find(
-      (provider: any) => provider.type === 'credentials'
+      (provider: ) => provider.type === 'credentials'
     );
     
     console.log('Credentials provider found:', !!credentialsProvider);
     console.log('Provider type:', credentialsProvider?.type);
-    console.log('Has authorize function:', typeof (credentialsProvider as any)?.authorize);
+    console.log('Has authorize function:', typeof (credentialsProvider as )?.authorize);
     
     if (!credentialsProvider) {
       return NextResponse.json({ error: 'Credentials provider not found' }, { status: 500 });
@@ -38,7 +38,7 @@ export async function POST(request: Request) {
        console.log('Calling authorize function...');
        console.log('About to call authorize with:', { email, password });
        
-       result = await (credentialsProvider as any).authorize(
+       result = await (credentialsProvider as ).authorize(
          { email, password },
          {} // req object (não usado)
        );

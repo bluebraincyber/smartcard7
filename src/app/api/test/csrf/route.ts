@@ -14,7 +14,7 @@ export async function GET() {
       csrfToken,
       timestamp: new Date().toISOString()
     });
-  } catch (e: any) {
+  } catch (e: ) {
     return Response.json({ 
       ok: false, 
       error: e.message,

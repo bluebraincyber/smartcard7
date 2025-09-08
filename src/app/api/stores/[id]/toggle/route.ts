@@ -81,7 +81,7 @@ export async function PATCH(
     `;
 
     return NextResponse.json(updateRes.rows[0], { status: 200 });
-  } catch (err: any) {
+  } catch (err: ) {
     console.error("Toggle store error:", err);
     return NextResponse.json(
       { error: "Failed to toggle store" },

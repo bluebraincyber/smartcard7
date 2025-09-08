@@ -3,7 +3,7 @@
 import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Store, Plus, Eye, BarChart3, Edit, Settings, ExternalLink, Power, PowerOff } from 'lucide-react'
+import { Store, Plus, Eye, BarChart3, Edit, Settings, ExternalLink, Power, PowerOff, Package } from 'lucide-react'
 
 interface Store {
   id: string
@@ -220,6 +220,13 @@ export default function MyStoresPage() {
                     >
                       <Edit className="mr-1 h-3 w-3" />
                       Editar
+                    </Link>
+                    <Link
+                      href={`/dashboard/store/${store.id}/categories`}
+                      className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
+                    >
+                      <Package className="mr-1 h-3 w-3" />
+                      Gerenciar Produtos
                     </Link>
                     <Link
                       href={`/dashboard/store/${store.id}/analytics`}

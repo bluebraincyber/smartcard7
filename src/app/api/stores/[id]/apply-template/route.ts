@@ -96,7 +96,7 @@ export async function POST(
       SET primary_color = ${template.storeConfig.primaryColor},
           requires_address = ${template.storeConfig.requiresAddress},
           business_type = ${template.storeConfig.businessType},
-          updated_at = ${new Date()}
+          updated_at = NOW()
       WHERE id = ${storeId}
     `
 
@@ -104,7 +104,7 @@ export async function POST(
     for (const categoryData of template.categories) {
       const { rows: categoryResult } = await sql`
         INSERT INTO categories (name, description, "storeid", isactive, created_at, updated_at)
-        VALUES (${categoryData.name}, ${categoryData.description}, ${storeId}, true, ${new Date()}, ${new Date()})
+        VALUES (${categoryData.name}, ${categoryData.description}, ${storeId}, true, NOW(), NOW())
         RETURNING id
       `
       const categoryId = categoryResult[0].id
@@ -113,7 +113,7 @@ export async function POST(
       for (const itemData of categoryData.items) {
         await sql`
           INSERT INTO items (name, description, price, "categoryId", isactive, created_at, updated_at)
-          VALUES (${itemData.name}, ${itemData.description}, ${itemData.price}, ${categoryId}, true, ${new Date()}, ${new Date()})
+          VALUES (${itemData.name}, ${itemData.description}, ${itemData.price}, ${categoryId}, true, NOW(), NOW())
         `
       }
     }

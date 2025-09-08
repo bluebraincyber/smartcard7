@@ -43,7 +43,13 @@ interface StorePageClientProps {
 
 export default function StorePageClient({ store: initialStore }: StorePageClientProps) {
   const router = useRouter()
-  const [store, setStore] = useState<Store>(initialStore)
+  const [store, setStore] = useState<Store>({
+    ...initialStore,
+    categories: initialStore.categories?.map(category => ({
+      ...category,
+      items: category.items || []
+    })) || []
+  })
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -353,7 +359,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
               </div>
               
               <div className="px-6 py-4">
-                {category.items.length === 0 ? (
+                {category.items?.length === 0 ? (
                   <p className="text-gray-500 text-center py-8">Nenhum item nesta categoria</p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

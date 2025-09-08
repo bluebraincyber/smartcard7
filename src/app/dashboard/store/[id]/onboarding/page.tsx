@@ -57,10 +57,10 @@ export default function OnboardingPage() {
   const router = useRouter()
   useSession()
   // params.id pode ser string | string[] | undefined. Normalize:
-  const id = typeof (params as any)?.id === 'string' 
-    ? (params as any).id 
-    : Array.isArray((params as any)?.id) 
-      ? (params as any).id[0] 
+  const id = typeof (params as )?.id === 'string' 
+    ? (params as ).id 
+    : Array.isArray((params as )?.id) 
+      ? (params as ).id[0] 
       : undefined
 
   const [store, setStore] = useState<Store | null>(null)

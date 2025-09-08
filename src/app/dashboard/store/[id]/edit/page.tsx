@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation'
 import { sql } from '@vercel/postgres'
-import { auth } from '@/auth'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/authOptions'
 import EditStoreClient from './edit-store-client'
 
 interface Store {
@@ -25,7 +26,7 @@ interface SlugCheckResult {
 
 export default async function EditStorePage({ params }: { params: { id: string } }) {
   // 1. Obter a sessão do usuário NO SERVIDOR
-  const session = await auth()
+  const session = await getServerSession(authOptions)
   if (!session?.user?.id) {
     notFound()
   }
@@ -35,7 +36,7 @@ export default async function EditStorePage({ params }: { params: { id: string }
   try {
     const storeResult = await sql`
       SELECT id, name, slug, description, whatsapp as phone, address, 
-             primarycolor, coverimage, profileimage, isactive
+             isactive
       FROM stores 
       WHERE id = ${params.id} AND "userid" = ${session.user.id}
     `
