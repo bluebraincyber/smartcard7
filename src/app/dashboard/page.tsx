@@ -1,13 +1,10 @@
-import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
-import { buildAuthOptions } from '@/auth'
+import { auth } from '@/auth'
 import { sql } from '@vercel/postgres'
 import DashboardClient from './dashboard-client'
 
-const authOptions = buildAuthOptions()
-
 export default async function DashboardPage() {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   
   if (!session) {
     redirect('/auth/login')

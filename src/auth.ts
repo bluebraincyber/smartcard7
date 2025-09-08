@@ -1,11 +1,10 @@
 // src/lib/auth.ts - Versão corrigida para Next.js 15
-import type { NextAuthOptions } from 'next-auth';
+import NextAuth from "next-auth"
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import { sql } from '@vercel/postgres';
 
-export function buildAuthOptions(): NextAuthOptions {
-  return {
+export const { handlers, auth, signIn, signOut } = NextAuth({
     providers: [
       CredentialsProvider({
         name: "Credentials",
@@ -114,5 +113,5 @@ export function buildAuthOptions(): NextAuthOptions {
     
     // Habilita debug exceto em produção (alinhado ao novidades.md)
     debug: process.env.NODE_ENV !== 'production',
-  };
-}
+  }
+});

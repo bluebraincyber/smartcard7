@@ -1,7 +1,6 @@
-import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
 import { sql } from '@vercel/postgres'
-import { buildAuthOptions } from '@/auth'
+import { auth } from '@/auth'
 import EditStoreClient from './edit-store-client'
 
 interface Store {
@@ -22,11 +21,11 @@ interface SlugCheckResult {
   message: string
 }
 
-const authOptions = buildAuthOptions()
+
 
 export default async function EditStorePage({ params }: { params: { id: string } }) {
   // 1. Obter a sessão do usuário NO SERVIDOR
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   if (!session?.user?.id) {
     notFound()
   }

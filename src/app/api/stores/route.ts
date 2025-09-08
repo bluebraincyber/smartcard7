@@ -1,7 +1,7 @@
 // Stores API usando @vercel/postgres
 import { sql } from '@vercel/postgres';
-import { getServerSession } from 'next-auth';
-import { buildAuthOptions } from '@/auth';
+import { auth } from '@/auth';
+
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -10,7 +10,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     // Verificar autenticação
-    const session = await getServerSession(buildAuthOptions());
+    const session = await auth();
     
     // Se não estiver autenticado, retornar lista vazia
     if (!session?.user?.id) {
@@ -68,7 +68,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     // Verificar autenticação
-    const session = await getServerSession(buildAuthOptions());
+    const session = await auth();
     
     if (!session?.user?.id) {
       return Response.json({ 

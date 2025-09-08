@@ -4,8 +4,8 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import { sql } from '@vercel/postgres';
 
-export function buildAuthOptions(): NextAuthOptions {
-  return {
+export const { handlers, auth, signIn, signOut } = NextAuth({
+    
     providers: [
       CredentialsProvider({
         name: "Credentials",

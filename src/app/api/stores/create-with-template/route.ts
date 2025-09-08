@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { buildAuthOptions } from '@/auth'
+import { auth } from '@/auth'
+
 import { sql } from '@vercel/postgres'
 
 export const runtime = 'nodejs'
@@ -10,7 +10,7 @@ import { getTemplateByType } from '@/lib/templates'
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(await buildAuthOptions())
+    const session = await auth()
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })

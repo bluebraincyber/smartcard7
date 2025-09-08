@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { buildAuthOptions } from '@/auth';
-import { NextAuthOptions } from 'next-auth';
+import { auth } from '@/auth';
+
 
 export async function POST(request: Request) {
   try {
@@ -13,9 +13,9 @@ export async function POST(request: Request) {
     console.log('Testing signin for:', email);
     
     // Obter as opções do NextAuth
-    const authOptions = await buildAuthOptions();
+    const session = await auth();
     console.log('Auth options built');
-    console.log('Providers count:', authOptions.providers?.length);
+    console.log('Auth session:', session);
     
     // Encontrar o provider de credentials
     const credentialsProvider = authOptions.providers?.find(
