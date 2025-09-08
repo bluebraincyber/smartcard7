@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth'
 import { notFound } from 'next/navigation'
 import { sql } from '@vercel/postgres'
-import { buildAuthOptions } from '@/lib/auth'
+import { buildAuthOptions } from '@/auth'
 import StorePageClient from './store-page-client'
 
 interface Store {

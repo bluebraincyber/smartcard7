@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { buildAuthOptions } from '@/lib/auth';
+import { buildAuthOptions } from '@/auth';
 import { NextAuthOptions } from 'next-auth';
 
 export async function POST(request: Request) {

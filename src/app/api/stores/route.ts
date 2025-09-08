@@ -1,7 +1,7 @@
 // Stores API usando @vercel/postgres
 import { sql } from '@vercel/postgres';
 import { getServerSession } from 'next-auth';
-import { buildAuthOptions } from '@/lib/auth';
+import { buildAuthOptions } from '@/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

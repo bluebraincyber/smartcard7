@@ -1,6 +1,6 @@
 import { getServerSession } from 'next-auth'
 import { redirect } from 'next/navigation'
-import { buildAuthOptions } from '@/lib/auth'
+import { buildAuthOptions } from '@/auth'
 import { sql } from '@vercel/postgres'
 import DashboardClient from './dashboard-client'
 

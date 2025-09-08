@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth/next'
-import { buildAuthOptions } from '@/lib/auth'
+import { buildAuthOptions } from '@/auth'
 import { sql } from '@vercel/postgres'
 import type { Session } from 'next-auth'
 

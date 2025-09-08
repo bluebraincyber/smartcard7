@@ -54,24 +54,16 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
 
   try {
     // Total de visitas
-    const totalVisitsResult = await sql`
-      SELECT COUNT(*) as count
+    const totalsResult = await sql`
+      SELECT
+        COUNT(CASE WHEN event = 'visit' THEN 1 END) as total_visits,
+        COUNT(CASE WHEN event = 'whatsapp_click' THEN 1 END) as total_whatsapp_clicks
       FROM analytics 
       WHERE "storeid" = ${storeid} 
-        AND event = 'visit' 
         AND timestamp >= ${startDate.toISOString()}
     `;
-    const totalVisits = parseInt(totalVisitsResult.rows[0].count);
-
-    // Total de cliques no WhatsApp
-    const totalWhatsAppClicksResult = await sql`
-      SELECT COUNT(*) as count
-      FROM analytics 
-      WHERE "storeid" = ${storeid} 
-        AND event = 'whatsapp_click' 
-        AND timestamp >= ${startDate.toISOString()}
-    `;
-    const totalWhatsAppClicks = parseInt(totalWhatsAppClicksResult.rows[0].count);
+    const totalVisits = parseInt(totalsResult.rows[0].total_visits);
+    const totalWhatsAppClicks = parseInt(totalsResult.rows[0].total_whatsapp_clicks);
 
     // Taxa de conversão (cliques / visitas)
     const conversionRate = totalVisits > 0 ? (totalWhatsAppClicks / totalVisits) * 100 : 0;
@@ -123,38 +115,29 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
       return date.toISOString().split('T')[0];
     }).reverse();
 
-    const dailyVisits = await Promise.all(
-      last7Days.map(async (date) => {
-        const startOfDay = new Date(date + 'T00:00:00.000Z');
-        const endOfDay = new Date(date + 'T23:59:59.999Z');
-        
-        const visitsResult = await sql`
-          SELECT COUNT(*) as count
-          FROM analytics 
-          WHERE "storeid" = ${storeid} 
-            AND event = 'visit' 
-            AND timestamp >= ${startOfDay.toISOString()}
-            AND timestamp <= ${endOfDay.toISOString()}
-        `;
-        const visits = parseInt(visitsResult.rows[0].count);
+    const dailyAggregatesResult = await sql`
+      SELECT
+        DATE_TRUNC('day', timestamp) as day,
+        COUNT(CASE WHEN event = 'visit' THEN 1 END) as visits,
+        COUNT(CASE WHEN event = 'whatsapp_click' THEN 1 END) as whatsapp_clicks
+      FROM analytics
+      WHERE "storeid" = ${storeid}
+        AND timestamp >= ${startDate.toISOString()}
+      GROUP BY day
+      ORDER BY day ASC
+    `;
 
-        const clicksResult = await sql`
-          SELECT COUNT(*) as count
-          FROM analytics 
-          WHERE "storeid" = ${storeid} 
-            AND event = 'whatsapp_click' 
-            AND timestamp >= ${startOfDay.toISOString()}
-            AND timestamp <= ${endOfDay.toISOString()}
-        `;
-        const clicks = parseInt(clicksResult.rows[0].count);
+    const dailyAggregates = dailyAggregatesResult.rows.reduce((acc: Record<string, { visits: number; whatsappClicks: number }>, row: any) => {
+      const dateKey = new Date(row.day).toISOString().split('T')[0];
+      acc[dateKey] = { visits: parseInt(row.visits), whatsappClicks: parseInt(row.whatsapp_clicks) };
+      return acc;
+    }, {});
 
-        return {
-          date,
-          visits,
-          whatsappClicks: clicks
-        };
-      })
-    );
+    const dailyVisits = last7Days.map(date => ({
+      date,
+      visits: dailyAggregates[date]?.visits || 0,
+      whatsappClicks: dailyAggregates[date]?.whatsappClicks || 0
+    }));
 
     return {
       totalVisits,
