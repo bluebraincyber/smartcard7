@@ -1,6 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { buildAuthOptions } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/auth'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 import { existsSync, unlinkSync } from 'fs'
@@ -11,7 +10,7 @@ export const revalidate = 0
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await getServerSession(await buildAuthOptions())
+    const session = await auth()
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -83,7 +82,7 @@ export async function POST(request: NextRequest) {
 // Endpoint para deletar imagens
 export async function DELETE(request: NextRequest) {
   try {
-    const session = await getServerSession(await buildAuthOptions())
+    const session = await auth()
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })

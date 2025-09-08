@@ -1,6 +1,5 @@
-﻿import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { buildAuthOptions } from '@/lib/auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@/auth'
 import { getGlobalAnalytics } from '@/lib/analytics'
 import type { Session } from 'next-auth'
 
@@ -10,7 +9,7 @@ export const revalidate = 0
 
 export async function GET(request: NextRequest) {
   try {
-    const session = await getServerSession(await buildAuthOptions()) as Session | null
+    const session = await auth() as Session | null
 
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })

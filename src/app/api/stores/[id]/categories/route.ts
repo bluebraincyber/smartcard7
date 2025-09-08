@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { buildAuthOptions } from '@/lib/auth'
+import { auth } from '@/auth'
 import { sql } from '@vercel/postgres'
 
 export const runtime = 'nodejs'
@@ -11,7 +10,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(await buildAuthOptions()) as Session | null
+    const session = await auth() as Session | null
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -63,7 +62,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(await buildAuthOptions()) as Session | null
+    const session = await auth() as Session | null
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }

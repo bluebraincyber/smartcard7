@@ -1,8 +1,7 @@
 // src/app/api/stores/[id]/toggle/route.ts
 import { NextResponse } from "next/server";
 import { sql } from "@vercel/postgres";
-import { getServerSession } from "next-auth";
-import { buildAuthOptions } from "@/lib/auth";
+import { auth } from "@/auth";
 
 export const runtime = "nodejs";
 
@@ -18,7 +17,7 @@ export async function PATCH(
     console.log('Toggle API called');
     
     // Sessão obrigatória
-    const session = await getServerSession(buildAuthOptions());
+    const session = await auth();
     console.log('Session:', session);
     
     if (!session?.user?.id) {

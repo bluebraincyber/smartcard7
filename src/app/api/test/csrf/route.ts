@@ -1,6 +1,5 @@
 import { getCsrfToken } from 'next-auth/react';
-import { getServerSession } from 'next-auth/next';
-import { buildAuthOptions } from '@/lib/auth';
+
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';

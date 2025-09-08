@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { buildAuthOptions } from '@/lib/auth'
+import { auth } from '@/auth'
 import { sql } from '@vercel/postgres'
 import { getTemplateByType } from '@/lib/templates'
 import type { Session } from 'next-auth'
@@ -14,7 +13,7 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await getServerSession(await buildAuthOptions()) as Session | null
+    const session = await auth() as Session | null
     
     if (!session?.user?.id) {
       return NextResponse.json(

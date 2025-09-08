@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { buildAuthOptions } from '@/lib/auth'
+import { auth } from '@/auth'
 import type { Session } from 'next-auth'
 import { sql } from '@vercel/postgres'
 
@@ -17,7 +16,7 @@ export async function GET(
   { params }: RouteParams
 ) {
   try {
-    const session = await getServerSession(await buildAuthOptions()) as Session | null
+    const session = await auth() as Session | null
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })

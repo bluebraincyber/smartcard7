@@ -1,12 +1,11 @@
-import { getServerSession } from 'next-auth/next';
-import { buildAuthOptions } from '@/lib/auth';
+import { auth } from '@/auth';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    const session = await getServerSession(buildAuthOptions());
+    const session = await auth();
     
     return Response.json({ 
       ok: true,

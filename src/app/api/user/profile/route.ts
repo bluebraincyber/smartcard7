@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth/next'
-import { buildAuthOptions } from '@/lib/auth'
+import { auth } from '@/auth'
 import { sql } from '@vercel/postgres'
 import { comparePassword, hashPassword } from '@/lib/password'
 
@@ -17,7 +16,7 @@ interface UserUpdateData {
 export async function GET() {
   try {
     // util de senha centralizado em src/lib/password.ts (não necessário aqui)
-    const session = await getServerSession(await buildAuthOptions())
+    const session = await auth()
     
      if (!session?.user?.id) {
        return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -44,7 +43,7 @@ export async function GET() {
 
 export async function PUT(request: NextRequest) {
   try {
-    const session = await getServerSession(await buildAuthOptions())
+    const session = await auth()
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
