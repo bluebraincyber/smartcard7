@@ -1,0 +1,1 @@
+Aqui você vai salvar toda a evolução do projeto, incluindo mudanças, e criar aqui também as listas de tarefas e objetivos a serem cumpridos durante o desenvolvimento do projeto. 
