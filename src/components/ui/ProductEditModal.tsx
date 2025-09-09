@@ -163,9 +163,11 @@ export default function ProductEditModal({
                       Imagem do Produto
                     </label>
                     <ImageUpload
-                      onImageUpload={handleImageUpload}
+                      onUpload={handleImageUpload}
                       currentImage={formData.image}
-                      folder="products"
+                      type="item"
+                      storeid={product?.id || "1"}
+                      placeholder="Clique para adicionar uma imagem"
                     />
                   </div>
 
