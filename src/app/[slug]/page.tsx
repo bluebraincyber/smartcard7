@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { sql } from '@vercel/postgres'
+import { sql } from '@/lib/db'
 import PublicStorePage from '@/components/PublicStorePage'
 import { trackEvent } from '@/lib/analytics'
 import { Metadata } from 'next'

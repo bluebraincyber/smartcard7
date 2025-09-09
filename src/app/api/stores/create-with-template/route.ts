@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-
-import { sql } from '@vercel/postgres'
+import pool from '@/lib/db'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -16,6 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
+    const requestBody = await request.json();
     const { 
       name, 
       slug, 
@@ -23,7 +23,7 @@ export async function POST(request: NextRequest) {
       whatsapp, 
       address, 
       templateType = 'geral' 
-    } = await request.json()
+    } = requestBody;
 
     // Validações básicas
     if (!name || !slug || !whatsapp) {
@@ -34,9 +34,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se o slug já existe
-    const existingStore = await sql`
-      SELECT id FROM stores WHERE slug = ${slug}
-    `
+    const existingStore = await pool.query(
+      'SELECT id FROM stores WHERE slug = $1',
+      [slug]
+    )
 
     if (existingStore.rows.length > 0) {
       return NextResponse.json(
@@ -49,62 +50,72 @@ export async function POST(request: NextRequest) {
     const template = getTemplateByType(templateType)
 
     // Criar loja com configurações do template
-    const storeResult = await sql`
-      INSERT INTO stores (
+    const storeResult = await pool.query(
+      `INSERT INTO stores (
         name, slug, description, whatsapp, address, 
         primary_color, requires_address, business_type, "userid",
         created_at, updated_at
       ) VALUES (
-        ${name}, ${slug}, ${description}, ${whatsapp}, ${address},
-        ${template.storeConfig.primaryColor}, ${template.storeConfig.requiresAddress}, 
-        ${template.storeConfig.businessType}, ${session.user.id},
+        $1, $2, $3, $4, $5,
+        $6, $7, 
+        $8, $9,
         NOW(), NOW()
-      ) RETURNING *
-    `
+      ) RETURNING *`,
+      [name, slug, description, whatsapp, address,
+        template.storeConfig.primaryColor, template.storeConfig.requiresAddress, 
+        template.storeConfig.businessType, session.user.id]
+    )
     const store = storeResult.rows[0]
 
     // Criar categorias e itens do template
     for (const categoryData of template.categories) {
-      const categoryResult = await sql`
-        INSERT INTO categories (
+      const categoryResult = await pool.query(
+        `INSERT INTO categories (
           name, description, "storeid", "order", created_at, updated_at
         ) VALUES (
-          ${categoryData.name}, ${categoryData.description}, 
-          ${store.id}, ${template.categories.indexOf(categoryData)},
+          $1, $2, 
+          $3, $4,
           NOW(), NOW()
-        ) RETURNING *
-      `
+        ) RETURNING *`,
+        [categoryData.name, categoryData.description, 
+          store.id, template.categories.indexOf(categoryData)]
+      )
       const category = categoryResult.rows[0]
 
       // Criar itens da categoria
       for (const itemData of categoryData.items) {
-        await sql`
-          INSERT INTO items (
+        await pool.query(
+          `INSERT INTO items (
             name, description, price, "categoryId", "order", created_at, updated_at
           ) VALUES (
-            ${itemData.name}, ${itemData.description}, ${itemData.price || 0},
-            ${category.id}, ${categoryData.items.indexOf(itemData)},
+            $1, $2, $3,
+            $4, $5,
             NOW(), NOW()
-          )
-        `
+          )`,
+          [itemData.name, itemData.description, itemData.price || 0,
+            category.id, categoryData.items.indexOf(itemData)]
+        )
       }
     }
 
     // Buscar loja completa para retornar
-    const storeData = await sql`
-      SELECT * FROM stores WHERE id = ${store.id}
-    `
+    const storeData = await pool.query(
+      'SELECT * FROM stores WHERE id = $1',
+      [store.id]
+    )
     
-    const categoriesData = await sql`
-      SELECT * FROM categories WHERE "storeid" = ${store.id} ORDER BY "order" ASC
-    `
+    const categoriesData = await pool.query(
+      'SELECT * FROM categories WHERE "storeid" = $1 ORDER BY "order" ASC',
+      [store.id]
+    )
     
-    const itemsData = await sql`
-      SELECT i.* FROM items i
+    const itemsData = await pool.query(
+      `SELECT i.* FROM items i
       JOIN categories c ON i."categoryId" = c.id
-      WHERE c."storeid" = ${store.id}
-      ORDER BY c."order" ASC, i."order" ASC
-    `
+      WHERE c."storeid" = $1
+      ORDER BY c."order" ASC, i."order" ASC`,
+      [store.id]
+    )
     
     // Montar estrutura completa
     const completeStore = {
@@ -117,11 +128,17 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(completeStore, { status: 201 })
   } catch (error) {
-    console.error('Erro ao criar loja:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    console.error('Erro detalhado ao criar loja:', {
+      error,
+      requestBody,
+      session: session?.user,
+      templateType
+    });
+    return NextResponse.json({ 
+      error: 'INTERNAL_ERROR', 
+      detail: (error as Error)?.message,
+      stack: process.env.NODE_ENV === 'development' ? (error as Error)?.stack : undefined
+    }, { status: 500 });
   }
 }
 

@@ -1,7 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { sql } from '@vercel/postgres'
+import pool from '@/lib/db'
 import type { Session } from 'next-auth'
+import { NextRequest, NextResponse } from 'next/server'
+
+
+
 
 export const runtime = 'nodejs'
 
@@ -29,10 +32,10 @@ export async function GET(
     const resolvedParams = await params
 
     // Buscar loja
-    const storeResult = await sql`
-      SELECT * FROM stores 
-      WHERE id = ${resolvedParams.id} AND "userid" = ${session.user.id}
-    `
+    const storeResult = await pool.query(
+      'SELECT * FROM stores WHERE id = $1 AND userid = $2',
+      [resolvedParams.id, session.user.id]
+    )
     
     if (storeResult.rows.length === 0) {
       return NextResponse.json({ error: 'Loja não encontrada' }, { status: 404 })
@@ -41,19 +44,16 @@ export async function GET(
     const store = storeResult.rows[0]
     
     // Buscar categorias
-    const categoriesResult = await sql`
-      SELECT * FROM categories 
-      WHERE "storeid" = ${resolvedParams.id} 
-      ORDER BY "order" ASC
-    `
+    const categoriesResult = await pool.query(
+      'SELECT * FROM categories WHERE storeid = $1 ORDER BY "order" ASC',
+      [resolvedParams.id]
+    )
     
     // Buscar itens
-    const itemsResult = await sql`
-      SELECT i.* FROM items i
-      JOIN categories c ON i."categoryId" = c.id
-      WHERE c."storeid" = ${resolvedParams.id}
-      ORDER BY c."order" ASC, i."order" ASC
-    `
+    const itemsResult = await pool.query(
+      'SELECT i.* FROM items i JOIN categories c ON i."categoryId" = c.id WHERE c.storeid = $1 ORDER BY c."order" ASC, i."order" ASC',
+      [resolvedParams.id]
+    )
     
     // Montar estrutura completa
     const storeWithCategories = {
@@ -67,10 +67,7 @@ export async function GET(
     return NextResponse.json(storeWithCategories)
   } catch (error) {
     console.error('Erro ao buscar loja:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
   }
 }
 
@@ -91,10 +88,10 @@ export async function PUT(
     const { name, description, whatsapp, address, coverImage, profileImage, primaryColor, isactive } = body
 
     // Verificar se a loja pertence ao usuário
-    const existingStoreResult = await sql`
-      SELECT * FROM stores 
-      WHERE id = ${resolvedParams.id} AND "userid" = ${session.user.id}
-    `
+    const existingStoreResult = await pool.query(
+      'SELECT * FROM stores WHERE id = $1 AND userid = $2',
+      [resolvedParams.id, session.user.id]
+    )
 
     if (existingStoreResult.rows.length === 0) {
       return NextResponse.json({ error: 'Loja não encontrada' }, { status: 404 })
@@ -108,39 +105,38 @@ export async function PUT(
 
     // só checa unicidade se mudou
     if (newSlug && newSlug !== existingStore.slug) {
-      const slugExistsResult = await sql`
-        SELECT id FROM stores WHERE slug = ${newSlug}
-      `
+      const slugExistsResult = await pool.query(
+        'SELECT id FROM stores WHERE slug = $1',
+        [newSlug]
+      )
       if (slugExistsResult.rows.length > 0 && slugExistsResult.rows[0].id !== id) {
         return NextResponse.json({ error: "Slug já em uso" }, { status: 409 })
       }
     }
 
-    const updatedStoreResult = await sql`
-      UPDATE stores SET 
-        name = ${name},
-        slug = ${newSlug},
-        description = ${description},
-        whatsapp = ${whatsapp},
-        address = ${address},
-        "primaryColor" = ${primaryColor},
-        isactive = ${isactive},
-        "coverImage" = ${coverImage},
-        "profileImage" = ${profileImage},
+    const updatedStoreResult = await pool.query(
+      `UPDATE stores SET 
+        name = $1,
+        slug = $2,
+        description = $3,
+        whatsapp = $4,
+        address = $5,
+        "primaryColor" = $6,
+        isactive = $7,
+        "coverImage" = $8,
+        "profileImage" = $9,
         updated_at = NOW()
-      WHERE id = ${id}
-      RETURNING *
-    `
+      WHERE id = $10
+      RETURNING *`,
+      [name, newSlug, description, whatsapp, address, primaryColor, isactive, coverImage, profileImage, id]
+    )
     
     const updatedStore = updatedStoreResult.rows[0]
 
     return NextResponse.json(updatedStore)
   } catch (error) {
     console.error('Erro ao atualizar loja:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
   }
 }
 
@@ -160,39 +156,37 @@ export async function DELETE(
     const resolvedParams = await params
 
     // Verificar se a loja pertence ao usuário
-    const existingStoreResult = await sql`
-      SELECT id FROM stores 
-      WHERE id = ${resolvedParams.id} AND "userid" = ${session.user.id}
-    `
+    const existingStoreResult = await pool.query(
+      'SELECT id FROM stores WHERE id = $1 AND userid = $2',
+      [resolvedParams.id, session.user.id]
+    )
 
     if (existingStoreResult.rows.length === 0) {
       return NextResponse.json({ error: 'Loja não encontrada' }, { status: 404 })
     }
 
     // Primeiro, deletar itens das categorias da loja
-    await sql`
-      DELETE FROM items WHERE "categoryId" IN (
-        SELECT id FROM categories WHERE "storeid" = ${resolvedParams.id}
-      )
-    `
+    await pool.query(
+      'DELETE FROM items WHERE "categoryId" IN (SELECT id FROM categories WHERE storeid = $1)',
+      [resolvedParams.id]
+    )
 
     // Depois, deletar categorias da loja
-    await sql`
-      DELETE FROM categories WHERE "storeid" = ${resolvedParams.id}
-    `
+    await pool.query(
+      'DELETE FROM categories WHERE storeid = $1',
+      [resolvedParams.id]
+    )
 
     // Por fim, deletar a loja
-    await sql`
-      DELETE FROM stores WHERE id = ${resolvedParams.id}
-    `
+    await pool.query(
+      'DELETE FROM stores WHERE id = $1',
+      [resolvedParams.id]
+    )
 
     return NextResponse.json({ message: 'Loja excluída com sucesso' })
   } catch (error) {
     console.error('Erro ao excluir loja:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
   }
 }
 

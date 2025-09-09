@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { sql } from '@vercel/postgres'
+import pool from '@/lib/db'
 import { comparePassword, hashPassword } from '@/lib/password'
 
 export const runtime = 'nodejs'
@@ -22,11 +22,10 @@ export async function GET() {
        return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
      }
 
-     const userResult = await sql`
-       SELECT id, name, email, created_at
-       FROM users 
-       WHERE id = ${session.user.id}
-     `
+     const userResult = await pool.query(
+       'SELECT id, name, email, created_at FROM users WHERE id = $1',
+       [session.user.id]
+     )
 
      if (userResult.rows.length === 0) {
        return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
@@ -37,7 +36,7 @@ export async function GET() {
      return NextResponse.json(user)
   } catch (error) {
      console.error('Erro ao buscar perfil:', error)
-     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+     return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }
 
@@ -50,10 +49,10 @@ export async function PUT(request: NextRequest) {
      const { name, email, currentPassword, newPassword } = await request.json()
 
      // Buscar usuário atual
-     const userResult = await sql`
-       SELECT id, name, email, password_hash FROM users 
-       WHERE id = ${session.user.id}
-     `
+     const userResult = await pool.query(
+       'SELECT id, name, email, password_hash FROM users WHERE id = $1',
+       [session.user.id]
+     )
 
      if (userResult.rows.length === 0) {
        return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
@@ -63,9 +62,10 @@ export async function PUT(request: NextRequest) {
 
      // Verificar se o email já está em uso por outro usuário
      if (email !== user.email) {
-       const existingUserResult = await sql`
-         SELECT id FROM users WHERE email = ${email}
-       `
+       const existingUserResult = await pool.query(
+         'SELECT id FROM users WHERE email = $1',
+         [email]
+       )
 
        if (existingUserResult.rows.length > 0) {
          return NextResponse.json({ error: 'Este email já está em uso' }, { status: 400 })
@@ -98,19 +98,21 @@ export async function PUT(request: NextRequest) {
      // Atualizar usuário
      let updatedUserResult
      if (updateData.password) {
-       updatedUserResult = await sql`
-         UPDATE users 
-         SET name = ${updateData.name}, email = ${updateData.email}, password_hash = ${updateData.password}, updated_at = NOW()
-         WHERE id = ${session.user.id}
-         RETURNING id, name, email, created_at
-       `
+       updatedUserResult = await pool.query(
+         `UPDATE users 
+         SET name = $1, email = $2, password_hash = $3, updated_at = NOW()
+         WHERE id = $4
+         RETURNING id, name, email, created_at`,
+         [updateData.name, updateData.email, updateData.password, session.user.id]
+       )
      } else {
-       updatedUserResult = await sql`
-         UPDATE users 
-         SET name = ${updateData.name}, email = ${updateData.email}, updated_at = NOW()
-         WHERE id = ${session.user.id}
-         RETURNING id, name, email, created_at
-       `
+       updatedUserResult = await pool.query(
+         `UPDATE users 
+         SET name = $1, email = $2, updated_at = NOW()
+         WHERE id = $3
+         RETURNING id, name, email, created_at`,
+         [updateData.name, updateData.email, session.user.id]
+       )
      }
     
      const updatedUser = updatedUserResult.rows[0]
@@ -118,7 +120,7 @@ export async function PUT(request: NextRequest) {
      return NextResponse.json(updatedUser)
   } catch (error) {
      console.error('Erro ao atualizar perfil:', error)
-     return NextResponse.json({ error: 'Erro interno do servidor' }, { status: 500 })
+     return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }
 

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 import type { Session } from 'next-auth'
-import { sql } from '@vercel/postgres'
+import pool from '@/lib/db'
 
 export const runtime = 'nodejs'
 
@@ -28,10 +28,10 @@ export async function GET(
     const resolvedParams = await params
 
     // Verificar se a loja pertence ao usuário
-    const { rows: stores } = await sql`
-      SELECT id, name, slug FROM stores 
-      WHERE id = ${resolvedParams.id} AND "userid" = ${session.user.id}
-    `
+    const { rows: stores } = await pool.query(
+      'SELECT id, name, slug FROM stores WHERE id = $1 AND "userid" = $2',
+      [resolvedParams.id, session.user.id]
+    )
 
     if (stores.length === 0) {
       return NextResponse.json(
@@ -44,14 +44,15 @@ export async function GET(
     const startDate = new Date()
     startDate.setDate(startDate.getDate() - days)
     
-    const { rows: analytics } = await sql`
-      SELECT 
+    const { rows: analytics } = await pool.query(
+      `SELECT 
         COUNT(*) as total_views,
         COUNT(DISTINCT DATE(created_at)) as active_days
       FROM analytics 
-      WHERE "storeid" = ${resolvedParams.id} 
-        AND created_at >= ${startDate.toISOString()}
-    `
+      WHERE "storeid" = $1 
+        AND created_at >= $2`,
+      [resolvedParams.id, startDate.toISOString()]
+    )
     
     const analyticsData = {
       totalViews: parseInt(analytics[0]?.total_views || '0'),
@@ -62,9 +63,6 @@ export async function GET(
     return NextResponse.json(analyticsData)
   } catch (error) {
     console.error('Erro ao buscar analytics da loja:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
   }
 }

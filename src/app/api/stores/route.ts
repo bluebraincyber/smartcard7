@@ -1,7 +1,7 @@
-// Stores API usando pool local
+import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { getServerSession } from 'next-auth';
-import { authOptions } from '@/lib/authOptions';
+import { auth } from '@/auth';
+import type { Session } from 'next-auth';
 
 
 export const runtime = 'nodejs';
@@ -11,11 +11,11 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     // Verificar autenticação
-    const session = await getServerSession(authOptions);
+    const session = await auth() as Session | null;
     
     // Se não estiver autenticado, retornar lista vazia
     if (!session?.user?.id) {
-      return Response.json({ stores: [] });
+      return NextResponse.json({ stores: [] });
     }
     
     const userid = Number(session.user.id);
@@ -56,12 +56,10 @@ export async function GET() {
       }
     }));
     
-    return Response.json({ stores: storesWithCount });
+    return NextResponse.json({ stores: storesWithCount });
   } catch (error) {
     console.error('Get stores error:', error);
-    return Response.json({ 
-      error: error.message 
-    }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
   }
 }
 
@@ -69,10 +67,10 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     // Verificar autenticação
-    const session = await getServerSession(authOptions);
+    const session = await auth() as Session | null;
     
     if (!session?.user?.id) {
-      return Response.json({ 
+      return NextResponse.json({ 
         error: 'Unauthorized - Please login' 
       }, { status: 401 });
     }
@@ -81,7 +79,7 @@ export async function POST(request: Request) {
     const { name, slug, description, whatsapp, address, primaryColor } = await request.json();
     
     if (!name || !slug) {
-      return Response.json({ 
+      return NextResponse.json({ 
         error: 'Nome e slug são obrigatórios' 
       }, { status: 400 });
     }
@@ -93,7 +91,7 @@ export async function POST(request: Request) {
     );
     
     if (existing.length > 0) {
-      return Response.json({ 
+      return NextResponse.json({ 
         error: 'Este identificador já está em uso' 
       }, { status: 400 });
     }
@@ -104,15 +102,13 @@ export async function POST(request: Request) {
       [name, slug, description || '', userid]
     );
     
-    return Response.json({ 
-      success: true, 
-      store: rows[0] 
-    });
+    return NextResponse.json({ 
+        success: true, 
+        store: rows[0] 
+      });
   } catch (error) {
     console.error('Create store error:', error);
-    return Response.json({ 
-      error: error.message 
-    }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
   }
 }
 

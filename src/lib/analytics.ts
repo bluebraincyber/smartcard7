@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres';
+import pool from '@/lib/db';
 
 export interface AnalyticsEvent {
   storeid: string;
@@ -29,20 +29,21 @@ export async function trackEvent({
       return;
     }
 
-    await sql`
-      INSERT INTO analytics (
+    await pool.query(
+      `INSERT INTO analytics (
         "storeid", event, data, "userAgent", ip, timestamp, "createdAt", "updatedAt"
       ) VALUES (
-        ${storeid},
-        ${event},
-        ${JSON.stringify(data || {})},
-        ${userAgent || null},
-        ${ipAddress || null},
+        $1,
+        $2,
+        $3,
+        $4,
+        $5,
         NOW(),
         NOW(),
         NOW()
-      )
-    `;
+      )`,
+      [storeid, event, JSON.stringify(data || {}), userAgent || null, ipAddress || null]
+    );
   } catch (error) {
     console.error('Erro ao registrar evento de analytics:', error);
   }
@@ -54,14 +55,15 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
 
   try {
     // Total de visitas
-    const totalsResult = await sql`
-      SELECT
+    const totalsResult = await pool.query(
+      `SELECT
         COUNT(CASE WHEN event = 'visit' THEN 1 END) as total_visits,
         COUNT(CASE WHEN event = 'whatsapp_click' THEN 1 END) as total_whatsapp_clicks
       FROM analytics 
-      WHERE "storeid" = ${storeid} 
-        AND timestamp >= ${startDate.toISOString()}
-    `;
+      WHERE "storeid" = $1 
+        AND timestamp >= $2`,
+      [storeid, startDate.toISOString()]
+    );
     const totalVisits = parseInt(totalsResult.rows[0].total_visits);
     const totalWhatsAppClicks = parseInt(totalsResult.rows[0].total_whatsapp_clicks);
 
@@ -69,13 +71,14 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
     const conversionRate = totalVisits > 0 ? (totalWhatsAppClicks / totalVisits) * 100 : 0;
 
     // Cliques por tipo
-    const whatsappClicksResult = await sql`
-      SELECT data
+    const whatsappClicksResult = await pool.query(
+      `SELECT data
       FROM analytics 
-      WHERE "storeid" = ${storeid} 
+      WHERE "storeid" = $1 
         AND event = 'whatsapp_click' 
-        AND timestamp >= ${startDate.toISOString()}
-    `;
+        AND timestamp >= $2`,
+      [storeid, startDate.toISOString()]
+    );
     const whatsappClicks = whatsappClicksResult.rows;
 
     const clicksByType: Record<string, number> = {};
@@ -88,13 +91,14 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
     });
 
     // Itens mais visualizados
-    const itemViewsResult = await sql`
-      SELECT data
+    const itemViewsResult = await pool.query(
+      `SELECT data
       FROM analytics 
-      WHERE "storeid" = ${storeid} 
+      WHERE "storeid" = $1 
         AND event = 'item_view' 
-        AND timestamp >= ${startDate.toISOString()}
-    `;
+        AND timestamp >= $2`,
+      [storeid, startDate.toISOString()]
+    );
     const itemViews = itemViewsResult.rows;
 
     const itemViewCounts: Record<string, number> = {};
@@ -115,17 +119,18 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
       return date.toISOString().split('T')[0];
     }).reverse();
 
-    const dailyAggregatesResult = await sql`
-      SELECT
+    const dailyAggregatesResult = await pool.query(
+      `SELECT
         DATE_TRUNC('day', timestamp) as day,
         COUNT(CASE WHEN event = 'visit' THEN 1 END) as visits,
         COUNT(CASE WHEN event = 'whatsapp_click' THEN 1 END) as whatsapp_clicks
       FROM analytics
-      WHERE "storeid" = ${storeid}
-        AND timestamp >= ${startDate.toISOString()}
+      WHERE "storeid" = $1
+        AND timestamp >= $2
       GROUP BY day
-      ORDER BY day ASC
-    `;
+      ORDER BY day ASC`,
+      [storeid, startDate.toISOString()]
+    );
 
     const dailyAggregates = dailyAggregatesResult.rows.reduce<Record<string, { visits: number; whatsappClicks: number }>>((acc, row: any) => {
       const dateKey = new Date(row.day).toISOString().split('T')[0];
@@ -163,9 +168,10 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
 export async function getGlobalAnalytics(userid: string) {
   try {
     // Buscar todas as lojas do usuário
-    const storesResult = await sql`
-      SELECT id FROM stores WHERE "userid" = ${userid}
-    `;
+    const storesResult = await pool.query(
+      `SELECT id FROM stores WHERE "userid" = $1`,
+      [userid]
+    );
     const stores = storesResult.rows;
     const storeids = stores.map(store => store.id);
 
@@ -182,36 +188,39 @@ export async function getGlobalAnalytics(userid: string) {
     last30Days.setDate(last30Days.getDate() - 30);
 
     // Total de visitas
-    const totalVisitsResult = await sql`
-      SELECT COUNT(*) as count
+    const totalVisitsResult = await pool.query(
+      `SELECT COUNT(*) as count
       FROM analytics 
-      WHERE "storeid" = ANY(${sql.array(storeids)})
+      WHERE "storeid" = ANY($1)
         AND event = 'visit' 
-        AND timestamp >= ${last30Days.toISOString()}
-    `;
+        AND timestamp >= $2`,
+      [storeids, last30Days.toISOString()]
+    );
     const totalVisits = parseInt(totalVisitsResult.rows[0].count);
 
     // Total de cliques
-    const totalClicksResult = await sql`
-      SELECT COUNT(*) as count
+    const totalClicksResult = await pool.query(
+      `SELECT COUNT(*) as count
       FROM analytics 
-      WHERE "storeid" = ANY(${sql.array(storeids)})
+      WHERE "storeid" = ANY($1)
         AND event = 'whatsapp_click' 
-        AND timestamp >= ${last30Days.toISOString()}
-    `;
+        AND timestamp >= $2`,
+      [storeids, last30Days.toISOString()]
+    );
     const totalClicks = parseInt(totalClicksResult.rows[0].count);
 
     // Lojas ativas (com pelo menos 1 clique na semana)
     const lastWeek = new Date();
     lastWeek.setDate(lastWeek.getDate() - 7);
 
-    const activestoreidsResult = await sql`
-      SELECT DISTINCT "storeid"
+    const activestoreidsResult = await pool.query(
+      `SELECT DISTINCT "storeid"
       FROM analytics 
-      WHERE "storeid" = (${sql.array(storeids)})
+      WHERE "storeid" = ANY($1)
         AND event = 'whatsapp_click' 
-        AND timestamp >= ${lastWeek.toISOString()}
-    `;
+        AND timestamp >= $2`,
+      [storeids, lastWeek.toISOString()]
+    );
     const activestoreids = activestoreidsResult.rows;
 
     return {

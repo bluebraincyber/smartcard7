@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@vercel/postgres'
+import pool from '@/lib/db'
 import { trackEvent } from '@/lib/analytics'
 
 export const runtime = 'nodejs'
@@ -16,9 +16,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Verify store exists
-    const storeResult = await sql`
-      SELECT id FROM stores WHERE id = ${storeId}
-    `
+    const storeResult = await pool.query(
+      'SELECT id FROM stores WHERE id = $1',
+      [storeId]
+    )
 
     if (storeResult.rows.length === 0) {
       return NextResponse.json(
@@ -32,7 +33,7 @@ export async function POST(request: NextRequest) {
     const ipAddress = (request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || undefined) as string | undefined
 
     await trackEvent({
-      storeId,
+      storeid: storeId,
       event,
       data,
       userAgent,
@@ -42,9 +43,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true })
   } catch (error) {
     console.error('Analytics tracking error:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }

@@ -1,4 +1,4 @@
-import { sql } from '@vercel/postgres';
+import pool from '@/lib/db';
 import { NextResponse } from 'next/server';
 
 export const runtime = 'nodejs';
@@ -8,7 +8,7 @@ export const revalidate = 0;
 export async function GET() {
   try {
     // Teste real de conexão com o banco
-    const result = await sql`SELECT 1 as test`;
+    const result = await pool.query('SELECT 1 as test');
     
     if (result.rows[0]?.test === 1) {
       return NextResponse.json({ 
@@ -24,11 +24,6 @@ export async function GET() {
     }
   } catch (error) {
     console.error('Database health check failed:', error);
-    return NextResponse.json({ 
-      ok: false, 
-      status: 'Database connection failed',
-      error: error instanceof Error ? error.message : 'Unknown error',
-      timestamp: new Date().toISOString()
-    }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }

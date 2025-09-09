@@ -8,17 +8,8 @@ export default pool;
 export { pool };
 
 // Export sql template literal function for convenience
-export const sql = (strings: TemplateStringsArray, ...values: []) => {
-  let query = '';
-  const params: [] = [];
-  
-  for (let i = 0; i < strings.length; i++) {
-    query += strings[i];
-    if (i < values.length) {
-      params.push(values[i]);
-      query += `${params.length}`;
-    }
-  }
-  
-  return { text: query, values: params };
+export const sql = async (strings: TemplateStringsArray, ...values: any[]) => {
+  const query = strings.reduce((acc, part, i) => acc + '$' + (i + 1) + part);
+  const result = await pool.query(query, values);
+  return result;
 };

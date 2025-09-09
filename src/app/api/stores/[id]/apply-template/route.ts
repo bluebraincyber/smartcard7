@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { sql } from '@vercel/postgres'
+import pool from '@/lib/db'
 import { getTemplateByType } from '@/lib/templates'
 import type { Session } from 'next-auth'
 
@@ -40,10 +40,10 @@ export async function POST(
     }
 
     // Verificar se a loja existe e pertence ao usuário
-    const { rows: stores } = await sql`
-      SELECT id, name, slug FROM stores 
-      WHERE id = ${storeId} AND "userid" = ${session.user.id}
-    `
+    const { rows: stores } = await pool.query(
+      'SELECT id, name, slug FROM stores WHERE id = $1 AND "userid" = $2',
+      [storeId, session.user.id]
+    )
 
     if (stores.length === 0) {
       return NextResponse.json(
@@ -63,58 +63,57 @@ export async function POST(
     }
 
     // Verificar se a loja já tem categorias/itens
-    const { rows: existingCategoriesResult } = await sql`
-      SELECT COUNT(*) as count FROM categories WHERE "storeid" = ${storeId}
-    `
+    const { rows: existingCategoriesResult } = await pool.query(
+      'SELECT COUNT(*) as count FROM categories WHERE "storeid" = $1',
+      [storeId]
+    )
     const existingCategories = parseInt(existingCategoriesResult[0].count)
 
-    const { rows: existingItemsResult } = await sql`
-      SELECT COUNT(*) as count FROM items i
-      JOIN categories c ON i."categoryId" = c.id
-    WHERE c."storeid" = ${storeId}
-    `
+    const { rows: existingItemsResult } = await pool.query(
+      'SELECT COUNT(*) as count FROM items i JOIN categories c ON i."categoryId" = c.id WHERE c."storeid" = $1',
+      [storeId]
+    )
     const existingItems = parseInt(existingItemsResult[0].count)
 
     // Se já existem dados, perguntar se quer sobrescrever
     if (existingCategories > 0 || existingItems > 0) {
       // Por enquanto, vamos limpar os dados existentes
-      await sql`
-        DELETE FROM items 
-        WHERE "categoryId" IN (
-      SELECT id FROM categories WHERE "storeid" = ${storeId}
-    )
-      `
+      await pool.query(
+        'DELETE FROM items WHERE "categoryId" IN (SELECT id FROM categories WHERE "storeid" = $1)',
+        [storeId]
+      )
       
-      await sql`
-        DELETE FROM categories WHERE "storeid" = ${storeId}
-      `
+      await pool.query(
+        'DELETE FROM categories WHERE "storeid" = $1',
+        [storeId]
+      )
     }
 
     // Aplicar configurações da loja do template
-    await sql`
-      UPDATE stores 
-      SET primary_color = ${template.storeConfig.primaryColor},
-          requires_address = ${template.storeConfig.requiresAddress},
-          business_type = ${template.storeConfig.businessType},
+    await pool.query(
+      `UPDATE stores 
+      SET primary_color = $1,
+          requires_address = $2,
+          business_type = $3,
           updated_at = NOW()
-      WHERE id = ${storeId}
-    `
+      WHERE id = $4`,
+      [template.storeConfig.primaryColor, template.storeConfig.requiresAddress, template.storeConfig.businessType, storeId]
+    )
 
     // Criar categorias e itens do template
     for (const categoryData of template.categories) {
-      const { rows: categoryResult } = await sql`
-        INSERT INTO categories (name, description, "storeid", isactive, created_at, updated_at)
-        VALUES (${categoryData.name}, ${categoryData.description}, ${storeId}, true, NOW(), NOW())
-        RETURNING id
-      `
+      const { rows: categoryResult } = await pool.query(
+        'INSERT INTO categories (name, description, "storeid", isactive, created_at, updated_at) VALUES ($1, $2, $3, true, NOW(), NOW()) RETURNING id',
+        [categoryData.name, categoryData.description, storeId]
+      )
       const categoryId = categoryResult[0].id
 
       // Criar itens da categoria
       for (const itemData of categoryData.items) {
-        await sql`
-          INSERT INTO items (name, description, price, "categoryId", isactive, created_at, updated_at)
-          VALUES (${itemData.name}, ${itemData.description}, ${itemData.price}, ${categoryId}, true, NOW(), NOW())
-        `
+        await pool.query(
+          'INSERT INTO items (name, description, price, "categoryId", isactive, created_at, updated_at) VALUES ($1, $2, $3, $4, true, NOW(), NOW())',
+          [itemData.name, itemData.description, itemData.price, categoryId]
+        )
       }
     }
 
@@ -126,9 +125,6 @@ export async function POST(
 
   } catch (error) {
     console.error('Erro ao aplicar template:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }

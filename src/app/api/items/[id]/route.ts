@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
 
-import { sql } from '@vercel/postgres'
+import pool from '@/lib/db'
 import type { Session } from 'next-auth'
 
 export const runtime = 'nodejs'
@@ -32,12 +32,13 @@ export async function PATCH(
     const { name, description, price, image, isactive, isAvailable } = await request.json()
 
     // Verificar se o item pertence ao usuário
-    const itemResult = await sql`
-      SELECT i.id FROM items i
+    const itemResult = await pool.query(
+      `SELECT i.id FROM items i
       JOIN categories c ON i."categoryId" = c.id
       JOIN stores s ON c."storeid" = s.id
-      WHERE i.id = ${id} AND s."userid" = ${session.user.id}
-    `
+      WHERE i.id = $1 AND s."userid" = $2`,
+      [id, session.user.id]
+    )
 
     if (itemResult.rows.length === 0) {
       return NextResponse.json({ error: 'Item não encontrado' }, { status: 404 })
@@ -94,16 +95,13 @@ export async function PATCH(
       RETURNING *
     `
     
-    const updatedItemResult = await sql.query(updateQuery, updateValues)
+    const updatedItemResult = await pool.query(updateQuery, updateValues)
     const updatedItem = updatedItemResult.rows[0]
 
     return NextResponse.json(updatedItem)
   } catch (error) {
     console.error('Erro ao atualizar item:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }
 
@@ -121,28 +119,27 @@ export async function DELETE(
     const { id } = await params
 
     // Verificar se o item pertence ao usuário
-    const itemResult = await sql`
-      SELECT i.id FROM items i
+    const itemResult = await pool.query(
+      `SELECT i.id FROM items i
       JOIN categories c ON i."categoryId" = c.id
       JOIN stores s ON c."storeid" = s.id
-      WHERE i.id = ${id} AND s."userid" = ${session.user.id}
-    `
+      WHERE i.id = $1 AND s."userid" = $2`,
+      [id, session.user.id]
+    )
 
     if (itemResult.rows.length === 0) {
       return NextResponse.json({ error: 'Item não encontrado' }, { status: 404 })
     }
 
     // Deletar o item
-    await sql`
-      DELETE FROM items WHERE id = ${id}
-    `
+    await pool.query(
+      `DELETE FROM items WHERE id = $1`,
+      [id]
+    )
 
     return NextResponse.json({ message: 'Item excluído com sucesso' })
   } catch (error) {
     console.error('Erro ao excluir item:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }

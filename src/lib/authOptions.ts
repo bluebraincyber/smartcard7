@@ -1,9 +1,10 @@
-import pool from '@/lib/db';
-import type { NextAuthOptions } from 'next-auth';
+import type { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
+import { pool } from '@/lib/db';
+import { AuthOptions } from 'next-auth/core/types';
 
-export const authOptions: NextAuthOptions = {
+export const authOptions: AuthOptions = {
     providers: [
       CredentialsProvider({
         name: "Credentials",

@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { sql } from '@vercel/postgres'
+import { sql } from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 import EditStoreClient from './edit-store-client'

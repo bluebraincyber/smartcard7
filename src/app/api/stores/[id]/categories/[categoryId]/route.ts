@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@/auth'
-import { sql } from '@vercel/postgres'
+import pool from '@/lib/db'
+import type { Session } from 'next-auth'
+
 
 export const runtime = 'nodejs'
-import type { Session } from 'next-auth'
 
 interface CategoryUpdateData {
   name?: string
@@ -13,7 +14,7 @@ interface CategoryUpdateData {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; categoryId: string }> }
+  { params }: { params: { id: string; categoryId: string } }
 ) {
   try {
     const session = await auth() as Session | null
@@ -21,28 +22,29 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const resolvedParams = await params
+    const resolvedParams = params
 
     // Verificar se a loja pertence ao usuário
-    const storeResult = await sql`
-      SELECT id FROM stores 
-      WHERE id = ${resolvedParams.id} AND "userid" = ${session.user.id}
-    `
+    const storeResult = await pool.query(
+      'SELECT id FROM stores WHERE id = $1 AND "userid" = $2',
+      [resolvedParams.id, String(session.user.id)]
+    )
 
     if (storeResult.rows.length === 0) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 })
     }
 
     // Buscar categoria com contagem de itens
-    const categoryResult = await sql`
-      SELECT 
+    const categoryResult = await pool.query(
+      `SELECT 
         c.*,
         COUNT(i.id) as items_count
       FROM categories c
       LEFT JOIN items i ON c.id = i."categoryId"
-      WHERE c.id = ${resolvedParams.categoryId} AND c."storeid" = ${resolvedParams.id}
-      GROUP BY c.id
-    `
+      WHERE c.id = $1 AND c."storeid" = $2
+      GROUP BY c.id`,
+      [resolvedParams.categoryId, resolvedParams.id]
+    )
 
     if (categoryResult.rows.length === 0) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 })
@@ -58,16 +60,13 @@ export async function GET(
     return NextResponse.json(category)
   } catch (error) {
     console.error('Error fetching category:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; categoryId: string }> }
+  { params }: { params: { id: string; categoryId: string } }
 ) {
   try {
     const session = await auth() as Session | null
@@ -75,23 +74,23 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const resolvedParams = await params
+    const resolvedParams = params
 
     // Verificar se a loja pertence ao usuário
-    const storeResult = await sql`
-      SELECT id FROM stores 
-      WHERE id = ${resolvedParams.id} AND "userid" = ${session.user.id}
-    `
+    const storeResult = await pool.query(
+      'SELECT id FROM stores WHERE id = $1 AND "userid" = $2',
+      [resolvedParams.id, session.user.id]
+    )
 
     if (storeResult.rows.length === 0) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 })
     }
 
     // Verificar se a categoria existe
-    const categoryResult = await sql`
-      SELECT id FROM categories 
-      WHERE id = ${resolvedParams.categoryId} AND "storeid" = ${resolvedParams.id}
-    `
+    const categoryResult = await pool.query(
+      'SELECT id FROM categories WHERE id = $1 AND "storeid" = $2',
+      [resolvedParams.categoryId, resolvedParams.id]
+    )
 
     if (categoryResult.rows.length === 0) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 })
@@ -148,33 +147,31 @@ export async function PATCH(
       RETURNING *
     `
     
-    const updatedCategoryResult = await sql.query(updateQuery, updateValues)
+    const updatedCategoryResult = await pool.query(updateQuery, updateValues)
     
     // Buscar contagem de itens
-    const itemsCountResult = await sql`
-      SELECT COUNT(*) as count FROM items WHERE "categoryId" = ${resolvedParams.categoryId}
-    `
+    const existingItemsCountResult = await pool.query(
+      'SELECT COUNT(*) as count FROM items WHERE "categoryId" = $1',
+      [resolvedParams.categoryId]
+    )
     
     const updatedCategory = {
       ...updatedCategoryResult.rows[0],
       _count: {
-        items: parseInt(itemsCountResult.rows[0].count) || 0
+        items: parseInt(existingItemsCountResult.rows[0].count) || 0
       }
     }
 
     return NextResponse.json(updatedCategory)
   } catch (error) {
     console.error('Error updating category:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: Promise<{ id: string; categoryId: string }> }
+  { params }: { params: { id: string; categoryId: string } }
 ) {
   try {
     const session = await auth() as Session | null
@@ -182,28 +179,29 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const resolvedParams = await params
+    const resolvedParams = params
 
     // Verificar se a loja pertence ao usuário
-    const storeResult = await sql`
-      SELECT id FROM stores 
-      WHERE id = ${resolvedParams.id} AND "userid" = ${session.user.id}
-    `
+    const storeResult = await pool.query(
+      'SELECT id FROM stores WHERE id = $1 AND "userid" = $2',
+      [resolvedParams.id, session.user.id]
+    )
 
     if (storeResult.rows.length === 0) {
       return NextResponse.json({ error: 'Store not found' }, { status: 404 })
     }
 
     // Verificar se a categoria existe e contar itens
-    const categoryResult = await sql`
-      SELECT 
+    const categoryResult = await pool.query(
+      `SELECT 
         c.id,
         COUNT(i.id) as items_count
       FROM categories c
       LEFT JOIN items i ON c.id = i."categoryId"
-      WHERE c.id = ${resolvedParams.categoryId} AND c."storeid" = ${resolvedParams.id}
-      GROUP BY c.id
-    `
+      WHERE c.id = $1 AND c."storeid" = $2
+      GROUP BY c.id`,
+      [resolvedParams.categoryId, resolvedParams.id]
+    )
 
     if (categoryResult.rows.length === 0) {
       return NextResponse.json({ error: 'Category not found' }, { status: 404 })
@@ -211,25 +209,23 @@ export async function DELETE(
 
     const itemsCount = parseInt(categoryResult.rows[0].items_count) || 0
 
-    // Check if category has items
+    // If there are items, delete them first
     if (itemsCount > 0) {
-      return NextResponse.json(
-        { error: 'Cannot delete category with items. Please delete all items first.' },
-        { status: 400 }
+      await pool.query(
+        'DELETE FROM items WHERE "categoryId" = $1',
+        [resolvedParams.categoryId]
       )
     }
 
     // Deletar a categoria
-    await sql`
-      DELETE FROM categories WHERE id = ${resolvedParams.categoryId}
-    `
+    await pool.query(
+      'DELETE FROM categories WHERE id = $1 AND "storeid" = $2',
+      [resolvedParams.categoryId, resolvedParams.id]
+    )
 
     return NextResponse.json({ message: 'Category deleted successfully' })
   } catch (error) {
     console.error('Error deleting category:', error)
-    return NextResponse.json(
-      { error: 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }

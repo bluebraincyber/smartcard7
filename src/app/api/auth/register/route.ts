@@ -1,7 +1,7 @@
 // app/api/auth/register/route.ts
 export const runtime = 'nodejs';
 import { NextResponse } from 'next/server';
-import { sql } from '@/lib/db';
+import pool from '@/lib/db';
 import { hashPassword } from '@/lib/password';
 
 export async function POST(req: Request) {
@@ -13,19 +13,20 @@ export async function POST(req: Request) {
 
     const hash = await hashPassword(password);
 
-    await sql`
-      INSERT INTO users (name, email, password_hash)
-      VALUES (${name ?? null}, ${email.toLowerCase()}, ${hash})
+    await pool.query(
+      `INSERT INTO users (name, email, password_hash)
+      VALUES ($1, $2, $3)
       ON CONFLICT (email) DO UPDATE 
         SET name = EXCLUDED.name, 
             password_hash = EXCLUDED.password_hash, 
-            updated_at = NOW()
-    `;
+            updated_at = NOW()`,
+      [name ?? null, email.toLowerCase(), hash]
+    );
 
     return NextResponse.json({ ok: true }, { status: 201 });
   } catch (e: any) {
     console.error('register error', e);
-    return NextResponse.json({ ok: false, error: 'REGISTER_FAILED' }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: e?.message }, { status: 500 });
   }
 }
 

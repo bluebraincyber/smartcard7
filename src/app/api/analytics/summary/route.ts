@@ -21,10 +21,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(analytics)
   } catch (error) {
     console.error('Erro ao buscar analytics:', error)
-    return NextResponse.json(
-      { error: 'Erro interno do servidor' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }
 
