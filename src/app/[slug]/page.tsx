@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation'
 import pool from '@/lib/db'
 import PublicStorePage from '@/components/PublicStorePage'
-import { trackEvent } from '@/lib/analytics'
 import { Metadata } from 'next'
 import { unstable_noStore as noStore } from "next/cache";
 
@@ -15,92 +14,159 @@ interface PageProps {
   }
 }
 
-interface StoreRow {
-  id: string
-  name: string
-  slug: string
-  description: string | null
-  whatsapp: string
-  address: string | null
-  primaryColor: string
-  isactive: boolean
-  requiresAddress: boolean
-  businessType: string
-  userid: string
-  createdAt: Date
-  updatedAt: Date
-}
-
-interface CategoryRow {
-  id: string
-  name: string
-  storeid: string
-  active: boolean
-}
-
-interface ItemRow {
-  id: string
-  name: string
-  description: string | null
-  price: number | null;
-  categoryId: string
-  imageUrl: string | null; // Adicionado imageUrl
-}
-
-interface StoreWithCategories extends StoreRow {
-  categories: {
-    id: string
-    name: string
-    storeid: string
-    items: ItemRow[]
-  }[]
-}
-
 async function getStore(slug: string) {
-  noStore();
+  try {
+    noStore();
 
-  const { rows: [store] } = await pool.query(
-    `SELECT id, name, slug, description, whatsapp, address, primary_color as primaryColor, isactive, requires_address as requiresAddress, business_type as businessType, userid, created_at as createdAt, updated_at as updatedAt FROM stores WHERE slug = $1 LIMIT 1`,
-    [slug]
-  );
+    console.log('🔍 Buscando loja com slug:', slug)
 
-  if (!store) {
+    // Buscar loja - versão simplificada e robusta
+    const storeResult = await pool.query(
+      `SELECT id, name, slug, description, whatsapp, address, isactive, userid, created_at, updated_at 
+       FROM stores 
+       WHERE slug = $1 
+       LIMIT 1`,
+      [slug]
+    );
+
+    console.log('📊 Resultado da busca de loja:', storeResult.rows.length, 'registros')
+
+    if (storeResult.rows.length === 0) {
+      console.log('❌ Loja não encontrada para slug:', slug)
+      return null;
+    }
+
+    const store = storeResult.rows[0];
+    console.log('✅ Loja encontrada:', store.name)
+
+    // Verificar se a loja está ativa
+    if (!store.isactive) {
+      console.log('⚠️ Loja inativa:', store.name)
+      return null;
+    }
+
+    // Buscar categorias - versão simplificada
+    const categoriesResult = await pool.query(
+      `SELECT id, name, storeid FROM categories WHERE storeid = $1 ORDER BY id ASC`,
+      [store.id]
+    );
+
+    console.log('📂 Categorias encontradas:', categoriesResult.rows.length)
+
+    const enrichedCategories = [];
+    for (const category of categoriesResult.rows) {
+      console.log('🔍 Buscando itens para categoria:', category.name)
+      
+      try {
+        // Buscar itens com tratamento robusto de cada coluna
+        const itemsResult = await pool.query(
+          `SELECT 
+            id, 
+            name, 
+            COALESCE(description, '') as description,
+            COALESCE(price_cents, 0) as price_cents,
+            COALESCE(image, '') as image,
+            COALESCE(isactive, true) as isactive,
+            COALESCE(isarchived, false) as isarchived
+           FROM items
+           WHERE categoryid = $1
+           ORDER BY name ASC`,
+          [category.id]
+        );
+
+        console.log(`📦 Itens encontrados para ${category.name}:`, itemsResult.rows.length)
+
+        // Log detalhado dos itens para debug
+        if (itemsResult.rows.length > 0) {
+          console.log(`🔍 Primeiro item da categoria ${category.name}:`, JSON.stringify(itemsResult.rows[0], null, 2))
+        }
+
+        // Converter itens para formato esperado pelo frontend com tratamento robusto
+        const formattedItems = itemsResult.rows
+          .filter(item => {
+            const isArchived = item.isarchived === true
+            const isActive = item.isactive !== false
+            console.log(`📋 Item ${item.name}: archived=${isArchived}, active=${isActive}`)
+            return !isArchived && isActive
+          })
+          .map(item => {
+            const formattedItem = {
+              id: String(item.id),
+              name: String(item.name || ''),
+              description: item.description || null,
+              price: item.price_cents ? Number(item.price_cents) / 100 : 0,
+              categoryId: String(category.id),
+              imageUrl: item.image || null,
+              isactive: item.isactive !== false,
+              isarchived: item.isarchived === true
+            };
+            console.log(`✅ Item formatado:`, JSON.stringify(formattedItem, null, 2))
+            return formattedItem;
+          });
+
+        enrichedCategories.push({ 
+          ...category, 
+          items: formattedItems 
+        });
+
+      } catch (itemError) {
+        console.error(`❌ Erro ao buscar itens para categoria ${category.name}:`, itemError)
+        // Continuar com categoria vazia em caso de erro
+        enrichedCategories.push({ 
+          ...category, 
+          items: [] 
+        });
+      }
+    }
+
+    const finalStore = { 
+      ...store, 
+      primaryColor: '#EA1D2C', // Valor padrão
+      categories: enrichedCategories 
+    };
+
+    console.log('🏪 Loja completa preparada:', finalStore.name, 'com', enrichedCategories.length, 'categorias')
+    console.log('📊 Resumo das categorias:', enrichedCategories.map(cat => ({ 
+      name: cat.name, 
+      itemCount: cat.items.length 
+    })))
+    
+    return finalStore;
+
+  } catch (error) {
+    console.error('❌ Erro ao buscar loja:', error)
+    console.error('❌ Stack trace:', error.stack)
     return null;
   }
-
-  const { rows: categories } = await pool.query(
-    `SELECT id, name, position FROM categories WHERE storeid = $1 ORDER BY position ASC`, // Revertido para storeid
-    [store.id]
-  );
-
-  const enrichedCategories = [];
-  for (const category of categories) {
-    const { rows: items } = await pool.query(
-      `SELECT id, name, description, price, COALESCE(isactive, TRUE) AS isactive, COALESCE(isarchived, FALSE) AS isarchived, image_url as imageUrl
-         FROM items
-        WHERE categoryid = $1
-          AND COALESCE(isarchived, FALSE) = FALSE
-          AND COALESCE(isactive, TRUE) = TRUE
-        ORDER BY name ASC`, // Revertido para categoryid
-      [category.id]
-    );
-    enrichedCategories.push({ ...category, items: items ?? [] });
-  }
-
-  return { ...store, categories: enrichedCategories };
 }
 
 export default async function StorePage({ params }: { params: { slug: string } }) {
-  noStore(); // sem cache
-  const store = await getStore(params.slug);
+  try {
+    noStore();
+    
+    console.log('🚀 Carregando página pública para slug:', params.slug)
+    
+    const store = await getStore(params.slug);
 
-  if (!store) {
+    if (!store) {
+      console.log('🚫 Redirecionando para 404 - loja não encontrada')
+      notFound()
+    }
+
+    console.log('🎉 Renderizando página pública para:', store.name)
+    console.log('🔍 Store data antes de passar para componente:', JSON.stringify({
+      name: store.name,
+      categoriesCount: store.categories.length,
+      totalItems: store.categories.reduce((sum, cat) => sum + cat.items.length, 0)
+    }, null, 2))
+    
+    return <PublicStorePage store={store} />
+    
+  } catch (error) {
+    console.error('❌ Erro crítico na página pública:', error)
+    console.error('❌ Stack trace:', error.stack)
     notFound()
   }
-
-  return (
-    <PublicStorePage store={store} />
-  )
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -121,44 +187,19 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
       title: `${store.name} - Cartão Digital SmartCard`,
       description,
-      keywords: [
-        store.name,
-        'cartão digital',
-        'smartcard',
-        'catálogo online',
-        'whatsapp',
-        store.businessType
-      ],
       openGraph: {
         title: `${store.name} - Cartão Digital`,
         description,
         type: 'website',
         siteName: 'SmartCard',
         locale: 'pt_BR'
-      },
-      twitter: {
-        card: 'summary_large_image',
-        title: `${store.name} - Cartão Digital`,
-        description
-      },
-      robots: {
-        index: true,
-        follow: true,
-        googleBot: {
-          index: true,
-          follow: true
-        }
       }
     }
   } catch (error) {
     console.error('Erro ao gerar metadata:', error)
-    // Fallback metadata se houver erro de conexão durante build
     return {
       title: `${params.slug} - SmartCard`,
       description: 'Cartão digital inteligente para seu negócio'
     }
   }
 }
-
-// Removido generateStaticParams para evitar build-time estático
-// Agora todas as páginas são renderizadas dinamicamente em runtime

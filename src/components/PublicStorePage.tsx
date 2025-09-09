@@ -45,6 +45,29 @@ interface PublicStorePageProps {
 }
 
 export default function PublicStorePage({ store }: PublicStorePageProps) {
+  // Validação de dados na entrada
+  if (!store || !store.id || !store.name) {
+    console.error('❌ Dados de store inválidos:', store)
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-xl font-medium text-gray-900 mb-2">Erro ao carregar loja</h2>
+          <p className="text-gray-500">Os dados da loja estão incompletos.</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Garantir que categories é um array
+  const safeCategories = Array.isArray(store.categories) ? store.categories : []
+  console.log('🏪 Componente recebeu store:', {
+    name: store.name,
+    categoriesCount: safeCategories.length,
+    categories: safeCategories.map(cat => ({
+      name: cat.name,
+      itemsCount: Array.isArray(cat.items) ? cat.items.length : 0
+    }))
+  })
   const [cart, setCart] = useState<CartItem[]>([])
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
@@ -134,11 +157,6 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
     })
     
     message += `💰 *TOTAL DO PEDIDO: R$ ${(getCartTotal() || 0).toFixed(2)}*\n\n`
-    
-    if (store.requiresAddress) {
-      message += `📍 *ENDEREÇO PARA ENTREGA:*\n`
-      message += `(Por favor, informe seu endereço completo)\n\n`
-    }
     
     message += `✅ Confirma o pedido?`
     
@@ -347,7 +365,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
 
       {/* Categories and Items */}
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-        {store.categories.length === 0 ? (
+        {safeCategories.length === 0 ? (
           <div className="text-center py-12">
             <div className="text-gray-400 mb-4">
               <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -368,16 +386,20 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
           </div>
         ) : (
           <div className="space-y-8">
-            {store.categories.map(category => (
+            {safeCategories.map(category => {
+              // Garantir que items é um array
+              const safeItems = Array.isArray(category.items) ? category.items : []
+              
+              return (
               <div key={category.id} className="mb-8">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">{category.name}</h2>
-                {category.items.filter(item => !item.isarchived && item.isactive).length === 0 ? (
+                {safeItems.filter(item => !item.isarchived && item.isactive).length === 0 ? (
                   <p className="text-gray-500 text-center py-8">
                     Nenhum item disponível nesta categoria
                   </p>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {category.items
+                    {safeItems
                       .filter(item => !item.isarchived && item.isactive)
                       .map(item => (
                         <div
@@ -452,7 +474,8 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                   </div>
                 )}
               </div>
-            ))}
+              )
+            })}
           </div>
         )}
       </div>
