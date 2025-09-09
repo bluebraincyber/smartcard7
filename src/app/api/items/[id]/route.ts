@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/lib/auth'
+import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 import pool from '@/lib/db'
+import type { Session } from 'next-auth'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -21,81 +22,86 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth() as Session | null
+    console.log('🔄 Iniciando atualização de item...')
+    
+    const session = await getServerSession(authOptions) as Session | null
+    console.log('👤 Sessão:', session?.user?.id ? 'Autenticado' : 'Não autenticado')
     
     if (!session?.user?.id) {
+      console.log('❌ Usuário não autenticado')
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const { id } = await params
-    const { name, description, price, image, isactive, isarchived } = await request.json()
+    const resolvedParams = await params
+    const { id } = resolvedParams
+    const body = await request.json()
+    const { name, description, price, image, isactive, isarchived } = body
 
-    console.log('🔄 Atualizando item:', id, 'com dados:', { name, description, price, image, isactive, isarchived })
+    console.log('📊 Dados recebidos:', { id, name, description, price, image, isactive, isarchived })
 
-    // Verificar se o item pertence ao usuário - CORRIGIDO: usar nomes corretos das colunas
+    // Verificar se o item pertence ao usuário
+    console.log('🔍 Verificando permissão do item...')
     const itemResult = await pool.query(
       `SELECT i.id FROM items i
       JOIN categories c ON i.categoryid = c.id
       JOIN stores s ON c.storeid = s.id
-      WHERE i.id = $1 AND s.userid = $2`, // Revertido para categoryid e storeid
+      WHERE i.id = $1 AND s.userid = $2`,
       [id, session.user.id]
     )
 
+    console.log('📋 Resultado da verificação:', itemResult.rows.length, 'registros')
+
     if (itemResult.rows.length === 0) {
+      console.log('❌ Item não encontrado ou sem permissão')
       return NextResponse.json({ error: 'Item não encontrado' }, { status: 404 })
     }
 
-    const updateData: ItemUpdateData = {}
-    if (name !== undefined) updateData.name = name
-    if (description !== undefined) updateData.description = description
-    if (price !== undefined) updateData.price = price
-    if (image !== undefined) updateData.image = image
-    if (isactive !== undefined) updateData.isactive = isactive
-    if (isarchived !== undefined) updateData.isarchived = isarchived
-
-    // Construir query de update dinamicamente
+    // Construir update dinamicamente apenas com campos fornecidos
     const updateFields = []
     const updateValues = []
     
-    if (updateData.name !== undefined) {
+    if (name !== undefined) {
       updateFields.push('name = $' + (updateValues.length + 1))
-      updateValues.push(updateData.name)
+      updateValues.push(name)
     }
     
-    if (updateData.description !== undefined) {
+    if (description !== undefined) {
       updateFields.push('description = $' + (updateValues.length + 1))
-      updateValues.push(updateData.description)
+      updateValues.push(description)
     }
     
-    if (updateData.price !== undefined) {
-      updateFields.push('price = $' + (updateValues.length + 1))
-      updateValues.push(updateData.price)
-      // Adicionar price_cents também
+    if (price !== undefined) {
       updateFields.push('price_cents = $' + (updateValues.length + 1))
-      updateValues.push(Math.round(updateData.price * 100))
+      updateValues.push(Math.round(parseFloat(price) * 100))
     }
     
-    if (updateData.image !== undefined) {
+    if (image !== undefined) {
       updateFields.push('image = $' + (updateValues.length + 1))
-      updateValues.push(updateData.image)
+      updateValues.push(image)
     }
     
-    if (updateData.isactive !== undefined) {
+    if (isactive !== undefined) {
       updateFields.push('isactive = $' + (updateValues.length + 1))
-      updateValues.push(updateData.isactive)
+      updateValues.push(isactive)
     }
     
-    if (updateData.isarchived !== undefined) {
+    if (isarchived !== undefined) {
       updateFields.push('isarchived = $' + (updateValues.length + 1))
-      updateValues.push(updateData.isarchived)
+      updateValues.push(isarchived)
     }
     
+    // Sempre atualizar updated_at
     updateFields.push('updated_at = NOW()')
+    
+    if (updateFields.length === 1) { // Apenas updated_at
+      console.log('⚠️ Nenhum campo para atualizar')
+      return NextResponse.json({ error: 'Nenhum campo para atualizar' }, { status: 400 })
+    }
     
     const updateQuery = `
       UPDATE items SET ${updateFields.join(', ')}
       WHERE id = $${updateValues.length + 1}
-      RETURNING *
+      RETURNING id, name, description, price_cents, image, isactive, isarchived, updated_at
     `
     updateValues.push(id)
     
@@ -103,14 +109,26 @@ export async function PATCH(
     console.log('📊 Valores:', updateValues)
     
     const updatedItemResult = await pool.query(updateQuery, updateValues)
-    const updatedItem = updatedItemResult.rows[0]
+    
+    if (updatedItemResult.rows.length === 0) {
+      console.log('❌ Nenhum item foi atualizado')
+      return NextResponse.json({ error: 'Falha ao atualizar item' }, { status: 500 })
+    }
+    
+    const updatedItem = {
+      ...updatedItemResult.rows[0],
+      price: updatedItemResult.rows[0].price_cents ? updatedItemResult.rows[0].price_cents / 100 : 0
+    }
 
-    console.log('✅ Item atualizado:', updatedItem)
+    console.log('✅ Item atualizado com sucesso:', updatedItem)
 
     return NextResponse.json(updatedItem)
   } catch (error) {
     console.error('❌ Erro ao atualizar item:', error)
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Erro desconhecido' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'INTERNAL_ERROR', 
+      detail: error instanceof Error ? error.message : 'Erro desconhecido' 
+    }, { status: 500 });
   }
 }
 
@@ -119,36 +137,59 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth() as Session | null
+    console.log('🗑️ Iniciando exclusão de item...')
+    
+    const session = await getServerSession(authOptions) as Session | null
+    console.log('👤 Sessão:', session?.user?.id ? 'Autenticado' : 'Não autenticado')
     
     if (!session?.user?.id) {
+      console.log('❌ Usuário não autenticado')
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const { id } = await params
+    const resolvedParams = await params
+    const { id } = resolvedParams
 
-    // Verificar se o item pertence ao usuário - CORRIGIDO: usar nomes corretos das colunas
+    console.log('📊 ID do item para exclusão:', id)
+
+    // Verificar se o item pertence ao usuário
+    console.log('🔍 Verificando permissão do item...')
     const itemResult = await pool.query(
       `SELECT i.id FROM items i
       JOIN categories c ON i.categoryid = c.id
       JOIN stores s ON c.storeid = s.id
-      WHERE i.id = $1 AND s.userid = $2`, // Revertido para categoryid e storeid
+      WHERE i.id = $1 AND s.userid = $2`,
       [id, session.user.id]
     )
 
+    console.log('📋 Resultado da verificação:', itemResult.rows.length, 'registros')
+
     if (itemResult.rows.length === 0) {
+      console.log('❌ Item não encontrado ou sem permissão')
       return NextResponse.json({ error: 'Item não encontrado' }, { status: 404 })
     }
 
     // Deletar o item
-    await pool.query(
+    console.log('🗑️ Executando exclusão...')
+    const deleteResult = await pool.query(
       `DELETE FROM items WHERE id = $1`,
       [id]
     )
 
+    console.log('📊 Linhas afetadas pela exclusão:', deleteResult.rowCount)
+
+    if (deleteResult.rowCount === 0) {
+      console.log('❌ Nenhum item foi excluído')
+      return NextResponse.json({ error: 'Falha ao excluir item' }, { status: 500 })
+    }
+
+    console.log('✅ Item excluído com sucesso')
     return NextResponse.json({ message: 'Item excluído com sucesso' })
   } catch (error) {
-    console.error('Erro ao excluir item:', error)
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Erro desconhecido' }, { status: 500 });
+    console.error('❌ Erro ao excluir item:', error)
+    return NextResponse.json({ 
+      error: 'INTERNAL_ERROR', 
+      detail: error instanceof Error ? error.message : 'Erro desconhecido' 
+    }, { status: 500 });
   }
 }

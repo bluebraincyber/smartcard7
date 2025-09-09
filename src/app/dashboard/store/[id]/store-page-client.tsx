@@ -451,11 +451,11 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                                 {item.isactive ? 'Ativo' : 'Inativo'}
                               </span>
                               <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                item.isAvailable 
+                                !item.isarchived 
                                   ? 'bg-blue-100 text-blue-800' 
                                   : 'bg-yellow-100 text-yellow-800'
                               }`}>
-                                {item.isarchived ? 'Indisponível' : 'Disponível'}
+                                {!item.isarchived ? 'Disponível' : 'Indisponível'}
                               </span>
                             </div>
                           </div>

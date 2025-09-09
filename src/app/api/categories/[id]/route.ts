@@ -3,6 +3,7 @@ import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 import pool from '@/lib/db'
 import type { Session } from 'next-auth'
+import { revalidatePath } from 'next/cache'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -21,15 +22,17 @@ export async function PATCH(
     }
     const { isactive } = await request.json()
 
-    // Verificar se a categoria pertence ao usuário
+    // Verificar se a categoria pertence ao usuário e obter store slug
     const categoryResult = await pool.query(
-      'SELECT c.id FROM categories c JOIN stores s ON c.storeid = s.id WHERE c.id = $1 AND s.userid = $2',
+      'SELECT c.id, s.slug FROM categories c JOIN stores s ON c.storeid = s.id WHERE c.id = $1 AND s.userid = $2',
       [id, session.user.id]
     )
 
     if (categoryResult.rows.length === 0) {
       return NextResponse.json({ error: 'Categoria não encontrada' }, { status: 404 })
     }
+
+    const storeSlug = categoryResult.rows[0].slug
 
     // Atualizar categoria
     const updatedCategoryResult = await pool.query(
@@ -38,6 +41,14 @@ export async function PATCH(
     )
     
     const updatedCategory = updatedCategoryResult.rows[0]
+
+    // CORREÇÃO: Revalidar cache da página pública
+    try {
+      revalidatePath(`/${storeSlug}`)
+      console.log('📄 Cache revalidado para página pública:', `/${storeSlug}`)
+    } catch (revalidateError) {
+      console.warn('⚠️ Erro ao revalidar cache da página pública:', revalidateError)
+    }
 
     return NextResponse.json(updatedCategory)
   } catch (error) {

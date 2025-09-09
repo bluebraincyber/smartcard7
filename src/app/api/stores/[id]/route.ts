@@ -4,9 +4,6 @@ import pool from '@/lib/db'
 import type { Session } from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
 
-
-
-
 export const runtime = 'nodejs'
 
 const toSlug = (s: string) =>
@@ -32,7 +29,6 @@ export async function GET(
 
     const resolvedParams = await params
 
-    // Buscar loja
     const storeResult = await pool.query(
       'SELECT * FROM stores WHERE id = $1 AND userid = $2',
       [resolvedParams.id, session.user.id]
@@ -44,19 +40,16 @@ export async function GET(
     
     const store = storeResult.rows[0]
     
-    // Buscar categorias
     const categoriesResult = await pool.query(
-      'SELECT * FROM categories WHERE storeid = $1 ORDER BY "order" ASC', // Revertido para storeid e "order"
+      'SELECT * FROM categories WHERE storeid = $1 ORDER BY id ASC',
       [resolvedParams.id]
     )
     
-    // Buscar itens - CORRIGIDO: usar nomes corretos das colunas
     const itemsResult = await pool.query(
-      'SELECT i.* FROM items i JOIN categories c ON i.categoryid = c.id WHERE c.storeid = $1 ORDER BY c."order" ASC', // Revertido para categoryid, storeid e "order"
+      'SELECT i.* FROM items i JOIN categories c ON i.categoryid = c.id WHERE c.storeid = $1 ORDER BY c.id ASC',
       [resolvedParams.id]
     )
     
-    // Montar estrutura completa com correção de preço
     const storeWithCategories = {
       ...store,
       categories: categoriesResult.rows.map(category => ({
@@ -65,7 +58,7 @@ export async function GET(
           .filter(item => item.categoryid === category.id)
           .map(item => ({
             ...item,
-            price: item.price_cents ? item.price_cents / 100 : 0 // CORRIGIDO: converter centavos para reais
+            price: item.price_cents ? item.price_cents / 100 : 0
           }))
       }))
     }
@@ -74,6 +67,98 @@ export async function GET(
   } catch (error) {
     console.error('Erro ao buscar loja:', error)
     return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
+  }
+}
+
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    console.log('API PATCH chamada')
+    const session = await getServerSession(authOptions) as Session | null
+    
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+    }
+
+    const resolvedParams = await params
+    const id = resolvedParams.id
+    const body = await request.json()
+    console.log('Dados recebidos:', body)
+
+    const existingStoreResult = await pool.query(
+      'SELECT * FROM stores WHERE id = $1 AND userid = $2',
+      [id, session.user.id]
+    )
+
+    if (existingStoreResult.rows.length === 0) {
+      return NextResponse.json({ error: 'Loja não encontrada' }, { status: 404 })
+    }
+
+    const setParts = []
+    const values = []
+    let paramCount = 0
+
+    if (body.name !== undefined) {
+      paramCount++
+      setParts.push(`name = $${paramCount}`)
+      values.push(body.name)
+    }
+
+    if (body.description !== undefined) {
+      paramCount++
+      setParts.push(`description = $${paramCount}`)
+      values.push(body.description)
+    }
+
+    if (body.whatsapp !== undefined || body.phone !== undefined) {
+      paramCount++
+      setParts.push(`whatsapp = $${paramCount}`)
+      values.push(body.whatsapp || body.phone)
+    }
+
+    if (body.address !== undefined) {
+      paramCount++
+      setParts.push(`address = $${paramCount}`)
+      values.push(body.address)
+    }
+
+    if (body.isactive !== undefined) {
+      paramCount++
+      setParts.push(`isactive = $${paramCount}`)
+      values.push(body.isactive)
+    }
+
+    setParts.push('updated_at = NOW()')
+
+    if (setParts.length === 1) {
+      return NextResponse.json({ error: 'Nenhum campo para atualizar' }, { status: 400 })
+    }
+
+    paramCount++
+    values.push(id)
+
+    const queryText = `UPDATE stores SET ${setParts.join(', ')} WHERE id = $${paramCount} RETURNING *`
+    
+    console.log('Query:', queryText)
+    console.log('Values:', values)
+    
+    const result = await pool.query(queryText, values)
+
+    if (result.rows.length === 0) {
+      return NextResponse.json({ error: 'Falha ao atualizar loja' }, { status: 500 })
+    }
+
+    const updatedStore = result.rows[0]
+    console.log('Loja atualizada:', updatedStore)
+    return NextResponse.json(updatedStore)
+  } catch (error) {
+    console.error('Erro PATCH:', error)
+    return NextResponse.json({ 
+      error: 'INTERNAL_ERROR', 
+      detail: error instanceof Error ? error.message : 'Erro desconhecido' 
+    }, { status: 500 })
   }
 }
 
@@ -91,9 +176,8 @@ export async function PUT(
     const resolvedParams = await params
     const id = resolvedParams.id
     const body = await request.json()
-    const { name, description, whatsapp, address, coverImage, profileImage, primaryColor, isactive } = body
+    const { name, description, whatsapp, address, isactive } = body
 
-    // Verificar se a loja pertence ao usuário
     const existingStoreResult = await pool.query(
       'SELECT * FROM stores WHERE id = $1 AND userid = $2',
       [resolvedParams.id, session.user.id]
@@ -105,11 +189,9 @@ export async function PUT(
     
     const existingStore = existingStoreResult.rows[0]
 
-    // decide o slug desejado
     const desired = body.slug ?? body.name ?? existingStore.name ?? ""
     const newSlug = desired ? toSlug(desired) : existingStore.slug
 
-    // só checa unicidade se mudou
     if (newSlug && newSlug !== existingStore.slug) {
       const slugExistsResult = await pool.query(
         'SELECT id FROM stores WHERE slug = $1',
@@ -121,20 +203,8 @@ export async function PUT(
     }
 
     const updatedStoreResult = await pool.query(
-      `UPDATE stores SET 
-        name = $1,
-        slug = $2,
-        description = $3,
-        whatsapp = $4,
-        address = $5,
-        "primaryColor" = $6,
-        isactive = $7,
-        "coverImage" = $8,
-        "profileImage" = $9,
-        updated_at = NOW()
-      WHERE id = $10
-      RETURNING *`,
-      [name, newSlug, description, whatsapp, address, primaryColor, isactive, coverImage, profileImage, id]
+      'UPDATE stores SET name = $1, slug = $2, description = $3, whatsapp = $4, address = $5, isactive = $6, updated_at = NOW() WHERE id = $7 RETURNING *',
+      [name, newSlug, description, whatsapp, address, isactive, id]
     )
     
     const updatedStore = updatedStoreResult.rows[0]
@@ -145,8 +215,6 @@ export async function PUT(
     return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
   }
 }
-
-// PATCH method removed - using dedicated /toggle route instead
 
 export async function DELETE(
   request: NextRequest,
@@ -161,7 +229,6 @@ export async function DELETE(
 
     const resolvedParams = await params
 
-    // Verificar se a loja pertence ao usuário
     const existingStoreResult = await pool.query(
       'SELECT id FROM stores WHERE id = $1 AND userid = $2',
       [resolvedParams.id, session.user.id]
@@ -171,19 +238,16 @@ export async function DELETE(
       return NextResponse.json({ error: 'Loja não encontrada' }, { status: 404 })
     }
 
-    // Primeiro, deletar itens das categorias da loja
     await pool.query(
-      'DELETE FROM items WHERE categoryid IN (SELECT id FROM categories WHERE storeid = $1)', // Revertido para categoryid e storeid
+      'DELETE FROM items WHERE categoryid IN (SELECT id FROM categories WHERE storeid = $1)',
       [resolvedParams.id]
     )
 
-    // Depois, deletar categorias da loja
     await pool.query(
-      'DELETE FROM categories WHERE storeid = $1', // Revertido para storeid
+      'DELETE FROM categories WHERE storeid = $1',
       [resolvedParams.id]
     )
 
-    // Por fim, deletar a loja
     await pool.query(
       'DELETE FROM stores WHERE id = $1',
       [resolvedParams.id]
@@ -195,4 +259,3 @@ export async function DELETE(
     return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
   }
 }
-
