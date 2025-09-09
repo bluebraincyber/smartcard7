@@ -26,7 +26,7 @@ export async function GET() {
         s.name,
         s.slug,
         s.description,
-        s.active as "isActive",
+        s.isactive as "isActive",
         s.userid,
         s.created_at as "createdAt",
         s.updated_at as "updatedAt",
