@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import { sql } from '@/lib/db'
-import { getServerSession } from 'next-auth'
+import { auth } from '@/auth'
 import { authOptions } from '@/lib/authOptions'
 import EditStoreClient from './edit-store-client'
 
@@ -26,7 +26,7 @@ interface SlugCheckResult {
 
 export default async function EditStorePage({ params }: { params: { id: string } }) {
   // 1. Obter a sessão do usuário NO SERVIDOR
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   if (!session?.user?.id) {
     notFound()
   }

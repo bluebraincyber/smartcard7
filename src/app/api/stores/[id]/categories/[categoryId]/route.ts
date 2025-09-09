@@ -60,7 +60,7 @@ export async function GET(
     return NextResponse.json(category)
   } catch (error) {
     console.error('Error fetching category:', error)
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -165,7 +165,7 @@ export async function PATCH(
     return NextResponse.json(updatedCategory)
   } catch (error) {
     console.error('Error updating category:', error)
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -226,6 +226,6 @@ export async function DELETE(
     return NextResponse.json({ message: 'Category deleted successfully' })
   } catch (error) {
     console.error('Error deleting category:', error)
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
