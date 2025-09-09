@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
@@ -50,6 +50,11 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
       items: category.items || []
     })) || []
   })
+
+  useEffect(() => {
+    fetchStore()
+  }, [])
+
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [deleteConfirmText, setDeleteConfirmText] = useState('')
   const [isDeleting, setIsDeleting] = useState(false)
@@ -60,7 +65,8 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
     title: string
     message: string
     onConfirm: () => void
-  }>({ isOpen: false, title: '', message: '', onConfirm: () => {} })
+    onClose: () => void
+  }>({ isOpen: false, title: '', message: '', onConfirm: () => {}, onClose: () => {} })
   const [editModal, setEditModal] = useState<{
     isOpen: boolean
     product: Item | null
@@ -473,8 +479,8 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
 
       {/* Delete Store Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white">
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onClick={() => setShowDeleteModal(false)}>
+          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Deletar Loja</h3>
               <p className="text-sm text-gray-600 mb-4">
@@ -516,7 +522,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         title={confirmModal.title}
         message={confirmModal.message}
         onConfirm={confirmModal.onConfirm}
-        onCancel={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+        onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
       />
 
       {/* Product Edit Modal */}
@@ -524,7 +530,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         isOpen={editModal.isOpen}
         product={editModal.product}
         onClose={() => setEditModal({ isOpen: false, product: null })}
-        onSave={() => {
+        onSave={async (productData) => {
           fetchStore()
           setEditModal({ isOpen: false, product: null })
         }}

@@ -12,7 +12,9 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    console.log('Iniciando DELETE para categoria:', id)
     const session = await auth() as Session | null
+    console.log('Sessão obtida:', session?.user?.id)
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -22,6 +24,7 @@ export async function PATCH(
     const { isactive } = await request.json()
 
     // Verificar se a categoria pertence ao usuário
+    console.log('Verificando se a categoria pertence ao usuário...')
     const categoryResult = await sql`
       SELECT c.id FROM categories c
       JOIN stores s ON c."storeid" = s.id
@@ -57,33 +60,40 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth() as Session | null
+    const { id } = await params;
+    console.log(`DELETE /api/categories/${id} - Requisição recebida.`);
+
+    const session = await auth() as Session | null;
+    console.log('Sessão obtida:', session?.user?.id);
     
     if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
     }
 
-    const { id } = await params
-
     // Verificar se a categoria pertence ao usuário
+    console.log('Verificando se a categoria pertence ao usuário...');
     const categoryResult = await sql`
       SELECT c.id FROM categories c
       JOIN stores s ON c."storeid" = s.id
       WHERE c.id = ${id} AND s."userid" = ${session.user.id}
-    `
+    `;
 
     if (categoryResult.rows.length === 0) {
-      return NextResponse.json({ error: 'Categoria não encontrada' }, { status: 404 })
+      return NextResponse.json({ error: 'Categoria não encontrada' }, { status: 404 });
     }
 
     // Deletar categoria (os itens serão deletados automaticamente devido ao CASCADE)
+    console.log('Deletando categoria...');
     await sql`
       DELETE FROM categories WHERE id = ${id}
-    `
+    `;
 
-    return NextResponse.json({ message: 'Categoria excluída com sucesso' })
+    console.log('Categoria excluída com sucesso.');
+    return NextResponse.json({ message: 'Categoria excluída com sucesso' });
   } catch (error) {
-    console.error('Erro ao excluir categoria:', error)
+    console.error('Erro ao excluir categoria:', error);
+    console.error('Stack Trace:', (error as Error).stack);
+    console.error('Detalhes do Erro:', JSON.stringify(error, Object.getOwnPropertyNames(error)));
     return NextResponse.json(
       { error: 'Erro interno do servidor' },
       { status: 500 }

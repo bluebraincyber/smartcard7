@@ -185,7 +185,7 @@ export async function getGlobalAnalytics(userid: string) {
     const totalVisitsResult = await sql`
       SELECT COUNT(*) as count
       FROM analytics 
-      WHERE "storeid" = (${sql.array(storeids)})
+      WHERE "storeid" = ANY(${sql.array(storeids)})
         AND event = 'visit' 
         AND timestamp >= ${last30Days.toISOString()}
     `;
@@ -195,7 +195,7 @@ export async function getGlobalAnalytics(userid: string) {
     const totalClicksResult = await sql`
       SELECT COUNT(*) as count
       FROM analytics 
-      WHERE "storeid" = (${sql.array(storeids)})
+      WHERE "storeid" = ANY(${sql.array(storeids)})
         AND event = 'whatsapp_click' 
         AND timestamp >= ${last30Days.toISOString()}
     `;
