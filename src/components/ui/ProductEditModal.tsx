@@ -12,7 +12,7 @@ interface Item {
   price: number
   image?: string
   isactive: boolean
-  isAvailable: boolean
+  isarchived: boolean // Mudando para isarchived para coincidir com o banco
 }
 
 interface ProductEditModalProps {
@@ -34,7 +34,7 @@ export default function ProductEditModal({
     price: 0,
     image: '',
     isactive: true,
-    isAvailable: true
+    isarchived: false // Mudando para isarchived
   })
   const [isLoading, setIsLoading] = useState(false)
 
@@ -46,7 +46,7 @@ export default function ProductEditModal({
         price: product.price || 0,
         image: product.image || '',
         isactive: product.isactive ?? true,
-        isAvailable: product.isAvailable ?? true
+        isarchived: product.isarchived ?? false // Mudando para isarchived
       })
     }
   }, [product])
@@ -188,14 +188,14 @@ export default function ProductEditModal({
 
                     <div className="flex items-center">
                       <input
-                        id="isAvailable"
+                        id="isArchived"
                         type="checkbox"
                         className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        checked={formData.isAvailable}
-                        onChange={(e) => setFormData(prev => ({ ...prev, isAvailable: e.target.checked }))}
+                        checked={formData.isarchived}
+                        onChange={(e) => setFormData(prev => ({ ...prev, isarchived: e.target.checked }))}
                       />
-                      <label htmlFor="isAvailable" className="ml-2 block text-sm text-gray-900">
-                        Disponível
+                      <label htmlFor="isArchived" className="ml-2 block text-sm text-gray-900">
+                        Indisponível
                       </label>
                     </div>
                   </div>

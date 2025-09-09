@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { MapPin, Phone, MessageCircle, ShoppingCart, Plus, Minus, Menu, Home, User, Settings } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
+import { ImageThumb } from './ui/ImageThumb'
 
 interface Store {
   id: string
@@ -408,21 +409,13 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                           <div className="flex items-start space-x-3 sm:space-x-4">
                             {/* Product Image */}
                             <div className="flex-shrink-0">
-                              {item.imageUrl ? (
-                                <Image 
-                                  src={item.imageUrl} 
-                                  alt={item.name}
-                                  width={80}
-                                  height={80}
-                                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover border border-gray-200"
-                                />
-                              ) : (
-                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-                                  <svg className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                                  </svg>
-                                </div>
-                              )}
+                              <ImageThumb
+                                src={item.imageUrl || ''}
+                                alt={item.name}
+                                size="md"
+                                variant="rounded"
+                                className="w-16 h-16 sm:w-20 sm:h-20"
+                              />
                             </div>
                             
                             {/* Product Info */}

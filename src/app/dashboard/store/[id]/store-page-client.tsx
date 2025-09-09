@@ -429,6 +429,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                               alt={item.name}
                               width={200}
                               height={150}
+                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                               className="w-full h-32 object-cover rounded"
                             />
                           </div>
@@ -583,7 +584,37 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         product={editModal.product}
         onClose={() => setEditModal({ isOpen: false, product: null })}
         onSave={async (productData) => {
-          fetchStore()
+          if (editModal.product) {
+            try {
+              console.log('💾 Salvando produto:', productData)
+              
+              const response = await fetch(`/api/items/${editModal.product.id}`, {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  name: productData.name,
+                  description: productData.description,
+                  price: productData.price,
+                  image: productData.image,
+                  isactive: productData.isactive,
+                  isarchived: productData.isarchived // Corrigido
+                }),
+              })
+              
+              if (response.ok) {
+                console.log('✅ Produto salvo com sucesso')
+                fetchStore() // Recarregar dados após sucesso
+              } else {
+                console.error('❌ Erro ao salvar produto:', response.status)
+                const errorData = await response.json().catch(() => ({}))
+                console.error('Detalhes do erro:', errorData)
+              }
+            } catch (error) {
+              console.error('💥 Erro de rede ao salvar produto:', error)
+            }
+          }
           setEditModal({ isOpen: false, product: null })
         }}
       />
