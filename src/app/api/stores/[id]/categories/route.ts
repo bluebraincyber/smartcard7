@@ -1,7 +1,8 @@
 import pool from '@/lib/db'
- import type { Session } from 'next-auth'
- import { NextRequest, NextResponse } from 'next/server'
- import { auth } from '@/auth'
+import type { Session } from 'next-auth'
+import { NextRequest, NextResponse } from 'next/server'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/authOptions'
 
 export const runtime = 'nodejs'
 
@@ -10,7 +11,7 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth() as Session | null
+    const session = await getServerSession(authOptions) as Session | null
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -51,7 +52,7 @@ export async function GET(
     return NextResponse.json(categories)
   } catch (error) {
     console.error('Error fetching categories:', error)
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -60,7 +61,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const session = await auth() as Session | null
+    const session = await getServerSession(authOptions) as Session | null
     if (!session?.user?.email) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
@@ -114,6 +115,6 @@ export async function POST(
     return NextResponse.json(category, { status: 201 })
   } catch (error) {
     console.error('Error creating category:', error)
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

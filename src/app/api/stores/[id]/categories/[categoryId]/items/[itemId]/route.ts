@@ -12,14 +12,14 @@ export async function GET(_req: Request, { params }: Params) {
   try {
     const { id: storeid, categoryId, itemId } = params;
     const { rows } = await pool.query(
-      'select i.* from items i where i.id = $1 and i."categoryId" = $2 and i."storeid" = $3 limit 1',
+      'select i.* from items i where i.id = $1 and i.categoryId = $2 and i.storeid = $3 limit 1',
       [itemId, categoryId, storeid]
     );
     if (!rows[0]) return NextResponse.json({ ok: false, error: 'ITEM_NOT_FOUND' }, { status: 404 });
     return NextResponse.json({ ok: true, item: rows[0] });
   } catch (error) {
     console.error('Error fetching item:', error);
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -40,7 +40,7 @@ export async function PUT(req: Request, { params }: Params) {
              featured = coalesce($3, featured), 
              active = coalesce($4, active), 
              updated_at = now() 
-       where id = $5 and "categoryId" = $6 and "storeid" = $7 
+       where id = $5 and categoryId = $6 and storeid = $7 
        returning *`,
       [name, price, featured, active, itemId, categoryId, storeid]
     );
@@ -48,7 +48,7 @@ export async function PUT(req: Request, { params }: Params) {
     return NextResponse.json({ ok: true, item: rows[0] });
   } catch (error) {
     console.error('Error updating item:', error);
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -60,12 +60,12 @@ export async function DELETE(_req: Request, { params }: Params) {
 
     const { id: storeid, categoryId, itemId } = params;
     const result = await pool.query(
-      'delete from items where id = $1 and "categoryId" = $2 and "storeid" = $3',
+      'delete from items where id = $1 and categoryId = $2 and storeid = $3',
       [itemId, categoryId, storeid]
     );
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error('Error deleting item:', error);
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

@@ -1,12 +1,11 @@
 // src/lib/auth.ts - Versão corrigida para Next.js 15
-import type { NextAuthOptions } from 'next-auth';
-import CredentialsProvider from 'next-auth/providers/credentials';
-import { compare } from 'bcryptjs';
-import { sql } from '@vercel/postgres';
-
-export const { handlers, auth, signIn, signOut } = NextAuth({
-    
-    providers: [
+import NextAuth, { type AuthOptions } from "next-auth";
+ import CredentialsProvider from 'next-auth/providers/credentials';
+ import { compare } from 'bcryptjs';
+ 
+ export const authOptions: AuthOptions = {
+     
+     providers: [
       CredentialsProvider({
         name: "Credentials",
         credentials: {
@@ -53,7 +52,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       error: '/auth/error',
     },
     callbacks: {
-      async jwt({ token, user, trigger, session }) {
+      async jwt({ token, user, trigger, session }: { token: any; user: any; trigger: any; session: any; }) {
         if (user) {
           token.id = user.id;
           token.email = user.email;
@@ -68,7 +67,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return token;
       },
       
-      async session({ session, token }) {
+      async session({ session, token }: { session: any; token: any; }) {
         if (session?.user) {
           session.user.id = token.id as string;
           session.user.email = token.email as string;
@@ -77,7 +76,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return session;
       },
       
-      async redirect({ url, baseUrl }) {
+      async redirect({ url, baseUrl }: { url: string; baseUrl: string; }) {
         // Corrigir URLs relativas
         if (url.startsWith("/")) {
           return `${baseUrl}${url}`;
@@ -113,6 +112,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
     
     // Habilita debug exceto em produção (alinhado ao novidades.md)
-    debug: process.env.NODE_ENV !== 'production',
-  };
-}
+    debug: process.env.NODE_ENV !== 'production'
+};
+
+export const { handlers, auth, signIn, signOut } = NextAuth(authOptions);

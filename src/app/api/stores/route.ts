@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { auth } from '@/auth';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/authOptions';
 import type { Session } from 'next-auth';
 
 
@@ -11,7 +12,7 @@ export const dynamic = 'force-dynamic';
 export async function GET() {
   try {
     // Verificar autenticação
-    const session = await auth() as Session | null;
+    const session = await getServerSession(authOptions) as Session | null;
     
     // Se não estiver autenticado, retornar lista vazia
     if (!session?.user?.id) {
@@ -67,7 +68,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     // Verificar autenticação
-    const session = await auth() as Session | null;
+    const session = await getServerSession(authOptions) as Session | null;
     
     if (!session?.user?.id) {
       return NextResponse.json({ 

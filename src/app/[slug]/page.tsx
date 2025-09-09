@@ -1,8 +1,9 @@
 import { notFound } from 'next/navigation'
-import { sql } from '@/lib/db'
+import pool from '@/lib/db'
 import PublicStorePage from '@/components/PublicStorePage'
 import { trackEvent } from '@/lib/analytics'
 import { Metadata } from 'next'
+import { unstable_noStore as noStore } from "next/cache";
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
@@ -14,7 +15,7 @@ interface PageProps {
   }
 }
 
-interface StoreWithCategories {
+interface StoreRow {
   id: string
   name: string
   slug: string
@@ -28,93 +29,78 @@ interface StoreWithCategories {
   userid: string
   createdAt: Date
   updatedAt: Date
+}
+
+interface CategoryRow {
+  id: string
+  name: string
+  storeid: string
+  active: boolean
+}
+
+interface ItemRow {
+  id: string
+  name: string
+  description: string | null
+  price: number | null;
+  categoryId: string
+  imageUrl: string | null; // Adicionado imageUrl
+}
+
+interface StoreWithCategories extends StoreRow {
   categories: {
     id: string
     name: string
     storeid: string
-    items: {
-      id: string
-      name: string
-      description: string | null
-      price: number | null
-      categoryId: string
-    }[]
+    items: ItemRow[]
   }[]
 }
 
-async function getStore(slug: string): Promise<StoreWithCategories | null> {
-  try {
-    // Buscar store
-    const storeResult = await sql`
-      SELECT 
-        id, name, slug, description, whatsapp, address, 
-        primary_color as "primaryColor", isactive as "isactive", 
-        requires_address as "requiresAddress", business_type as "businessType", 
-        "userid", created_at as "createdAt", updated_at as "updatedAt"
-      FROM stores 
-      WHERE slug = ${slug} AND isactive = true
-    `
+async function getStore(slug: string) {
+  noStore();
 
-    if (storeResult.rows.length === 0) {
-      return null
-    }
+  const { rows: [store] } = await pool.query(
+    `SELECT id, name, slug, description, whatsapp, address, primary_color as primaryColor, isactive, requires_address as requiresAddress, business_type as businessType, userid, created_at as createdAt, updated_at as updatedAt FROM stores WHERE slug = $1 LIMIT 1`,
+    [slug]
+  );
 
-    const store = storeResult.rows[0]
-
-    // Buscar categorias
-    const categoriesResult = await sql`
-      SELECT 
-        id, name, "storeid"
-    FROM categories
-    WHERE "storeid" = ${store.id} AND isactive = true
-      ORDER BY name ASC
-    `
-
-    // Buscar items para cada categoria
-    const categories = []
-    for (const category of categoriesResult.rows) {
-      const itemsResult = await sql`
-        SELECT 
-          id, name, description, 
-          COALESCE(price::numeric, 0) as price, 
-          "categoryId"
-        FROM items
-        WHERE "categoryId" = ${category.id} AND isactive = true
-        ORDER BY name ASC
-      `
-      
-      categories.push({
-        ...category,
-        items: itemsResult.rows
-      })
-    }
-
-    return {
-      ...store,
-      categories
-    }
-  } catch (error) {
-    console.error('Error fetching store:', error)
-    return null
+  if (!store) {
+    return null;
   }
+
+  const { rows: categories } = await pool.query(
+    `SELECT id, name, position FROM categories WHERE storeid = $1 ORDER BY position ASC`, // Revertido para storeid
+    [store.id]
+  );
+
+  const enrichedCategories = [];
+  for (const category of categories) {
+    const { rows: items } = await pool.query(
+      `SELECT id, name, description, price, COALESCE(isactive, TRUE) AS isactive, COALESCE(isarchived, FALSE) AS isarchived, image_url as imageUrl
+         FROM items
+        WHERE categoryid = $1
+          AND COALESCE(isarchived, FALSE) = FALSE
+          AND COALESCE(isactive, TRUE) = TRUE
+        ORDER BY name ASC`, // Revertido para categoryid
+      [category.id]
+    );
+    enrichedCategories.push({ ...category, items: items ?? [] });
+  }
+
+  return { ...store, categories: enrichedCategories };
 }
 
-export default async function StorePage({ params }: PageProps) {
-  const store = await getStore(params.slug)
+export default async function StorePage({ params }: { params: { slug: string } }) {
+  noStore(); // sem cache
+  const store = await getStore(params.slug);
 
   if (!store) {
     notFound()
   }
 
-  // Registrar visita de forma assíncrona (não bloquear renderização)
-  trackEvent({
-    storeid: store.id,
-    event: 'visit'
-  }).catch(error => {
-    console.error('Erro ao registrar visita:', error)
-  })
-
-  return <PublicStorePage store={store} />
+  return (
+    <PublicStorePage store={store} />
+  )
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -176,4 +162,3 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 // Removido generateStaticParams para evitar build-time estático
 // Agora todas as páginas são renderizadas dinamicamente em runtime
-

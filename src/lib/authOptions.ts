@@ -1,8 +1,7 @@
 import type { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
-import { pool } from '@/lib/db';
-import { AuthOptions } from 'next-auth/core/types';
+import pool from '@/lib/db';
 
 export const authOptions: AuthOptions = {
     providers: [

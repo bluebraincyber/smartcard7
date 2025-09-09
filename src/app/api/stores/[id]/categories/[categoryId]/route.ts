@@ -26,7 +26,7 @@ export async function GET(
 
     // Verificar se a loja pertence ao usuário
     const storeResult = await pool.query(
-      'SELECT id FROM stores WHERE id = $1 AND "userid" = $2',
+      'SELECT id FROM stores WHERE id = $1 AND userid = $2',
       [resolvedParams.id, String(session.user.id)]
     )
 
@@ -41,7 +41,7 @@ export async function GET(
         COUNT(i.id) as items_count
       FROM categories c
       LEFT JOIN items i ON c.id = i."categoryId"
-      WHERE c.id = $1 AND c."storeid" = $2
+      WHERE c.id = $1 AND c.storeid = $2
       GROUP BY c.id`,
       [resolvedParams.categoryId, resolvedParams.id]
     )
@@ -78,7 +78,7 @@ export async function PATCH(
 
     // Verificar se a loja pertence ao usuário
     const storeResult = await pool.query(
-      'SELECT id FROM stores WHERE id = $1 AND "userid" = $2',
+      'SELECT id FROM stores WHERE id = $1 AND userid = $2',
       [resolvedParams.id, session.user.id]
     )
 
@@ -88,7 +88,7 @@ export async function PATCH(
 
     // Verificar se a categoria existe
     const categoryResult = await pool.query(
-      'SELECT id FROM categories WHERE id = $1 AND "storeid" = $2',
+      'SELECT id FROM categories WHERE id = $1 AND storeid = $2',
       [resolvedParams.categoryId, resolvedParams.id]
     )
 
@@ -198,7 +198,7 @@ export async function DELETE(
         COUNT(i.id) as items_count
       FROM categories c
       LEFT JOIN items i ON c.id = i."categoryId"
-      WHERE c.id = $1 AND c."storeid" = $2
+      WHERE c.id = $1 AND c.storeid = $2
       GROUP BY c.id`,
       [resolvedParams.categoryId, resolvedParams.id]
     )
@@ -219,7 +219,7 @@ export async function DELETE(
 
     // Deletar a categoria
     await pool.query(
-      'DELETE FROM categories WHERE id = $1 AND "storeid" = $2',
+      'DELETE FROM categories WHERE id = $1 AND storeid = $2',
       [resolvedParams.categoryId, resolvedParams.id]
     )
 

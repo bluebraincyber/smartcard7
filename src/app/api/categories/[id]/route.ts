@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@/auth'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/authOptions'
 import pool from '@/lib/db'
 import type { Session } from 'next-auth'
 
@@ -13,7 +14,7 @@ export async function PATCH(
 ) {
   try {
     const { id } = await params
-    const session = await auth() as Session | null
+    const session = await getServerSession(authOptions) as Session | null
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -22,9 +23,7 @@ export async function PATCH(
 
     // Verificar se a categoria pertence ao usuário
     const categoryResult = await pool.query(
-      `SELECT c.id FROM categories c
-      JOIN stores s ON c."storeid" = s.id
-      WHERE c.id = $1 AND s."userid" = $2`,
+      'SELECT c.id FROM categories c JOIN stores s ON c.storeid = s.id WHERE c.id = $1 AND s.userid = $2',
       [id, session.user.id]
     )
 
@@ -34,10 +33,7 @@ export async function PATCH(
 
     // Atualizar categoria
     const updatedCategoryResult = await pool.query(
-      `UPDATE categories 
-      SET isactive = $1, updated_at = NOW()
-      WHERE id = $2
-      RETURNING id, name, description, "storeid", isactive, created_at, updated_at`,
+      'UPDATE categories SET isactive = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
       [isactive, id]
     )
     
@@ -57,7 +53,7 @@ export async function DELETE(
   try {
     const { id } = await params;
 
-    const session = await auth() as Session | null;
+    const session = await getServerSession(authOptions) as Session | null;
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
@@ -65,9 +61,7 @@ export async function DELETE(
 
     // Verificar se a categoria pertence ao usuário
     const categoryResult = await pool.query(
-      `SELECT c.id FROM categories c
-      JOIN stores s ON c."storeid" = s.id
-      WHERE c.id = $1 AND s."userid" = $2`,
+      'SELECT c.id FROM categories c JOIN stores s ON c.storeid = s.id WHERE c.id = $1 AND s.userid = $2',
       [id, session.user.id]
     );
 
@@ -77,7 +71,7 @@ export async function DELETE(
 
     // Deletar categoria (os itens serão deletados automaticamente devido ao CASCADE)
     await pool.query(
-      `DELETE FROM categories WHERE id = $1`,
+      'DELETE FROM categories WHERE id = $1',
       [id]
     );
 

@@ -34,7 +34,7 @@ interface Item {
   price: number
   image?: string
   isactive: boolean
-  isAvailable: boolean
+  isarchived: boolean
 }
 
 interface StorePageClientProps {
@@ -124,6 +124,8 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
 
   const toggleItemStatus = async (itemId: string, isactive: boolean) => {
     try {
+      console.log('🔄 Alterando status do item:', itemId, 'de', isactive, 'para', !isactive)
+      
       const response = await fetch(`/api/items/${itemId}`, {
         method: 'PATCH',
         headers: {
@@ -133,43 +135,91 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
       })
 
       if (response.ok) {
-        fetchStore() // Recarregar dados
+        const updatedItem = await response.json()
+        console.log('✅ Item atualizado no servidor:', updatedItem)
+        
+        // Atualizar o estado local imediatamente
+        setStore(prevStore => ({
+          ...prevStore,
+          categories: prevStore.categories.map(category => ({
+            ...category,
+            items: category.items.map(item => 
+              item.id === itemId 
+                ? { ...item, isactive: updatedItem.isactive }
+                : item
+            )
+          }))
+        }))
+        
+        console.log('✅ Estado local atualizado')
+      } else {
+        console.error('❌ Erro na resposta:', response.status)
       }
     } catch (error) {
-      console.error('Erro ao atualizar item:', error)
+      console.error('💥 Erro ao atualizar item:', error)
     }
   }
 
-  const toggleItemAvailability = async (itemId: string, isAvailable: boolean) => {
+  const toggleItemAvailability = async (itemId: string, isarchived: boolean) => {
     try {
+      console.log('🔄 Alterando disponibilidade do item:', itemId, 'de', isarchived, 'para', !isarchived)
+      
       const response = await fetch(`/api/items/${itemId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ isAvailable: !isAvailable }),
+        body: JSON.stringify({ isarchived: !isarchived }),
       })
 
       if (response.ok) {
-        fetchStore() // Recarregar dados
+        const updatedItem = await response.json()
+        console.log('✅ Item atualizado no servidor:', updatedItem)
+        
+        // Atualizar o estado local imediatamente com os dados do servidor
+        setStore(prevStore => ({
+          ...prevStore,
+          categories: prevStore.categories.map(category => ({
+            ...category,
+            items: category.items.map(item => 
+              item.id === itemId 
+                ? { ...item, isarchived: updatedItem.isarchived }
+                : item
+            )
+          }))
+        }))
+        
+        console.log('✅ Estado local atualizado')
+      } else {
+        console.error('❌ Erro na resposta:', response.status)
       }
     } catch (error) {
-      console.error('Erro ao atualizar disponibilidade:', error)
+      console.error('💥 Erro ao atualizar disponibilidade:', error)
     }
   }
 
   const deleteCategory = async (categoryId: string) => {
+    console.log('🗑️ Iniciando exclusão da categoria:', categoryId)
+    console.log('Store ID:', store?.id)
     setDeletingCategoryId(categoryId)
     try {
+      console.log('🌐 Fazendo requisição DELETE para:', `/api/categories/${categoryId}`)
       const response = await fetch(`/api/categories/${categoryId}`, {
         method: 'DELETE',
       })
 
+      console.log('📡 Resposta da API:', response.status, response.statusText)
+      
       if (response.ok) {
+        console.log('✅ Categoria deletada com sucesso, recarregando dados...')
+        console.log('Dados da loja após exclusão:', store)
         fetchStore() // Recarregar dados
+      } else {
+        const errorData = await response.json().catch(() => null)
+        console.error('❌ Erro da API:', errorData)
       }
     } catch (error) {
-      console.error('Erro ao deletar categoria:', error)
+      console.error('💥 Erro de rede ao deletar categoria:', error)
     } finally {
       setDeletingCategoryId(null)
     }
@@ -353,8 +403,9 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                         onConfirm: () => {
                           deleteCategory(category.id)
                           setConfirmModal({ ...confirmModal, isOpen: false })
-                        }
-                      })}
+                        },
+                        onClose: () => { }
+                      })} 
                       disabled={deletingCategoryId === category.id}
                       className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
                     >
@@ -404,7 +455,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                                   ? 'bg-blue-100 text-blue-800' 
                                   : 'bg-yellow-100 text-yellow-800'
                               }`}>
-                                {item.isAvailable ? 'Disponível' : 'Indisponível'}
+                                {item.isarchived ? 'Indisponível' : 'Disponível'}
                               </span>
                             </div>
                           </div>
@@ -426,13 +477,13 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                               {item.isactive ? '🔴' : '🟢'}
                             </button>
                             <button
-                              onClick={() => toggleItemAvailability(item.id, item.isAvailable)}
+                              onClick={() => toggleItemAvailability(item.id, item.isarchived)}
                               className={`p-1 ${
-                                item.isAvailable ? 'text-yellow-600 hover:text-yellow-800' : 'text-blue-600 hover:text-blue-800'
+                                item.isarchived ? 'text-blue-600 hover:text-blue-800' : 'text-yellow-600 hover:text-yellow-800'
                               }`}
-                              title={item.isAvailable ? 'Marcar como indisponível' : 'Marcar como disponível'}
+                              title={item.isarchived ? 'Marcar como disponível' : 'Marcar como indisponível'}
                             >
-                              {item.isAvailable ? '⏸️' : '▶️'}
+                              {item.isarchived ? '▶️' : '⏸️'}
                             </button>
                             <button
                               onClick={() => setConfirmModal({
@@ -442,8 +493,9 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                                 onConfirm: () => {
                                   deleteItem(item.id)
                                   setConfirmModal({ ...confirmModal, isOpen: false })
-                                }
-                              })}
+                                },
+                                onClose: () => { }
+                              })} 
                               disabled={deletingItemId === item.id}
                               className="p-1 text-red-600 hover:text-red-800 disabled:opacity-50"
                               title="Deletar"

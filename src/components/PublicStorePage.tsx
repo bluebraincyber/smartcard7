@@ -32,6 +32,8 @@ interface Item {
   price: number | null
   categoryId: string
   imageUrl?: string
+  isactive?: boolean
+  isarchived?: boolean
 }
 
 interface CartItem extends Item {
@@ -366,84 +368,89 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
           </div>
         ) : (
           <div className="space-y-8">
-            {store.categories.map((category) => (
-              <div key={category.id}>
-                <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-3 sm:mb-4">{category.name}</h2>
-                
-                {category.items.length === 0 ? (
+            {store.categories.map(category => (
+              <div key={category.id} className="mb-8">
+                <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">{category.name}</h2>
+                {category.items.filter(item => !item.isarchived && item.isactive).length === 0 ? (
                   <p className="text-gray-500 text-center py-8">
                     Nenhum item disponível nesta categoria
                   </p>
                 ) : (
-                  <div className="space-y-2 sm:space-y-3">
-                    {category.items.map((item) => (
-                      <div key={item.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
-                        <div className="flex items-start space-x-3 sm:space-x-4">
-                          {/* Product Image */}
-                          <div className="flex-shrink-0">
-                            {item.image ? (
-                              <Image 
-                                src={item.image} 
-                                alt={item.name}
-                                width={80}
-                                height={80}
-                                className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover border border-gray-200"
-                              />
-                            ) : (
-                              <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
-                                <svg className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                                  <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
-                                </svg>
-                              </div>
-                            )}
-                          </div>
-                          
-                          {/* Product Info */}
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
-                              <h3 className="font-medium text-gray-900 text-sm sm:text-base mb-1 sm:mb-0">{item.name}</h3>
-                              <span className="text-base sm:text-lg font-semibold text-green-600 sm:ml-2">
-                                R$ {(Number(item.price) || 0).toFixed(2)}
-                              </span>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {category.items
+                      .filter(item => !item.isarchived && item.isactive)
+                      .map(item => (
+                      <div key={item.id} className="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden flex flex-col">
+                      return (
+                        <div
+                          key={item.id}
+                          className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
+                          <div className="flex items-start space-x-3 sm:space-x-4">
+                            {/* Product Image */}
+                            <div className="flex-shrink-0">
+                              {item.imageUrl ? (
+                                <Image 
+                                  src={item.imageUrl} 
+                                  alt={item.name}
+                                  width={80}
+                                  height={80}
+                                  className="w-16 h-16 sm:w-20 sm:h-20 rounded-lg object-cover border border-gray-200"
+                                />
+                              ) : (
+                                <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-lg flex items-center justify-center border border-gray-200">
+                                  <svg className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/>
+                                  </svg>
+                                </div>
+                              )}
                             </div>
                             
-                            {item.description && (
-                              <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 leading-relaxed">{item.description}</p>
-                            )}
-                            
-                            {/* Add to Cart Controls */}
-                            <div className="flex items-center justify-end">
-                              {cart.find(cartItem => cartItem.id === item.id) ? (
-                                <div className="flex items-center space-x-2 sm:space-x-3">
-                                  <button
-                                    onClick={() => removeFromCart(item.id)}
-                                    className="bg-red-100 text-red-600 p-1.5 sm:p-2 rounded-full hover:bg-red-200 transition-colors"
-                                  >
-                                    <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
-                                  </button>
-                                  <span className="font-medium text-base sm:text-lg min-w-[1.5rem] sm:min-w-[2rem] text-center">
-                                    {cart.find(cartItem => cartItem.id === item.id)?.quantity || 0}
-                                  </span>
+                            {/* Product Info */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
+                                <h3 className="font-medium text-gray-900 text-sm sm:text-base mb-1 sm:mb-0">{item.name}</h3>
+                                <span className="text-base sm:text-lg font-semibold text-green-600 sm:ml-2">
+                                  R$ {(Number(item.price) || 0).toFixed(2)}
+                                </span>
+                              </div>
+                              
+                              {item.description && (
+                                <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-3 leading-relaxed">{item.description}</p>
+                              )}
+                              
+                              {/* Add to Cart Controls */}
+                              <div className="flex items-center justify-end">
+                                {cart.find(cartItem => cartItem.id === item.id) ? (
+                                  <div className="flex items-center space-x-2 sm:space-x-3">
+                                    <button
+                                      onClick={() => removeFromCart(item.id)}
+                                      className="bg-red-100 text-red-600 p-1.5 sm:p-2 rounded-full hover:bg-red-200 transition-colors"
+                                    >
+                                      <Minus className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    </button>
+                                    <span className="font-medium text-base sm:text-lg min-w-[1.5rem] sm:min-w-[2rem] text-center">
+                                      {cart.find(cartItem => cartItem.id === item.id)?.quantity || 0}
+                                    </span>
+                                    <button
+                                      onClick={() => addToCart(item)}
+                                      className="bg-green-100 text-green-600 p-1.5 sm:p-2 rounded-full hover:bg-green-200 transition-colors"
+                                    >
+                                      <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    </button>
+                                  </div>
+                                ) : (
                                   <button
                                     onClick={() => addToCart(item)}
-                                    className="bg-green-100 text-green-600 p-1.5 sm:p-2 rounded-full hover:bg-green-200 transition-colors"
+                                    className="bg-green-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium"
                                   >
-                                    <Plus className="h-3 w-3 sm:h-4 sm:w-4" />
+                                    Adicionar
                                   </button>
-                                </div>
-                              ) : (
-                                <button
-                                  onClick={() => addToCart(item)}
-                                  className="bg-green-600 text-white px-4 sm:px-6 py-1.5 sm:py-2 rounded-lg hover:bg-green-700 transition-colors text-xs sm:text-sm font-medium"
-                                >
-                                  Adicionar
-                                </button>
-                              )}
+                                )}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 )}
               </div>

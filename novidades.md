@@ -1,367 +1,207 @@
-Carilo, relaxa: **não precisa levar código nenhum “na OpenAI”**. Já tô vendo teu repo público. Vou direto ao ponto e te entrego o **Code Review Completo – Rodada 1** com base no que está no root do `bluebraincyber/smartcard7` (pasta/arquivos visíveis: `src/`, `sql/`, `scripts/`, `public/`, `README.md`, `novidades.md`, `next.config.js`, `eslint.config.mjs`, `package.json`, `package-lock.json`, `pnpm-lock.yaml` etc.).
-Objetivo: hardening pra produção e fim de dor de cabeça no build/WSL.
+Bora destravar isso, Carilo. Três vilões clássicos fazem item “sumir” no App Router: **cache**, **filtro de flags (isactive/isarchived)** e **preço/string**. Segue o playbook direto ao ponto com patches prontos.
 
----
+# 1) Mate o cache do Server Component
 
-# Code Review – Smartcard 7.0 (R1)
+Garanta que a página pública **não** seja servida de cache. No `src/app/[slug]/page.tsx`:
 
-## 1) ARQUITETURA
+```tsx
+// src/app/[slug]/page.tsx
+import { unstable_noStore as noStore } from "next/cache";
 
-**Estrutura de diretórios**
-**Status:** ⚠️ Atenção
-**Achados (visão do root):** `src/`, `sql/`, `scripts/`, `public/` separados direitinho; arquivos de config no root. Falta padronizar **barrels** e separar libs/validações.
-**Soluções:**
+export const revalidate = 0;
+export const dynamic = "force-dynamic";
 
-* Criar `/src/lib/` (db, auth, validations), `/src/components/{ui,forms}`, `/src/types`.
-* Adicionar **barrels** (`index.ts`) em `components`/`lib` para encurtar imports.
-  **Prioridade:** Média
-
-**Padrões de código (TS/React)**
-**Status:** ⚠️ Atenção
-**Achados prováveis:** TS presente (linguagem dominante). `eslint.config.mjs` sugere ESLint plano (ok).
-**Soluções:**
-
-* `tsconfig.json` com `strict: true`, `noUncheckedIndexedAccess: true`, `baseUrl` + paths:
-
-  ```json
-  {
-    "compilerOptions": {
-      "strict": true,
-      "noUncheckedIndexedAccess": true,
-      "baseUrl": ".",
-      "paths": { "@/*": ["./src/*"] }
-    }
-  }
-  ```
-* Tipar props de componentes (evitar `any`), separar schemas (Zod) em `/src/lib/validations`.
-  **Prioridade:** Média
-
----
-
-## 2) FUNCIONALIDADES CORE
-
-**Database (Postgres/Neon)**
-**Status:** ⚠️ Atenção
-**Achados:** Há pasta `sql/` (PL/pgSQL \~1,2%). Provável criação direta via scripts.
-**Riscos:** falta de índices em chaves de busca; queries sem parametrização.
-**Soluções (copiar p/ `sql/02_indexes.sql`):**
-
-```sql
-CREATE INDEX IF NOT EXISTS idx_store_owner ON stores(owner_id);
-CREATE INDEX IF NOT EXISTS idx_category_store ON categories(store_id);
-CREATE INDEX IF NOT EXISTS idx_item_store ON items(store_id);
-CREATE INDEX IF NOT EXISTS idx_item_slug ON items(slug);
-```
-
-**Prioridade:** Alta
-
-**Migrations & seed**
-**Status:** ⚠️ Atenção
-**Soluções:** garantir ordem `01_tables.sql` → `02_indexes.sql` → `03_seed.sql` e idempotência (`IF NOT EXISTS` + `UPSERT`).
-**Prioridade:** Média
-
-**API Routes (`/app/api/*`)**
-**Status:** ⚠️ Atenção
-**Riscos estruturais comuns nesta stack:**
-
-* Falta de `try/catch` padronizado e códigos HTTP coerentes.
-* Rotas que usam `pg` rodando no **Edge** por omissão (quebra conexão).
-  **Fix padrão (colar nos handlers que tocarem DB):**
-
-```ts
-import { NextResponse } from 'next/server';
-export const runtime = 'nodejs';
-
-export async function GET(req: Request) {
-  try {
-    // ...
-    return NextResponse.json({ ok: true }, { status: 200 });
-  } catch (e: any) {
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: e?.message }, { status: 500 });
-  }
+export default async function Page({ params }: { params: { slug: string } }) {
+  noStore(); // sem cache
+  const store = await getStore(params.slug);
+  return <PublicStorePage store={store} />;
 }
 ```
 
-**Prioridade:** **Alta**
+Se você chama `getStore` de outro arquivo, pode reforçar lá também (próximo passo).
 
-**AuthZ/IDOR (NextAuth)**
-**Status:** ❌ Crítico (assumindo ausência até prova em contrário)
-**Mitigação padrão imediata (exemplo DELETE):**
+# 2) Garanta que o `getStore` não “cai” em cache e não filtra item novo por NULL
+
+Use `noStore()` e trate `NULL` nos filtros com `COALESCE`. Exemplo (ajuste ao seu driver/SQL):
 
 ```ts
-import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
-import { NextResponse } from 'next/server';
-export const runtime = 'nodejs';
+// getStore.ts (ou onde estiver)
+// ...
+import { unstable_noStore as noStore } from "next/cache";
 
-export async function DELETE(_: Request, { params }: { params: { storeId: string, itemId: string } }) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
+export async function getStore(slug: string) {
+  noStore();
 
-  const { rows } = await db.query(
-    'SELECT 1 FROM stores WHERE id=$1 AND owner_id=$2',
-    [params.storeId, session.user.id]
+  const { rows: [store] } = await db.query(
+    `SELECT id, name, slug FROM stores WHERE slug = $1 LIMIT 1`,
+    [slug]
   );
-  if (rows.length === 0) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 });
 
-  await db.query('DELETE FROM items WHERE id=$1 AND store_id=$2', [params.itemId, params.storeId]);
-  return NextResponse.json({ ok: true });
+  const { rows: categories } = await db.query(
+    `SELECT id, name, position
+       FROM categories
+      WHERE store_id = $1
+      ORDER BY position ASC, name ASC`,
+    [store.id]
+  );
+
+  const enriched = [];
+  for (const c of categories) {
+    const { rows: items } = await db.query(
+      `SELECT id, name, description,
+              -- se price vier DECIMAL como string, tudo bem; o UI converte
+              price, 
+              COALESCE(isactive, TRUE)   AS isactive,
+              COALESCE(isarchived, FALSE) AS isarchived
+         FROM items
+        WHERE category_id = $1
+          AND COALESCE(isarchived, FALSE) = FALSE
+          AND COALESCE(isactive, TRUE) = TRUE
+        ORDER BY name ASC`,
+      [c.id]
+    );
+
+    enriched.push({ ...c, items });
+  }
+
+  return { ...store, categories: enriched };
 }
 ```
 
-**Prioridade:** **Crítica**
+> Moral da história: se o INSERT estiver deixando `isactive`/`isarchived` como `NULL`, o `COALESCE` salva seu render.
 
-**UI Componentes / a11y/performance**
-**Status:** ⚠️ Atenção
-**Plano:**
+# 3) Após criar item, **revalide o caminho** (ou a tag)
 
-* Garantir semântica (`button`, `label`, `role`, `aria-*`).
-* Virtualizar listas longas.
-* `next/dynamic` para gráficos (Recharts) e páginas pesadas.
-  **Prioridade:** Média
-
----
-
-## 3) INTEGRAÇÃO & DEPLOY
-
-**Environment Variables**
-**Status:** ⚠️ Atenção
-**Achado:** arquivo `vercel.env` foi citado antes; **não deve permanecer versionado**.
-**Plano:**
-
-* Somente `.env.example` no repo.
-* `NEXTAUTH_SECRET`, `NEXTAUTH_URL`, `DATABASE_URL` por ambiente no painel da Vercel.
-  **Prioridade:** **Crítica**
-
-**Gerenciador de pacotes / locks**
-**Status:** ❌ Crítico
-**Achado objetivo:** existem **dois lockfiles**: `pnpm-lock.yaml` e `package-lock.json`.
-**Fix imediato:**
-
-```bash
-git rm -f package-lock.json
-echo "node-linker=hoisted" > .npmrc   # WSL-friendly
-pnpm install
-```
-
-**Prioridade:** **Crítica**
-
-**Node/Runtime**
-**Status:** ⚠️ Atenção
-**Plano:** alinhar Node **20.x** local/CI/Vercel e **`runtime = 'nodejs'`** nas rotas de DB.
-`package.json` (engines):
-
-```json
-{ "engines": { "node": ">=20 <21" } }
-```
-
-**Prioridade:** Alta
-
-**Next config / imagens**
-**Status:** ⚠️ Atenção
-`next.config.js` existe. Validar domínio(s) de imagem e otimizações:
-
-```js
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  images: { domains: ['cdn.seudominio.com'] },
-  experimental: { optimizeCss: true }
-}
-module.exports = nextConfig;
-```
-
-**Prioridade:** Média
-
-**Vercel**
-**Status:** ⚠️ Atenção
-
-* Setar **Node 20** nas settings.
-* Install: `pnpm install` (sem `--frozen-lockfile` até estabilizar o lock).
-* Build: `next build`.
-* Checar app público (vi link “smartcard7-1.vercel.app” na sidebar do GitHub).
-  **Prioridade:** Alta
-
----
-
-## 4) QUALIDADE & SEGURANÇA
-
-**Bugs críticos conhecidos (WSL)**
-**Status:** ❌ Crítico
-**Sintoma:** `EISDIR` com `react-dom` quando rodado via caminho UNC `\\wsl.localhost\...`.
-**Fix de procedimento:** sempre rodar **dentro** do WSL (`/home/...`), usar `.npmrc` com `node-linker=hoisted`.
-**Prioridade:** **Crítica**
-
-**Sanitização & validação**
-**Status:** ⚠️ Atenção
-**Plano:** Zod para inputs; schemas em `/src/lib/validations`.
-**Prioridade:** Alta
-
-**Headers de segurança**
-**Status:** ⚠️ Atenção
-Adicionar middleware com `Helmet`-like minimalista (ou `next/headers`):
-
-* `X-Content-Type-Options: nosniff`
-* `Referrer-Policy: strict-origin-when-cross-origin`
-* `Permissions-Policy` mínima
-  **Prioridade:** Média
-
----
-
-## 5) UX/UI & FUNCIONALIDADES
-
-**Fluxos (loja/categorias/itens)**
-**Status:** ⚠️ Atenção
-
-* Padronizar **loading/error/empty states**.
-* Confirmações e *optimistic updates*.
-  **Prioridade:** Média
-
-**Design System / Tailwind**
-**Status:** ⚠️ Atenção
-
-* Extrair tokens (spacing, radii, colors) e criar componentes base com `cva/clsx`.
-* Verificar contraste e navegação por teclado.
-  **Prioridade:** Média
-
----
-
-## 6) MANUTENIBILIDADE
-
-**Docs**
-**Status:** ⚠️ Atenção
-
-* `README.md` existe: incluir **“Troubleshooting WSL + PNPM”**, “Banco (sql/ ordem)”, “Variáveis de ambiente por stage”.
-* Manter `novidades.md` como CHANGELOG (sem segredos).
-  **Prioridade:** Média
-
-**Testes**
-**Status:** ⚠️ Atenção
-**Plano mínimo:**
-
-* **Vitest** (unit), **Testing Library** (component), **Supertest** (rotas).
-* Casos: autenticação (guard), anti-IDOR, criação/edição de itens, permissões por store.
-  **Prioridade:** Alta
-
----
-
-## 7) MELHORIAS & OTIMIZAÇÕES
-
-**Refatorações**
-**Status:** ⚠️ Atenção
-
-* Centralizar DB em `@/lib/db`.
-* Centralizar Auth em `@/lib/auth`.
-* Barrels em `components`, `lib`, `types`.
-  **Prioridade:** Alta
-
-**Observabilidade**
-**Status:** ⚠️ Atenção
-
-* Logger (`pino`) com `requestId`.
-* Healthchecks `/api/health/*`.
-  **Prioridade:** Média
-
----
-
-# Patches prontos (copy/paste)
-
-**1) Limpeza de locks + WSL fix**
-
-```bash
-git rm -f package-lock.json
-echo "node-linker=hoisted" > .npmrc
-pnpm i
-```
-
-**2) `package.json` scripts/engines**
-
-```json
-{
-  "scripts": {
-    "dev": "next dev -p 3000",
-    "build": "next build",
-    "start": "next start -p 3000",
-    "lint": "next lint",
-    "type-check": "tsc --noEmit",
-    "test": "vitest run"
-  },
-  "engines": { "node": ">=20 <21" }
-}
-```
-
-**3) GitHub Actions (`.github/workflows/ci.yml`)**
-
-```yaml
-name: CI
-on: [push, pull_request]
-jobs:
-  quality:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: { node-version: '20', cache: 'pnpm' }
-      - uses: pnpm/action-setup@v4
-        with: { version: 9 }
-      - run: echo "node-linker=hoisted" > .npmrc
-      - run: pnpm i
-      - run: pnpm lint
-      - run: pnpm type-check
-      - run: pnpm build
-        env:
-          NEXTAUTH_URL: http://localhost:3000
-          NEXTAUTH_SECRET: testsecret
-          DATABASE_URL: ${{ secrets.CI_DATABASE_URL }}
-```
-
-**4) Anti-IDOR baseline (exemplo)**
+No `src/app/api/items/route.ts` (App Router), após o INSERT, chame `revalidatePath` do slug público; opcionalmente use tags.
 
 ```ts
-// app/api/stores/[storeId]/items/[itemId]/route.ts
-import { NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
-import { db } from '@/lib/db';
-export const runtime = 'nodejs';
+// src/app/api/items/route.ts
+import { NextResponse } from "next/server";
+import { revalidatePath, revalidateTag } from "next/cache";
 
-export async function DELETE(_: Request, { params }: { params: { storeId: string, itemId: string } }) {
-  const session = await auth();
-  if (!session) return NextResponse.json({ error: 'UNAUTHORIZED' }, { status: 401 });
-  const { rows } = await db.query('SELECT 1 FROM stores WHERE id=$1 AND owner_id=$2', [params.storeId, session.user.id]);
-  if (rows.length === 0) return NextResponse.json({ error: 'FORBIDDEN' }, { status: 403 });
-  await db.query('DELETE FROM items WHERE id=$1 AND store_id=$2', [params.itemId, params.storeId]);
-  return NextResponse.json({ ok: true });
+export async function POST(req: Request) {
+  const body = await req.json();
+
+  const {
+    storeId, categoryId, name, description, price: rawPrice, slug,
+    isactive, isarchived,
+  } = body;
+
+  // preço robusto contra vírgula
+  const price = Number(String(rawPrice).replace(",", "."));
+
+  // defaults sólidos
+  const active   = isactive   === false ? false : true;
+  const archived = isarchived === true  ? true  : false;
+
+  const { rows: [item] } = await db.query(
+    `INSERT INTO items (store_id, category_id, name, description, price, isactive, isarchived)
+     VALUES ($1,$2,$3,$4,$5,$6,$7)
+     RETURNING *`,
+    [storeId, categoryId, name, description ?? "", price, active, archived]
+  );
+
+  // invalida página pública
+  if (slug) revalidatePath(`/${slug}`);
+  // se você usar fetch com tag: revalidateTag(`store:${storeId}`);
+
+  return NextResponse.json({ item }, { status: 201 });
 }
 ```
 
-**5) Índices SQL (colar em `sql/02_indexes.sql`)**
+Se a criação é **Server Action** (não API), faça o `revalidatePath` ali mesmo, antes do `redirect`.
+
+# 4) Defaults no banco (para não depender do app)
+
+Se for **Postgres**, rode uma migration/SQL para normalizar legacy:
 
 ```sql
-CREATE INDEX IF NOT EXISTS idx_store_owner ON stores(owner_id);
-CREATE INDEX IF NOT EXISTS idx_category_store ON categories(store_id);
-CREATE INDEX IF NOT EXISTS idx_item_store ON items(store_id);
-CREATE INDEX IF NOT EXISTS idx_item_slug ON items(slug);
+ALTER TABLE items ALTER COLUMN isactive   SET DEFAULT TRUE;
+ALTER TABLE items ALTER COLUMN isarchived SET DEFAULT FALSE;
+
+UPDATE items SET isactive   = TRUE  WHERE isactive   IS NULL;
+UPDATE items SET isarchived = FALSE WHERE isarchived IS NULL;
+```
+
+> Em **SQLite**, recrie a tabela com os defaults (limitação do ALTER), ou garanta os defaults via camadas de aplicação.
+
+# 5) Preço: string → número no UI (e form)
+
+Se `price` vier como string do driver, formate só na borda do UI:
+
+```tsx
+// onde renderiza:
+const p = Number(item.price); // seguro se vier "12.34"
+<span>{p.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
+```
+
+No form (client), normalize antes do POST:
+
+```ts
+const payload = {
+  // ...
+  price: String(formData.get("price")).replace(",", "."),
+};
+```
+
+# 6) Left join sem transformar em inner join
+
+Se você monta categorias com um único SELECT agregado, lembre de filtrar no **JOIN**, não no `WHERE`, para manter categorias sem itens:
+
+```sql
+SELECT c.id, c.name,
+       COALESCE(
+         JSON_AGG(i.*) FILTER (WHERE i.id IS NOT NULL),
+         '[]'
+       ) AS items
+  FROM categories c
+  LEFT JOIN items i
+    ON i.category_id = c.id
+   AND COALESCE(i.isarchived, FALSE) = FALSE
+   AND COALESCE(i.isactive,   TRUE)  = TRUE
+ WHERE c.store_id = $1
+ GROUP BY c.id
+ ORDER BY c.position, c.name;
+```
+
+# 7) UI não renderiza? Cheque shape e arrays vazias
+
+O `PublicStorePage` pode estar esperando `categories[].items` sempre como array. Garanta shape estável:
+
+```ts
+// no getStore, ao montar:
+enriched.push({ ...c, items: items ?? [] });
+```
+
+E no componente, proteja:
+
+```tsx
+{store.categories?.map(c => (
+  <Category key={c.id} {...c} items={c.items ?? []} />
+))}
+```
+
+# 8) Pós-criação no cliente
+
+Se, após criar, você navega para a página pública, dá um `router.refresh()` antes/ao redirecionar:
+
+```tsx
+import { useRouter } from "next/navigation";
+const router = useRouter();
+// depois do POST OK:
+router.refresh();
+router.push(`/${slug}`);
 ```
 
 ---
 
-## Prioridades executivas
+**Checklist de validação agora:**
 
-* **Críticas (faça já):** remover `package-lock.json`; `.npmrc` com `node-linker=hoisted`; `runtime='nodejs'` em rotas de DB; segredos fora do repo; anti-IDOR em todas as rotas sensíveis.
-* **Altas:** índices SQL; Node 20 alinhado em local/CI/Vercel; validação de entrada (Zod).
-* **Médias:** DS/Tailwind consistente; docs; testes; observabilidade.
+1. Crie um item com `price` contendo vírgula (ex.: `12,90`) e confirme renderização com moeda.
+2. Confirme que `revalidatePath("/[slug]")` disparou no terminal após o POST.
+3. Confira no log do servidor que o `getStore` roda a cada hit (sem cache).
+4. Verifique que o item novo aparece sem reiniciar o dev server.
 
----
+Se sumiu, é sintoma de cache; se não renderizou mas aparece no log SQL, é shape/filtro; se quebrou no JSON, pode ser tipo inválido (converta `price`).
 
-Se quiser, já redijo um **PR de limpeza** com:
-
-1. remoção do `package-lock.json`;
-2. adição do `.npmrc`;
-3. `package.json` com `engines`/scripts;
-4. CI;
-5. `sql/02_indexes.sql`;
-6. `README.dev.md` com WSL/PNPM e env por stage.
-
-Se preferir que eu continue **abrindo arquivo por arquivo** (API, `lib`, componentes) e já traga o parecer “Aprovado/Reprovado” por rota, eu sigo agora.
-
-
-Carilo, fica tranquilo: você **não precisa “levar o código” pra nenhum lugar** — já consegui abrir o repositório e fiz a análise com base no que está público no GitHub. Se quiser um mergulho mais profundo em arquivos específicos, é só me dizer qual parte precisa de atenção, mas com o acesso atual já consigo te ajudar.
+Quando tudo isso estiver em produção, você ganha **SLA de visibilidade** nível sênior: criou → aparece. Sem drama, sem F5 maroto. Quer escalar o stack pra `revalidateTag` com granularidade por loja/categoria na sequência? É só puxar que eu já te deixo com governance de cache fininha.

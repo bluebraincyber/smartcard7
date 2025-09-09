@@ -80,6 +80,7 @@ CREATE TABLE items (
   image           TEXT,
   isfeatured      BOOLEAN DEFAULT FALSE,
   isarchived      BOOLEAN DEFAULT FALSE,
+  isactive        BOOLEAN DEFAULT TRUE,
   created_at      TIMESTAMP DEFAULT NOW(),
   updated_at      TIMESTAMP DEFAULT NOW()
 );

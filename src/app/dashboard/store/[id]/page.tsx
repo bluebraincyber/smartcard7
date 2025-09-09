@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation'
-import { sql } from '@/lib/db'
+import pool from '@/lib/db'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/authOptions'
 import StorePageClient from './store-page-client'
@@ -45,44 +45,47 @@ export default async function StorePage({ params }: { params: { id: string } }) 
   // 2. Buscar os dados da loja USANDO O ID DO USUÁRIO NA CONSULTA
   // ESTA É A CORREÇÃO CRÍTICA DE SEGURANÇA
   try {
-    const storeResult = await sql`
-      SELECT s.*, 
-             json_agg(
-               json_build_object(
-                 'id', c.id,
-                 'name', c.name,
-                 'isactive', c.isactive,
-                 'items', c.items
-               ) ORDER BY c.name
-             ) FILTER (WHERE c.id IS NOT NULL) as categories
-      FROM stores s
-      LEFT JOIN (
-        SELECT c.id, c.name, c.isactive, c.storeid,
-               json_agg(
-                 json_build_object(
-                   'id', i.id,
-                   'name', i.name,
-                   'description', i.description,
-                   'price', i.price,
-                   'image', i.image,
-                   'isactive', i.isactive,
-                   'isAvailable', true
-                 ) ORDER BY i.name
-               ) FILTER (WHERE i.id IS NOT NULL) as items
-        FROM categories c
-        LEFT JOIN items i ON c.id = i.categoryid
-        GROUP BY c.id, c.name, c.isactive, c.storeid
-      ) c ON s.id = c.storeid
-      WHERE s.id = ${params.id} AND s."userid" = ${session.user.id}
-      GROUP BY s.id, s.name, s.slug, s.description, s.whatsapp, s.address, s.primary_color, s.isactive
-    `
+    // Primeira busca mais simples para evitar erros de tipo
+    const storeResult = await pool.query(
+      'SELECT * FROM stores WHERE id = $1 AND userid = $2',
+      [params.id, session.user.id]
+    )
 
-    // 3. Se a consulta não retornar NADA, significa que a loja não existe OU não pertence a este usuário
-    if (storeResult.rowCount === 0) {
+    if (storeResult.rows.length === 0) {
       notFound()
     }
 
     const storeData = storeResult.rows[0]
+    
+    // Buscar categorias separadamente
+    const categoriesResult = await pool.query(
+      'SELECT * FROM categories WHERE storeid = $1 ORDER BY "order" ASC', // Revertido para storeid e "order"
+      [params.id]
+    )
+    
+    // Buscar items separadamente - CORRIGIDO: usar nome correto da coluna
+    const itemsResult = await pool.query(
+      'SELECT i.* FROM items i JOIN categories c ON i.categoryid = c.id WHERE c.storeid = $1', // Revertido para categoryid e storeid
+      [params.id]
+    )
+    
+    // Organizar dados
+    const categories = categoriesResult.rows.map(cat => ({
+      id: cat.id,
+      name: cat.name,
+      isactive: cat.isactive,
+      items: itemsResult.rows
+        .filter(item => item.categoryid === cat.id) // Revertido para categoryid
+        .map(item => ({
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          price: item.price_cents ? item.price_cents / 100 : 0, // CORRIGIDO: converter de centavos para reais
+          image: item.image,
+          isactive: item.isactive,
+          isAvailable: item.isAvailable !== false // Default true se undefined
+        }))
+    }))
     const store: Store = {
       id: storeData.id,
       name: storeData.name,
@@ -90,9 +93,9 @@ export default async function StorePage({ params }: { params: { id: string } }) 
       description: storeData.description,
       whatsapp: storeData.whatsapp,
       address: storeData.address,
-      primaryColor: storeData.primary_color,
+      primaryColor: storeData.primaryColor || storeData.primary_color || '#EA1D2C',
       isactive: storeData.isactive,
-      categories: storeData.categories || []
+      categories: categories
     }
 
     // 4. Somente se a validação passar, renderize a página com os dados da loja

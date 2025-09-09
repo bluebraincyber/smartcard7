@@ -1,4 +1,5 @@
-import { auth } from '@/auth'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/authOptions'
 import pool from '@/lib/db'
 import type { Session } from 'next-auth'
 import { NextRequest, NextResponse } from 'next/server'
@@ -23,7 +24,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth() as Session | null
+    const session = await getServerSession(authOptions) as Session | null
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -45,22 +46,27 @@ export async function GET(
     
     // Buscar categorias
     const categoriesResult = await pool.query(
-      'SELECT * FROM categories WHERE storeid = $1 ORDER BY "order" ASC',
+      'SELECT * FROM categories WHERE storeid = $1 ORDER BY "order" ASC', // Revertido para storeid e "order"
       [resolvedParams.id]
     )
     
-    // Buscar itens
+    // Buscar itens - CORRIGIDO: usar nomes corretos das colunas
     const itemsResult = await pool.query(
-      'SELECT i.* FROM items i JOIN categories c ON i."categoryId" = c.id WHERE c.storeid = $1 ORDER BY c."order" ASC, i."order" ASC',
+      'SELECT i.* FROM items i JOIN categories c ON i.categoryid = c.id WHERE c.storeid = $1 ORDER BY c."order" ASC', // Revertido para categoryid, storeid e "order"
       [resolvedParams.id]
     )
     
-    // Montar estrutura completa
+    // Montar estrutura completa com correção de preço
     const storeWithCategories = {
       ...store,
       categories: categoriesResult.rows.map(category => ({
         ...category,
-        items: itemsResult.rows.filter(item => item.categoryId === category.id)
+        items: itemsResult.rows
+          .filter(item => item.categoryid === category.id)
+          .map(item => ({
+            ...item,
+            price: item.price_cents ? item.price_cents / 100 : 0 // CORRIGIDO: converter centavos para reais
+          }))
       }))
     }
 
@@ -76,7 +82,7 @@ export async function PUT(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth() as Session | null
+    const session = await getServerSession(authOptions) as Session | null
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
@@ -147,7 +153,7 @@ export async function DELETE(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const session = await auth() as Session | null
+    const session = await getServerSession(authOptions) as Session | null
     
     if (!session?.user?.id) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -167,13 +173,13 @@ export async function DELETE(
 
     // Primeiro, deletar itens das categorias da loja
     await pool.query(
-      'DELETE FROM items WHERE "categoryId" IN (SELECT id FROM categories WHERE storeid = $1)',
+      'DELETE FROM items WHERE categoryid IN (SELECT id FROM categories WHERE storeid = $1)', // Revertido para categoryid e storeid
       [resolvedParams.id]
     )
 
     // Depois, deletar categorias da loja
     await pool.query(
-      'DELETE FROM categories WHERE storeid = $1',
+      'DELETE FROM categories WHERE storeid = $1', // Revertido para storeid
       [resolvedParams.id]
     )
 

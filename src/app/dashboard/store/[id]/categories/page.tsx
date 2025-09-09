@@ -36,22 +36,46 @@ export default function CategoriesPage() {
 
   const fetchStoreAndCategories = async () => {
     try {
-      const [storeResponse, categoriesResponse] = await Promise.all([
-        fetch(`/api/stores/${params.id}`),
-        fetch(`/api/stores/${params.id}/categories`)
-      ])
-
+      console.log('🔍 Buscando dados para store ID:', params.id)
+      
+      // Buscar store que já inclui categories
+      const storeResponse = await fetch(`/api/stores/${params.id}`)
+      
+      console.log('📡 Response status:', storeResponse.status)
+      
       if (storeResponse.ok) {
         const storeData = await storeResponse.json()
-        setStore(storeData)
-      }
-
-      if (categoriesResponse.ok) {
-        const categoriesData = await categoriesResponse.json()
-        setCategories(categoriesData)
+        console.log('📦 Store data recebido:', storeData)
+        console.log('📂 Categories no store data:', storeData.categories)
+        console.log('Tipo de storeData.categories:', typeof storeData.categories, Array.isArray(storeData.categories) ? 'É array' : 'Não é array')
+        
+        setStore({
+          id: storeData.id,
+          name: storeData.name,
+          slug: storeData.slug
+        })
+        
+        // Extrair e formatar categorias do store
+        const categoriesWithCount = (storeData.categories || []).map((cat: any) => {
+          console.log('🏷️ Processando categoria:', cat)
+          return {
+            id: cat.id,
+            name: cat.name,
+            order: cat.order || 0,
+            isactive: cat.isactive !== false, // Default true se undefined
+            _count: {
+              items: Array.isArray(cat.items) ? cat.items.length : 0
+            }
+          }
+        })
+        
+        console.log('✅ Categories formatadas:', categoriesWithCount)
+        setCategories(categoriesWithCount)
+      } else {
+        console.error('❌ Response não OK:', storeResponse.status, storeResponse.statusText)
       }
     } catch (error) {
-      console.error('Erro ao carregar dados:', error)
+      console.error('💥 Erro ao carregar dados:', error)
     } finally {
       setLoading(false)
     }

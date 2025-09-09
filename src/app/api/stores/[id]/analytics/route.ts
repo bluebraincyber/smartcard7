@@ -29,7 +29,7 @@ export async function GET(
 
     // Verificar se a loja pertence ao usuário
     const { rows: stores } = await pool.query(
-      'SELECT id, name, slug FROM stores WHERE id = $1 AND "userid" = $2',
+      'SELECT id, name, slug FROM stores WHERE id = $1 AND userid = $2',
       [resolvedParams.id, session.user.id]
     )
 
@@ -63,6 +63,6 @@ export async function GET(
     return NextResponse.json(analyticsData)
   } catch (error) {
     console.error('Erro ao buscar analytics da loja:', error)
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

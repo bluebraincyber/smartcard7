@@ -19,7 +19,7 @@ export async function GET(
 
     // Verificar se a loja pertence ao usuário
     const storeResult = await pool.query(
-      'SELECT id FROM stores WHERE id = $1 AND "userid" = $2',
+      'SELECT id FROM stores WHERE id = $1 AND userid = $2',
       [resolvedParams.id, session.user.id]
     )
 
@@ -29,7 +29,7 @@ export async function GET(
 
     // Verificar se a categoria existe
     const categoryResult = await pool.query(
-      'SELECT id FROM categories WHERE id = $1 AND "storeid" = $2',
+      'SELECT id FROM categories WHERE id = $1 AND storeid = $2',
       [resolvedParams.categoryId, resolvedParams.id]
     )
 
@@ -48,7 +48,7 @@ export async function GET(
     return NextResponse.json(items)
   } catch (error) {
     console.error('Error fetching items:', error)
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }
 
@@ -66,7 +66,7 @@ export async function POST(
 
     // Verificar se a loja pertence ao usuário
     const storeResult = await pool.query(
-      'SELECT id FROM stores WHERE id = $1 AND "userid" = $2',
+      'SELECT id FROM stores WHERE id = $1 AND userid = $2',
       [resolvedParams.id, session.user.id]
     )
 
@@ -76,7 +76,7 @@ export async function POST(
 
     // Verificar se a categoria existe
     const categoryResult = await pool.query(
-      'SELECT id FROM categories WHERE id = $1 AND "storeid" = $2',
+      'SELECT id FROM categories WHERE id = $1 AND storeid = $2',
       [resolvedParams.categoryId, resolvedParams.id]
     )
 
@@ -114,7 +114,7 @@ export async function POST(
       [
         name.trim(),
         description?.trim() || null,
-        price ? parseFloat(price) : null,
+        price ? Math.round(parseFloat(price) * 100) : null,
         image?.trim() || null,
         resolvedParams.categoryId,
         nextOrder,
@@ -128,6 +128,6 @@ export async function POST(
     return NextResponse.json(item, { status: 201 })
   } catch (error) {
     console.error('Error creating item:', error)
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error instanceof Error ? error.message : 'Unknown error' }, { status: 500 });
   }
 }

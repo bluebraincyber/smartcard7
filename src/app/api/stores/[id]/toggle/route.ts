@@ -56,7 +56,7 @@ export async function PATCH(
     return NextResponse.json(updateRes.rows[0], { status: 200 });
   } catch (err: any) {
     console.error("Toggle store error:", err);
-    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: err?.message }, { status: 500 });
+    return NextResponse.json({ error: 'INTERNAL_ERROR', detail: err instanceof Error ? err.message : 'Unknown error' }, { status: 500 });
   }
 }
 
