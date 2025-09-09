@@ -16,7 +16,7 @@ export async function GET() {
       } : null,
       timestamp: new Date().toISOString()
     });
-  } catch (e: ) {
+  } catch (e: any) {
     return Response.json({ 
       ok: false, 
       error: e.message,
