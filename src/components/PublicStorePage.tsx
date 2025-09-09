@@ -380,8 +380,6 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                     {category.items
                       .filter(item => !item.isarchived && item.isactive)
                       .map(item => (
-                      <div key={item.id} className="bg-white dark:bg-gray-700 rounded-lg shadow-md overflow-hidden flex flex-col">
-                      return (
                         <div
                           key={item.id}
                           className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-4">
