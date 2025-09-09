@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import { auth } from '@/auth';
-
+import { authOptions } from '@/lib/authOptions';
 
 export async function POST(request: Request) {
   try {
@@ -12,19 +11,16 @@ export async function POST(request: Request) {
 
     console.log('Testing signin for:', email);
     
-    // Obter as opções do NextAuth
-    const session = await auth();
     console.log('Auth options built');
-    console.log('Auth session:', session);
     
     // Encontrar o provider de credentials
     const credentialsProvider = authOptions.providers?.find(
-      (provider: ) => provider.type === 'credentials'
+      (provider: any) => provider.type === 'credentials'
     );
     
     console.log('Credentials provider found:', !!credentialsProvider);
     console.log('Provider type:', credentialsProvider?.type);
-    console.log('Has authorize function:', typeof (credentialsProvider as )?.authorize);
+    console.log('Has authorize function:', typeof (credentialsProvider as any)?.authorize);
     
     if (!credentialsProvider) {
       return NextResponse.json({ error: 'Credentials provider not found' }, { status: 500 });
@@ -38,7 +34,7 @@ export async function POST(request: Request) {
        console.log('Calling authorize function...');
        console.log('About to call authorize with:', { email, password });
        
-       result = await (credentialsProvider as ).authorize(
+       result = await (credentialsProvider as any).authorize(
          { email, password },
          {} // req object (não usado)
        );

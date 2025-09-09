@@ -1,4 +1,4 @@
-import { sql } from "@vercel/postgres";
+import pool from '@/lib/db';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -9,9 +9,9 @@ export async function POST() {
     const passwordHash = '$2b$10$9HofpK/k0DZqon62lwMkP.CwtoVeL8EjhiMeqpouQF56ymB4v1Zim';
     
     // Verificar se o usuário já existe
-    const { rows: existingUsers } = await sql`
-      SELECT id FROM users WHERE email = 'admin@smartcard.local' LIMIT 1
-    `;
+    const { rows: existingUsers } = await pool.query(
+      "SELECT id FROM users WHERE email = 'admin@smartcard.local' LIMIT 1"
+    );
     
     if (existingUsers.length > 0) {
       return Response.json({ 
@@ -22,11 +22,10 @@ export async function POST() {
     }
     
     // Inserir usuário seed
-    const { rows } = await sql`
-      INSERT INTO users (name, email, password_hash, created_at, updated_at)
-      VALUES ('Admin', 'admin@smartcard.local', ${passwordHash}, NOW(), NOW())
-      RETURNING id, name, email, created_at
-    `;
+    const { rows } = await pool.query(
+      'INSERT INTO users (name, email, password_hash, created_at, updated_at) VALUES ($1, $2, $3, NOW(), NOW()) RETURNING id, name, email, created_at',
+      ['Admin', 'admin@smartcard.local', passwordHash]
+    );
     
     return Response.json({ 
       ok: true, 
@@ -37,7 +36,7 @@ export async function POST() {
         password: 'admin123'
       }
     });
-  } catch (e: ) {
+  } catch (e: any) {
     return Response.json({ 
       ok: false, 
       error: e.message 

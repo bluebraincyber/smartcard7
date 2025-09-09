@@ -1,6 +1,6 @@
 // src/app/api/stores/[id]/toggle/route.ts
 import { NextResponse } from "next/server";
-import { sql } from "@vercel/postgres";
+import pool from '@/lib/db';
 import { auth } from "@/auth";
 
 export const runtime = "nodejs";
@@ -40,12 +40,10 @@ export async function PATCH(
     // Garante que a loja pertence ao usuário e pega estado atual
     console.log('Querying store with:', { storeid, userid });
     
-    const storeRes = await sql/*sql*/`
-      SELECT id, active 
-      FROM stores 
-      WHERE id = ${storeid} AND userid = ${userid} 
-      LIMIT 1 
-    `;
+    const storeRes = await pool.query(
+      'SELECT id, active FROM stores WHERE id = $1 AND userid = $2 LIMIT 1',
+      [storeid, userid]
+    );
     
     console.log('Store query result:', { 
       rowCount: storeRes.rowCount, 
@@ -65,23 +63,13 @@ export async function PATCH(
     console.log('Toggling active state:', { currentActive, nextActive });
 
     // Alterna o active
-    const updateRes = await sql/*sql*/`
-      UPDATE stores 
-      SET active = ${nextActive}, updated_at = NOW() 
-      WHERE id = ${storeid} AND userid = ${userid} 
-      RETURNING 
-        id, 
-        name, 
-        slug, 
-        description, 
-        active        AS "isActive", 
-        userid        AS "userid", 
-        created_at    AS "createdAt", 
-        updated_at    AS "updatedAt" 
-    `;
+    const updateRes = await pool.query(
+      'UPDATE stores SET active = $1, updated_at = NOW() WHERE id = $2 AND userid = $3 RETURNING id, name, slug, description, active AS "isActive", userid, created_at AS "createdAt", updated_at AS "updatedAt"',
+      [nextActive, storeid, userid]
+    );
 
     return NextResponse.json(updateRes.rows[0], { status: 200 });
-  } catch (err: ) {
+  } catch (err: any) {
     console.error("Toggle store error:", err);
     return NextResponse.json(
       { error: "Failed to toggle store" },
