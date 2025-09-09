@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { sql } from '@vercel/postgres'
+import pool from '@/lib/db'
 
 export const runtime = 'nodejs'
 import { isValidSlug, generateSlugSuggestions } from '@/lib/subdomain'
@@ -25,9 +25,10 @@ export async function POST(request: NextRequest) {
     }
 
     // Verificar se já existe no banco
-    const existingStoreResult = await sql`
-      SELECT id FROM stores WHERE slug = ${slug}
-    `
+    const existingStoreResult = await pool.query(
+      'SELECT id FROM stores WHERE slug = $1',
+      [slug]
+    )
 
     if (existingStoreResult.rows.length > 0) {
       return NextResponse.json({
@@ -68,9 +69,10 @@ export async function GET(request: NextRequest) {
     const availableSuggestions = []
     
     for (const suggestion of suggestions) {
-      const existingStoreResult = await sql`
-        SELECT id FROM stores WHERE slug = ${suggestion}
-      `
+      const existingStoreResult = await pool.query(
+        'SELECT id FROM stores WHERE slug = $1',
+        [suggestion]
+      )
       
       if (existingStoreResult.rows.length === 0) {
         availableSuggestions.push(suggestion)

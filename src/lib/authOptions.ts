@@ -1,7 +1,7 @@
-import CredentialsProvider from 'next-auth/providers/credentials';
-import { compare } from 'bcryptjs';
 import pool from '@/lib/db';
 import type { NextAuthOptions } from 'next-auth';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import { compare } from 'bcryptjs';
 
 export const authOptions: NextAuthOptions = {
     providers: [
@@ -12,22 +12,36 @@ export const authOptions: NextAuthOptions = {
           password: { label: "Password", type: "password" },
         },
         async authorize(credentials) {
-          if (!credentials?.email || !credentials?.password) return null;
+          if (!credentials?.email || !credentials?.password) {
+            console.log('No credentials provided');
+            return null;
+          }
 
           try {
+            console.log('Attempting to authenticate user:', credentials.email);
+            console.log('Credentials received:', credentials);
             const { rows } = await pool.query(
               `SELECT id, email, name, password_hash 
               FROM users 
-              WHERE email = $1 
-              LIMIT 1`,
-              [credentials.email.toLowerCase().trim()]
+              WHERE email = $1
+              LIMIT 1`, [credentials.email.toLowerCase().trim()]
             );
+            console.log('Database query result:', rows);
             
             const user = rows[0];
-            if (!user) return null;
+            console.log('User object from DB:', user);
+            if (!user) {
+              console.log('User not found for email:', credentials.email);
+              return null;
+            }
+            console.log('User found:', user.email);
 
             const valid = await compare(credentials.password, user.password_hash);
-            if (!valid) return null;
+            if (!valid) {
+              console.log('Invalid password for user:', user.email);
+              return null;
+            }
+            console.log('Password valid for user:', user.email);
 
             return { 
               id: String(user.id), 
@@ -35,7 +49,7 @@ export const authOptions: NextAuthOptions = {
               email: user.email 
             };
           } catch (error) {
-            console.error('Auth error:', error);
+            console.error('Auth error during authorization:', error);
             return null;
           }
         },
@@ -51,14 +65,14 @@ export const authOptions: NextAuthOptions = {
       error: '/auth/error',
     },
     callbacks: {
-      async jwt({ token, user }) {
+      async jwt({ token, user }: { token: any, user: any }) {
         if (user) {
           token.id = user.id;
         }
         return token;
       },
       
-      async session({ session, token }) {
+      async session({ session, token }: { session: any, token: any }) {
         if (session?.user) {
           session.user.id = token.id as string;
         }

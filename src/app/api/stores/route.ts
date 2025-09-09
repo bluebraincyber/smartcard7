@@ -1,5 +1,5 @@
-// Stores API usando @vercel/postgres
-import { sql } from '@vercel/postgres';
+// Stores API usando pool local
+import pool from '@/lib/db';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/authOptions';
 
@@ -19,7 +19,7 @@ export async function GET() {
     }
     
     const userid = Number(session.user.id);
-    const { rows } = await sql`
+    const { rows } = await pool.query(`
       SELECT 
         s.id,
         s.name,
@@ -32,12 +32,12 @@ export async function GET() {
         u.name as owner_name, 
         COUNT(c.id) as category_count
       FROM stores s
-      LEFT JOIN users u ON s."userid" = u.id
-      LEFT JOIN categories c ON c."storeid" = s.id
-      WHERE s.userid = ${userid}
+      LEFT JOIN users u ON s.userid = u.id
+      LEFT JOIN categories c ON c.storeid = s.id
+      WHERE s.userid = $1
       GROUP BY s.id, u.name
       ORDER BY s.created_at DESC
-    `;
+    `, [userid]);
     
     // Transform the data to include _count object and ensure consistent naming
     const storesWithCount = rows.map(store => ({
@@ -87,9 +87,10 @@ export async function POST(request: Request) {
     }
     
     // Verificar se slug já existe
-    const { rows: existing } = await sql`
-      SELECT id FROM stores WHERE slug = ${slug}
-    `;
+    const { rows: existing } = await pool.query(
+      'SELECT id FROM stores WHERE slug = $1',
+      [slug]
+    );
     
     if (existing.length > 0) {
       return Response.json({ 
@@ -98,11 +99,10 @@ export async function POST(request: Request) {
     }
     
     // Criar store
-    const { rows } = await sql`
-      INSERT INTO stores (name, slug, description, "userid", created_at, updated_at)
-      VALUES (${name}, ${slug}, ${description || ''}, ${userid}, NOW(), NOW())
-      RETURNING *
-    `;
+    const { rows } = await pool.query(
+      'INSERT INTO stores (name, slug, description, userid, created_at, updated_at) VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *',
+      [name, slug, description || '', userid]
+    );
     
     return Response.json({ 
       success: true, 
