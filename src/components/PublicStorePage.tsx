@@ -300,6 +300,8 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
               alt={`Capa da ${store.name}`}
               fill
               className="object-cover"
+              priority // LCP acima da dobra
+              sizes="100vw"
             />
           </div>
         ) : (
@@ -328,6 +330,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                     width={64}
                     height={64}
                     className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover border-2 border-white shadow-md"
+                    priority // Logo geralmente acima da dobra
                   />
                 ) : (
                   <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-white shadow-md">
@@ -412,9 +415,10 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                               <ImageThumb
                                 src={item.imageUrl || ''}
                                 alt={item.name}
-                                size="md"
+                                size="lg"
                                 variant="rounded"
-                                className="w-16 h-16 sm:w-20 sm:h-20"
+                                className="w-20 h-20 sm:w-24 sm:h-24"
+                                priority={false}
                               />
                             </div>
                             

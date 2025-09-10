@@ -78,9 +78,28 @@ export async function POST(request: NextRequest) {
 
       // Criar diretório se não existir
       const uploadDir = join(process.cwd(), 'public', 'uploads', type)
+      console.log('📁 Verificando diretório de upload:', uploadDir)
+      
       if (!existsSync(uploadDir)) {
-        await mkdir(uploadDir, { recursive: true })
-        console.log('📁 Diretório criado:', uploadDir)
+        try {
+          await mkdir(uploadDir, { recursive: true })
+          console.log('✅ Diretório criado com sucesso:', uploadDir)
+        } catch (mkdirError) {
+          console.error('❌ Erro ao criar diretório:', mkdirError)
+          throw new Error(`Erro ao criar diretório: ${mkdirError instanceof Error ? mkdirError.message : 'Erro desconhecido'}`)
+        }
+      } else {
+        console.log('✅ Diretório já existe:', uploadDir)
+      }
+
+      // Verificar permissões de escrita
+      try {
+        const { access, constants } = await import('fs/promises')
+        await access(uploadDir, constants.W_OK)
+        console.log('✅ Permissões de escrita verificadas')
+      } catch (permError) {
+        console.error('❌ Sem permissão de escrita:', permError)
+        throw new Error('Sem permissão de escrita no diretório de upload')
       }
 
       // Gerar nome único para o arquivo
@@ -90,8 +109,20 @@ export async function POST(request: NextRequest) {
       const filepath = join(uploadDir, filename)
 
       // Salvar arquivo fisicamente
-      await writeFile(filepath, buffer)
-      console.log('💾 Arquivo salvo:', filepath)
+      try {
+        await writeFile(filepath, buffer)
+        console.log('💾 Arquivo salvo com sucesso:', filepath)
+        
+        // Verificar se o arquivo foi realmente criado
+        if (!existsSync(filepath)) {
+          throw new Error('Arquivo não foi criado no sistema de arquivos')
+        }
+        
+        console.log('✅ Arquivo verificado no sistema de arquivos')
+      } catch (writeError) {
+        console.error('❌ Erro ao escrever arquivo:', writeError)
+        throw new Error(`Erro ao salvar arquivo: ${writeError instanceof Error ? writeError.message : 'Erro desconhecido'}`)
+      }
 
       // Retornar URL pública através da API de imagens
       const publicUrl = `/api/uploads/${type}/${filename}`

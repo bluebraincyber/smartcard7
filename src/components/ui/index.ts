@@ -34,6 +34,19 @@ export {
   MenuIcon,
   MapPinIcon,
   ClockIcon,
-  TruckIcon
+  TruckIcon,
+  ImageIcon,
+  EditIcon,
+  PauseIcon,
+  PlayIcon,
+  CopyIcon,
+  TrashIcon,
+  MoreIcon
 } from './Icon';
 export type { IconProps } from './Icon';
+
+export { Switch } from './Switch';
+export type { SwitchProps } from './Switch';
+
+export { AdminProductCard } from './AdminProductCard';
+export type { AdminProductCardProps } from './AdminProductCard';

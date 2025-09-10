@@ -49,23 +49,42 @@ export default function ImageUpload({
     try {
       const formData = new FormData()
       formData.append('file', file)
-      formData.append('type', type)
-      formData.append('storeid', storeid)
+      formData.append('type', type || 'item') // Garantir que type não seja undefined
+      formData.append('storeid', storeid || 'default') // Garantir que storeid não seja undefined
+
+      console.log('📤 Enviando upload:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        uploadType: type || 'item',
+        storeId: storeid || 'default'
+      })
 
       const response = await fetch('/api/upload', {
         method: 'POST',
         body: formData,
       })
 
+      console.log('📡 Resposta do upload:', response.status, response.statusText)
+
       if (response.ok) {
         const data = await response.json()
+        console.log('✅ Upload bem-sucedido:', data)
         onUpload(data.url)
       } else {
-        const error = await response.json()
-        alert(error.error || 'Erro ao fazer upload da imagem')
+        const errorText = await response.text()
+        console.error('❌ Erro no upload:', response.status, errorText)
+        
+        try {
+          const error = JSON.parse(errorText)
+          alert(error.error || `Erro ao fazer upload da imagem (${response.status})`)
+        } catch {
+          alert(`Erro ao fazer upload da imagem (${response.status}): ${errorText}`)
+        }
       }
-    } catch {
-      alert('Erro ao fazer upload da imagem')
+    } catch (error) {
+      console.error('❌ Erro de rede no upload:', error)
+      alert('Erro de conexão ao fazer upload da imagem')
     } finally {
       setUploading(false)
     }
@@ -133,6 +152,8 @@ export default function ImageUpload({
               alt="Imagem carregada"
               fill
               className="object-cover"
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              priority // Preview principal, acima da dobra
             />
           </div>
           

@@ -22,7 +22,8 @@ async function getStore(slug: string) {
 
     // Buscar loja - versão simplificada e robusta
     const storeResult = await pool.query(
-      `SELECT id, name, slug, description, whatsapp, address, isactive, userid, created_at, updated_at 
+      `SELECT id, name, slug, description, whatsapp, address, active, userid, created_at, updated_at,
+              coverimage, logo
        FROM stores 
        WHERE slug = $1 
        LIMIT 1`,
@@ -40,7 +41,7 @@ async function getStore(slug: string) {
     console.log('✅ Loja encontrada:', store.name)
 
     // Verificar se a loja está ativa
-    if (!store.isactive) {
+    if (!store.active) {
       console.log('⚠️ Loja inativa:', store.name)
       return null;
     }
@@ -120,7 +121,10 @@ async function getStore(slug: string) {
     }
 
     const finalStore = { 
-      ...store, 
+      ...store,
+      isactive: store.active, // Mapear active para isactive para compatibilidade
+      coverImage: store.coverimage,
+      profileImage: store.logo,
       primaryColor: '#EA1D2C', // Valor padrão
       categories: enrichedCategories 
     };

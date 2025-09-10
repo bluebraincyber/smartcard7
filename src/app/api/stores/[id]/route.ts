@@ -1,4 +1,4 @@
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/authOptions'
 import pool from '@/lib/db'
 import type { Session } from 'next-auth'
@@ -52,6 +52,15 @@ export async function GET(
     
     const storeWithCategories = {
       ...store,
+      isactive: store.active, // Mapear active para isactive para compatibilidade 
+      coverImage: store.coverimage,
+      profileImage: store.logo,
+      // Usar valores do banco se existirem, senão valores padrão
+      whatsapp: store.whatsapp || '', 
+      address: store.address || '',
+      businessType: store.business_type || 'general',
+      requiresAddress: store.requires_address || false,
+      primaryColor: store.primary_color || '#EA1D2C',
       categories: categoriesResult.rows.map(category => ({
         ...category,
         items: itemsResult.rows
@@ -75,17 +84,18 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    console.log('API PATCH chamada')
+    console.log('🔄 API PATCH chamada')
     const session = await getServerSession(authOptions) as Session | null
     
     if (!session?.user?.id) {
+      console.log('❌ Usuário não autenticado')
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
     const resolvedParams = await params
     const id = resolvedParams.id
     const body = await request.json()
-    console.log('Dados recebidos:', body)
+    console.log('📊 Dados recebidos no PATCH:', JSON.stringify(body, null, 2))
 
     const existingStoreResult = await pool.query(
       'SELECT * FROM stores WHERE id = $1 AND userid = $2',
@@ -93,46 +103,91 @@ export async function PATCH(
     )
 
     if (existingStoreResult.rows.length === 0) {
+      console.log('❌ Loja não encontrada para ID:', id, 'Usuário:', session.user.id)
       return NextResponse.json({ error: 'Loja não encontrada' }, { status: 404 })
     }
+
+    console.log('✅ Loja encontrada:', existingStoreResult.rows[0].name)
 
     const setParts = []
     const values = []
     let paramCount = 0
 
+    // Apenas campos que existem na tabela stores
     if (body.name !== undefined) {
       paramCount++
       setParts.push(`name = $${paramCount}`)
       values.push(body.name)
+      console.log(`📝 Atualizando name: ${body.name}`)
     }
 
     if (body.description !== undefined) {
       paramCount++
       setParts.push(`description = $${paramCount}`)
       values.push(body.description)
+      console.log(`📝 Atualizando description: ${body.description}`)
+    }
+
+    if (body.slug !== undefined) {
+      paramCount++
+      setParts.push(`slug = $${paramCount}`)
+      values.push(body.slug)
+      console.log(`📝 Atualizando slug: ${body.slug}`)
+    }
+
+    if (body.coverImage !== undefined) {
+      paramCount++
+      setParts.push(`coverimage = $${paramCount}`)
+      values.push(body.coverImage)
+      console.log(`📝 Atualizando coverimage: ${body.coverImage}`)
+    }
+
+    if (body.profileImage !== undefined) {
+      paramCount++
+      setParts.push(`logo = $${paramCount}`)
+      values.push(body.profileImage)
+      console.log(`📝 Atualizando logo: ${body.profileImage}`)
+    }
+
+    if (body.isactive !== undefined) {
+      paramCount++
+      setParts.push(`active = $${paramCount}`)
+      values.push(body.isactive)
+      console.log(`📝 Atualizando active: ${body.isactive}`)
     }
 
     if (body.whatsapp !== undefined || body.phone !== undefined) {
       paramCount++
       setParts.push(`whatsapp = $${paramCount}`)
       values.push(body.whatsapp || body.phone)
+      console.log(`📝 Atualizando whatsapp: ${body.whatsapp || body.phone}`)
     }
 
     if (body.address !== undefined) {
       paramCount++
       setParts.push(`address = $${paramCount}`)
       values.push(body.address)
+      console.log(`📝 Atualizando address: ${body.address}`)
     }
 
-    if (body.isactive !== undefined) {
+    if (body.businessType !== undefined) {
       paramCount++
-      setParts.push(`isactive = $${paramCount}`)
-      values.push(body.isactive)
+      setParts.push(`business_type = $${paramCount}`)
+      values.push(body.businessType)
+      console.log(`📝 Atualizando business_type: ${body.businessType}`)
+    }
+
+    if (body.requiresAddress !== undefined) {
+      paramCount++
+      setParts.push(`requires_address = $${paramCount}`)
+      values.push(body.requiresAddress)
+      console.log(`📝 Atualizando requires_address: ${body.requiresAddress}`)
     }
 
     setParts.push('updated_at = NOW()')
 
     if (setParts.length === 1) {
+      console.log('❌ Nenhum campo para atualizar')
       return NextResponse.json({ error: 'Nenhum campo para atualizar' }, { status: 400 })
     }
 
@@ -141,23 +196,43 @@ export async function PATCH(
 
     const queryText = `UPDATE stores SET ${setParts.join(', ')} WHERE id = $${paramCount} RETURNING *`
     
-    console.log('Query:', queryText)
-    console.log('Values:', values)
+    console.log('🔍 Query SQL:', queryText)
+    console.log('🔍 Values:', values)
     
     const result = await pool.query(queryText, values)
 
     if (result.rows.length === 0) {
+      console.log('❌ Falha ao atualizar loja - nenhuma linha afetada')
       return NextResponse.json({ error: 'Falha ao atualizar loja' }, { status: 500 })
     }
 
     const updatedStore = result.rows[0]
-    console.log('Loja atualizada:', updatedStore)
-    return NextResponse.json(updatedStore)
+    console.log('✅ Loja atualizada com sucesso:', updatedStore.name)
+    console.log('📊 Dados atualizados:', JSON.stringify({
+      id: updatedStore.id,
+      name: updatedStore.name,
+      coverimage: updatedStore.coverimage,
+      logo: updatedStore.logo
+    }, null, 2))
+    
+    return NextResponse.json({
+      ...updatedStore,
+      isactive: updatedStore.active,
+      coverImage: updatedStore.coverimage,
+      profileImage: updatedStore.logo,
+      whatsapp: updatedStore.whatsapp || '',
+      address: updatedStore.address || '',
+      businessType: updatedStore.business_type || 'general',
+      requiresAddress: updatedStore.requires_address || false,
+      primaryColor: updatedStore.primary_color || '#EA1D2C'
+    })
   } catch (error) {
-    console.error('Erro PATCH:', error)
+    console.error('❌ Erro PATCH completo:', error)
+    console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack')
     return NextResponse.json({ 
       error: 'INTERNAL_ERROR', 
-      detail: error instanceof Error ? error.message : 'Erro desconhecido' 
+      detail: error instanceof Error ? error.message : 'Erro desconhecido',
+      stack: error instanceof Error ? error.stack : undefined
     }, { status: 500 })
   }
 }
@@ -176,7 +251,7 @@ export async function PUT(
     const resolvedParams = await params
     const id = resolvedParams.id
     const body = await request.json()
-    const { name, description, whatsapp, address, isactive } = body
+    const { name, description, slug: bodySlug, isactive } = body
 
     const existingStoreResult = await pool.query(
       'SELECT * FROM stores WHERE id = $1 AND userid = $2',
@@ -189,7 +264,7 @@ export async function PUT(
     
     const existingStore = existingStoreResult.rows[0]
 
-    const desired = body.slug ?? body.name ?? existingStore.name ?? ""
+    const desired = bodySlug ?? name ?? existingStore.name ?? ""
     const newSlug = desired ? toSlug(desired) : existingStore.slug
 
     if (newSlug && newSlug !== existingStore.slug) {
@@ -203,13 +278,20 @@ export async function PUT(
     }
 
     const updatedStoreResult = await pool.query(
-      'UPDATE stores SET name = $1, slug = $2, description = $3, whatsapp = $4, address = $5, isactive = $6, updated_at = NOW() WHERE id = $7 RETURNING *',
-      [name, newSlug, description, whatsapp, address, isactive, id]
+      'UPDATE stores SET name = $1, slug = $2, description = $3, active = $4, updated_at = NOW() WHERE id = $5 RETURNING *',
+      [name, newSlug, description, isactive, id]
     )
     
     const updatedStore = updatedStoreResult.rows[0]
 
-    return NextResponse.json(updatedStore)
+    return NextResponse.json({
+      ...updatedStore,
+      isactive: updatedStore.active,
+      coverImage: updatedStore.coverimage,
+      profileImage: updatedStore.logo,
+      whatsapp: '', // Valor padrão
+      address: ''   // Valor padrão
+    })
   } catch (error) {
     console.error('Erro ao atualizar loja:', error)
     return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });

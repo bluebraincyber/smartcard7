@@ -3,8 +3,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
-import { ArrowLeft, Plus, Edit, Trash2, Eye, EyeOff, DollarSign } from 'lucide-react'
+import { ArrowLeft, Plus } from 'lucide-react'
+import { AdminProductCard } from '@/components/ui/AdminProductCard'
 
 interface Store {
   id: string
@@ -25,7 +25,7 @@ interface Item {
   image?: string
   order: number
   isactive: boolean
-  isAvailable: boolean
+  isarchived: boolean
 }
 
 export default function ItemsPage() {
@@ -44,10 +44,6 @@ export default function ItemsPage() {
     price: '',
     image: ''
   })
-
-  useEffect(() => {
-    fetchData()
-  }, [params.id, params.categoryId, fetchData])
 
   const fetchData = useCallback(async () => {
     try {
@@ -77,6 +73,10 @@ export default function ItemsPage() {
       setLoading(false)
     }
   }, [params.id, params.categoryId])
+
+  useEffect(() => {
+    fetchData()
+  }, [fetchData])
 
   const resetForm = () => {
     setFormData({
@@ -149,29 +149,80 @@ export default function ItemsPage() {
     setShowNewForm(true)
   }
 
-  const toggleItemStatus = async (itemId: string, field: 'isactive' | 'isAvailable', currentValue: boolean) => {
+  const handleToggleActive = async (itemId: string, isActive: boolean) => {
     try {
       const response = await fetch(`/api/stores/${params.id}/categories/${params.categoryId}/items/${itemId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ [field]: !currentValue }),
+        body: JSON.stringify({ isactive: isActive }),
       })
 
       if (response.ok) {
         setItems(prev => 
           prev.map(item => 
-            item.id === itemId ? { ...item, [field]: !currentValue } : item
+            item.id === itemId ? { ...item, isactive: isActive } : item
           )
         )
       }
     } catch (error) {
-      console.error('Erro ao atualizar item:', error)
+      console.error('Erro ao atualizar status do item:', error)
     }
   }
 
-  const deleteItem = async (itemId: string) => {
+  const handleTogglePause = async (itemId: string, isPaused: boolean) => {
+    try {
+      const response = await fetch(`/api/stores/${params.id}/categories/${params.categoryId}/items/${itemId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ isarchived: isPaused }),
+      })
+
+      if (response.ok) {
+        setItems(prev => 
+          prev.map(item => 
+            item.id === itemId ? { ...item, isarchived: isPaused } : item
+          )
+        )
+      }
+    } catch (error) {
+      console.error('Erro ao pausar/retomar item:', error)
+    }
+  }
+
+  const handleDuplicate = async (itemId: string) => {
+    const itemToDuplicate = items.find(item => item.id === itemId)
+    if (!itemToDuplicate) return
+
+    try {
+      const payload = {
+        name: `${itemToDuplicate.name} (Cópia)`,
+        description: itemToDuplicate.description,
+        price: itemToDuplicate.price,
+        image: itemToDuplicate.image
+      }
+
+      const response = await fetch(`/api/stores/${params.id}/categories/${params.categoryId}/items`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (response.ok) {
+        const newItem = await response.json()
+        setItems(prev => [...prev, newItem])
+      }
+    } catch (error) {
+      console.error('Erro ao duplicar item:', error)
+    }
+  }
+
+  const handleDelete = async (itemId: string) => {
     if (!confirm('Tem certeza que deseja excluir este item?')) {
       return
     }
@@ -326,101 +377,23 @@ export default function ItemsPage() {
               </button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {items.map((item) => (
-                <div
+                <AdminProductCard
                   key={item.id}
-                  className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow"
-                >
-                  {item.image && (
-                    <div className="relative w-full h-32 mb-3">
-                      <Image
-                        src={item.image}
-                        alt={item.name}
-                        fill
-                        className="object-cover rounded-md"
-                      />
-                    </div>
-                  )}
-                  
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-sm font-medium text-gray-900 flex-1">
-                      {item.name}
-                    </h3>
-                    <div className="flex items-center space-x-1 ml-2">
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                        item.isactive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                      }`}>
-                        {item.isactive ? 'Ativo' : 'Inativo'}
-                      </span>
-                      {!item.isAvailable && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                          Indisponível
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  {item.description && (
-                    <p className="text-sm text-gray-600 mb-2 line-clamp-2">
-                      {item.description}
-                    </p>
-                  )}
-
-                  {item.price && (
-                    <div className="flex items-center text-sm font-medium text-green-600 mb-3">
-                      <DollarSign className="h-4 w-4 mr-1" />
-                      R$ {item.price.toFixed(2).replace('.', ',')}
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-2">
-                      <button
-                        onClick={() => toggleItemStatus(item.id, 'isactive', item.isactive)}
-                        className={`p-1 rounded ${
-                          item.isactive
-                            ? 'text-green-600 hover:bg-green-50'
-                            : 'text-gray-400 hover:bg-gray-50'
-                        }`}
-                        title={item.isactive ? 'Desativar item' : 'Ativar item'}
-                      >
-                        {item.isactive ? (
-                          <Eye className="h-4 w-4" />
-                        ) : (
-                          <EyeOff className="h-4 w-4" />
-                        )}
-                      </button>
-
-                      <button
-                        onClick={() => startEdit(item)}
-                        className="p-1 text-blue-600 hover:bg-blue-50 rounded"
-                        title="Editar item"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </button>
-
-                      <button
-                        onClick={() => deleteItem(item.id)}
-                        className="p-1 text-red-600 hover:bg-red-50 rounded"
-                        title="Excluir item"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
-                    </div>
-
-                    <button
-                      onClick={() => toggleItemStatus(item.id, 'isAvailable', item.isAvailable)}
-                      className={`text-xs px-2 py-1 rounded ${
-                        item.isAvailable
-                          ? 'bg-green-100 text-green-800 hover:bg-green-200'
-                          : 'bg-red-100 text-red-800 hover:bg-red-200'
-                      }`}
-                    >
-                      {item.isAvailable ? 'Disponível' : 'Indisponível'}
-                    </button>
-                  </div>
-                </div>
+                  id={item.id}
+                  name={item.name}
+                  description={item.description}
+                  price={item.price || 0}
+                  image={item.image}
+                  isActive={item.isactive}
+                  isPaused={item.isarchived}
+                  onToggleActive={handleToggleActive}
+                  onTogglePause={handleTogglePause}
+                  onEdit={() => startEdit(item)}
+                  onDuplicate={handleDuplicate}
+                  onDelete={handleDelete}
+                />
               ))}
             </div>
           )}

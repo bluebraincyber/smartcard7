@@ -280,10 +280,12 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
                   Imagem de Capa
                 </label>
                 <ImageUpload
-                  onImageUploaded={(url) => handleInputChange('coverImage', url)}
+                  onUpload={(url) => handleInputChange('coverImage', url)}
                   currentImage={formData.coverImage}
-                  folder="store"
+                  type="store"
+                  storeid={store.id}
                   className="w-full h-32"
+                  placeholder="Clique para adicionar uma imagem de capa"
                 />
               </div>
               <div>
@@ -291,10 +293,12 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
                   Logo/Perfil
                 </label>
                 <ImageUpload
-                  onImageUploaded={(url) => handleInputChange('profileImage', url)}
+                  onUpload={(url) => handleInputChange('profileImage', url)}
                   currentImage={formData.profileImage}
-                  folder="store"
+                  type="store"
+                  storeid={store.id}
                   className="w-full h-32"
+                  placeholder="Clique para adicionar um logo"
                 />
               </div>
             </div>

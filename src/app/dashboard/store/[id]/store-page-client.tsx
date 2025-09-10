@@ -3,10 +3,10 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 import { ArrowLeft, Plus, Edit, Trash2, Eye, ExternalLink } from 'lucide-react'
 import ConfirmationModal from '@/components/ui/ConfirmationModal'
 import ProductEditModal from '@/components/ui/ProductEditModal'
+import { AdminProductCard } from '@/components/ui/AdminProductCard'
 
 interface Store {
   id: string
@@ -122,16 +122,17 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
     }
   }
 
-  const toggleItemStatus = async (itemId: string, isactive: boolean) => {
+  // Handler para o AdminProductCard - ativar/desativar
+  const handleToggleActive = async (itemId: string, isActive: boolean) => {
     try {
-      console.log('🔄 Alterando status do item:', itemId, 'de', isactive, 'para', !isactive)
+      console.log('🔄 Alterando status do item:', itemId, 'para', isActive)
       
       const response = await fetch(`/api/items/${itemId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ isactive: !isactive }),
+        body: JSON.stringify({ isactive: isActive }),
       })
 
       if (response.ok) {
@@ -160,23 +161,24 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
     }
   }
 
-  const toggleItemAvailability = async (itemId: string, isarchived: boolean) => {
+  // Handler para o AdminProductCard - pausar/retomar
+  const handleTogglePause = async (itemId: string, isPaused: boolean) => {
     try {
-      console.log('🔄 Alterando disponibilidade do item:', itemId, 'de', isarchived, 'para', !isarchived)
+      console.log('🔄 Alterando disponibilidade do item:', itemId, 'para pausado:', isPaused)
       
       const response = await fetch(`/api/items/${itemId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ isarchived: !isarchived }),
+        body: JSON.stringify({ isarchived: isPaused }),
       })
 
       if (response.ok) {
         const updatedItem = await response.json()
         console.log('✅ Item atualizado no servidor:', updatedItem)
         
-        // Atualizar o estado local imediatamente com os dados do servidor
+        // Atualizar o estado local imediatamente
         setStore(prevStore => ({
           ...prevStore,
           categories: prevStore.categories.map(category => ({
@@ -198,21 +200,98 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
     }
   }
 
+  // Handler para o AdminProductCard - editar
+  const handleEdit = (itemId: string) => {
+    const item = store.categories
+      .flatMap(cat => cat.items)
+      .find(item => item.id === itemId)
+    
+    if (item) {
+      setEditModal({ isOpen: true, product: item })
+    }
+  }
+
+  // Handler para o AdminProductCard - duplicar
+  const handleDuplicate = async (itemId: string) => {
+    const item = store.categories
+      .flatMap(cat => cat.items)
+      .find(item => item.id === itemId)
+    
+    if (!item) return
+
+    // Encontrar a categoria do item
+    const category = store.categories.find(cat => 
+      cat.items.some(i => i.id === itemId)
+    )
+    
+    if (!category) return
+
+    try {
+      const payload = {
+        name: `${item.name} (Cópia)`,
+        description: item.description,
+        price: item.price,
+        image: item.image
+      }
+
+      const response = await fetch(`/api/stores/${store.id}/categories/${category.id}/items`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      })
+
+      if (response.ok) {
+        console.log('✅ Item duplicado com sucesso')
+        fetchStore() // Recarregar dados
+      }
+    } catch (error) {
+      console.error('Erro ao duplicar item:', error)
+    }
+  }
+
+  // Handler para o AdminProductCard - excluir
+  const handleDelete = async (itemId: string) => {
+    const item = store.categories
+      .flatMap(cat => cat.items)
+      .find(item => item.id === itemId)
+    
+    if (!item) return
+
+    setConfirmModal({
+      isOpen: true,
+      title: 'Excluir Item',
+      message: `Tem certeza que deseja excluir o item "${item.name}"? Esta ação não pode ser desfeita.`,
+      onConfirm: async () => {
+        try {
+          const response = await fetch(`/api/items/${itemId}`, {
+            method: 'DELETE',
+          })
+
+          if (response.ok) {
+            console.log('✅ Item excluído com sucesso')
+            fetchStore() // Recarregar dados
+          }
+        } catch (error) {
+          console.error('Erro ao excluir item:', error)
+        }
+        setConfirmModal({ ...confirmModal, isOpen: false })
+      },
+      onClose: () => setConfirmModal({ ...confirmModal, isOpen: false })
+    })
+  }
+
   const deleteCategory = async (categoryId: string) => {
     console.log('🗑️ Iniciando exclusão da categoria:', categoryId)
-    console.log('Store ID:', store?.id)
     setDeletingCategoryId(categoryId)
     try {
-      console.log('🌐 Fazendo requisição DELETE para:', `/api/categories/${categoryId}`)
       const response = await fetch(`/api/categories/${categoryId}`, {
         method: 'DELETE',
       })
 
-      console.log('📡 Resposta da API:', response.status, response.statusText)
-      
       if (response.ok) {
-        console.log('✅ Categoria deletada com sucesso, recarregando dados...')
-        console.log('Dados da loja após exclusão:', store)
+        console.log('✅ Categoria deletada com sucesso')
         fetchStore() // Recarregar dados
       } else {
         const errorData = await response.json().catch(() => null)
@@ -222,23 +301,6 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
       console.error('💥 Erro de rede ao deletar categoria:', error)
     } finally {
       setDeletingCategoryId(null)
-    }
-  }
-
-  const deleteItem = async (itemId: string) => {
-    setDeletingItemId(itemId)
-    try {
-      const response = await fetch(`/api/items/${itemId}`, {
-        method: 'DELETE',
-      })
-
-      if (response.ok) {
-        fetchStore() // Recarregar dados
-      }
-    } catch (error) {
-      console.error('Erro ao deletar item:', error)
-    } finally {
-      setDeletingItemId(null)
     }
   }
 
@@ -361,9 +423,52 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
           </div>
         </div>
 
+        {/* Categories Section Header */}
+        <div className="bg-white shadow rounded-lg mb-6">
+          <div className="px-6 py-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-bold text-gray-900">Categorias e Produtos</h2>
+                <p className="mt-1 text-sm text-gray-600">
+                  Organize seus produtos em categorias para facilitar a navegação dos clientes
+                </p>
+              </div>
+              <Link
+                href={`/dashboard/store/${store.id}/categories`}
+                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Nova Categoria
+              </Link>
+            </div>
+          </div>
+        </div>
+
         {/* Categories and Items */}
-        <div className="space-y-6">
-          {store.categories.map((category) => (
+        <div className="space-y-8">
+          {store.categories.length === 0 ? (
+            <div className="bg-white shadow rounded-lg">
+              <div className="px-6 py-12 text-center">
+                <div className="text-gray-400 mb-4">
+                  <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma categoria criada</h3>
+                <p className="text-gray-500 mb-4">
+                  Crie categorias para organizar seus produtos e facilitar a navegação dos clientes
+                </p>
+                <Link
+                  href={`/dashboard/store/${store.id}/categories`}
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                >
+                  <Plus className="mr-2 h-4 w-4" />
+                  Criar Primeira Categoria
+                </Link>
+              </div>
+            </div>
+          ) : (
+            store.categories.map((category) => (
             <div key={category.id} className="bg-white shadow rounded-lg">
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
@@ -404,7 +509,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                           deleteCategory(category.id)
                           setConfirmModal({ ...confirmModal, isOpen: false })
                         },
-                        onClose: () => { }
+                        onClose: () => setConfirmModal({ ...confirmModal, isOpen: false })
                       })} 
                       disabled={deletingCategoryId === category.id}
                       className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
@@ -415,103 +520,51 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                 </div>
               </div>
               
-              <div className="px-6 py-4">
+              <div className="px-6 py-6">
                 {category.items?.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">Nenhum item nesta categoria</p>
+                  <div className="text-center py-12">
+                    <div className="text-gray-400 mb-4">
+                      <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                    </div>
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum item nesta categoria</h3>
+                    <p className="text-gray-500 mb-4">
+                      Adicione itens para começar a vender
+                    </p>
+                    <Link
+                      href={`/dashboard/store/${store.id}/category/${category.id}/item/new`}
+                      className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Criar Primeiro Item
+                    </Link>
+                  </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {category.items.map((item) => (
-                      <div key={item.id} className="border border-gray-200 rounded-lg p-4">
-                        {item.image && (
-                          <div className="mb-3">
-                            <Image
-                              src={item.image}
-                              alt={item.name}
-                              width={200}
-                              height={150}
-                              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                              className="w-full h-32 object-cover rounded"
-                            />
-                          </div>
-                        )}
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-medium text-gray-900">{item.name}</h3>
-                            {item.description && (
-                              <p className="text-sm text-gray-600 mt-1">{item.description}</p>
-                            )}
-                            <p className="text-lg font-bold text-gray-900 mt-2">
-                              R$ {Number(item.price || 0).toFixed(2)}
-                            </p>
-                            <div className="flex items-center space-x-2 mt-2">
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                item.isactive 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : 'bg-red-100 text-red-800'
-                              }`}>
-                                {item.isactive ? 'Ativo' : 'Inativo'}
-                              </span>
-                              <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                !item.isarchived 
-                                  ? 'bg-blue-100 text-blue-800' 
-                                  : 'bg-yellow-100 text-yellow-800'
-                              }`}>
-                                {!item.isarchived ? 'Disponível' : 'Indisponível'}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex flex-col space-y-1 ml-2">
-                            <button
-                              onClick={() => setEditModal({ isOpen: true, product: item })}
-                              className="p-1 text-blue-600 hover:text-blue-800"
-                              title="Editar"
-                            >
-                              <Edit className="h-4 w-4" />
-                            </button>
-                            <button
-                              onClick={() => toggleItemStatus(item.id, item.isactive)}
-                              className={`p-1 ${
-                                item.isactive ? 'text-red-600 hover:text-red-800' : 'text-green-600 hover:text-green-800'
-                              }`}
-                              title={item.isactive ? 'Desativar' : 'Ativar'}
-                            >
-                              {item.isactive ? '🔴' : '🟢'}
-                            </button>
-                            <button
-                              onClick={() => toggleItemAvailability(item.id, item.isarchived)}
-                              className={`p-1 ${
-                                item.isarchived ? 'text-blue-600 hover:text-blue-800' : 'text-yellow-600 hover:text-yellow-800'
-                              }`}
-                              title={item.isarchived ? 'Marcar como disponível' : 'Marcar como indisponível'}
-                            >
-                              {item.isarchived ? '▶️' : '⏸️'}
-                            </button>
-                            <button
-                              onClick={() => setConfirmModal({
-                                isOpen: true,
-                                title: 'Deletar Item',
-                                message: `Tem certeza que deseja deletar o item "${item.name}"? Esta ação não pode ser desfeita.`,
-                                onConfirm: () => {
-                                  deleteItem(item.id)
-                                  setConfirmModal({ ...confirmModal, isOpen: false })
-                                },
-                                onClose: () => { }
-                              })} 
-                              disabled={deletingItemId === item.id}
-                              className="p-1 text-red-600 hover:text-red-800 disabled:opacity-50"
-                              title="Deletar"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
+                      <AdminProductCard
+                        key={item.id}
+                        id={item.id}
+                        name={item.name}
+                        description={item.description}
+                        price={item.price || 0}
+                        image={item.image}
+                        isActive={item.isactive}
+                        isPaused={item.isarchived}
+                        onToggleActive={handleToggleActive}
+                        onTogglePause={handleTogglePause}
+                        onEdit={handleEdit}
+                        onDuplicate={handleDuplicate}
+                        onDelete={handleDelete}
+                      />
                     ))}
                   </div>
                 )}
               </div>
             </div>
-          ))}
+          ))
+          )}
         </div>
 
         {/* Delete Store Section */}
@@ -599,7 +652,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                   price: productData.price,
                   image: productData.image,
                   isactive: productData.isactive,
-                  isarchived: productData.isarchived // Corrigido
+                  isarchived: productData.isarchived
                 }),
               })
               
