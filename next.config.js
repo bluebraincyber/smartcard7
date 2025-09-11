@@ -1,5 +1,3 @@
-const { withSentryConfig } = require("@sentry/nextjs");
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   env: {
@@ -51,11 +49,11 @@ const nextConfig = {
         hostname: 'localhost',
         port: '3000',
       },
-      {
-        protocol: 'https',
-        hostname: 'via.placeholder.com',
-      },
     ],
+    // Desabilitar otimização de imagens para domínios externos problemáticos
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   async headers() {
     return [
@@ -92,26 +90,4 @@ const nextConfig = {
   },
 };
 
-module.exports = withSentryConfig(
-  nextConfig,
-  {
-    // For all available options, see: https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-
-    // Upload a larger set of source maps for prettier stack traces (increases build time)
-    widenClientFileUpload: true,
-
-    // Transpiles SDK in order to use it with Next.js
-    transpileClientSDK: true,
-
-    // Routes browser requests to Sentry through a Next.js rewrite to circumvent ad-blockers (increases server load)
-    tunnelRoute: "/monitoring-tunnel",
-
-    // Hides source maps from generated client bundles
-    hideSourceMaps: true,
-
-    // Automatically tree-shake Sentry logger statements to reduce bundle size
-    disableLogger: true,
-
-    // For all available options, see: https://docs.sentry.io/platforms/javascript/guides/nextjs/manual-setup/
-  }
-);
+module.exports = nextConfig;
