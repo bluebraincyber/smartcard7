@@ -52,7 +52,7 @@ export async function GET(
     
     const storeWithCategories = {
       ...store,
-      isactive: store.active, // Mapear active para isactive para compatibilidade 
+      isactive: store.isactive, // Usar isactive do schema 
       coverImage: store.coverimage,
       profileImage: store.logo,
       // Usar valores do banco se existirem, senão valores padrão
@@ -151,9 +151,9 @@ export async function PATCH(
 
     if (body.isactive !== undefined) {
       paramCount++
-      setParts.push(`active = $${paramCount}`)
+      setParts.push(`isactive = ${paramCount}`)
       values.push(body.isactive)
-      console.log(`📝 Atualizando active: ${body.isactive}`)
+      console.log(`📝 Atualizando isactive: ${body.isactive}`)
     }
 
     if (body.whatsapp !== undefined || body.phone !== undefined) {
@@ -217,7 +217,7 @@ export async function PATCH(
     
     return NextResponse.json({
       ...updatedStore,
-      isactive: updatedStore.active,
+      isactive: updatedStore.isactive,
       coverImage: updatedStore.coverimage,
       profileImage: updatedStore.logo,
       whatsapp: updatedStore.whatsapp || '',
@@ -278,7 +278,7 @@ export async function PUT(
     }
 
     const updatedStoreResult = await pool.query(
-      'UPDATE stores SET name = $1, slug = $2, description = $3, active = $4, updated_at = NOW() WHERE id = $5 RETURNING *',
+      'UPDATE stores SET name = $1, slug = $2, description = $3, isactive = $4, updated_at = NOW() WHERE id = $5 RETURNING *',
       [name, newSlug, description, isactive, id]
     )
     
@@ -286,7 +286,7 @@ export async function PUT(
 
     return NextResponse.json({
       ...updatedStore,
-      isactive: updatedStore.active,
+      isactive: updatedStore.isactive,
       coverImage: updatedStore.coverimage,
       profileImage: updatedStore.logo,
       whatsapp: '', // Valor padrão

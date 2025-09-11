@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
     }
 
-    const analytics = await getGlobalAnalytics(session.user.id)
+    const analytics = await getGlobalAnalytics([session.user.id])
     
     return NextResponse.json(analytics)
   } catch (error) {

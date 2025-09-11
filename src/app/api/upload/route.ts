@@ -126,7 +126,7 @@ export async function POST(request: NextRequest) {
       }
 
       // Retornar URL pública através da API de imagens
-      const publicUrl = `/api/uploads/${type}/${filename}`
+      const publicUrl = `/uploads/${type}/${filename}`
       console.log('🎉 Upload concluído com sucesso:', publicUrl)
 
       return NextResponse.json({

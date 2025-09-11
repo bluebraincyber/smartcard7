@@ -312,7 +312,7 @@ export default function ProductPage() {
             value={specialInstructions}
             onChange={(e) => setSpecialInstructions(e.target.value)}
             placeholder="Ex: Sem cebola, ponto da carne bem passado..."
-            className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            className="w-full p-3 rounded-lg resize-none bg-gray-100 shadow-inner shadow-lg focus:outline-none"
             rows={3}
             maxLength={200}
           />

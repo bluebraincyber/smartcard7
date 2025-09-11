@@ -164,7 +164,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
   // Handler para o AdminProductCard - pausar/retomar
   const handleTogglePause = async (itemId: string, isPaused: boolean) => {
     try {
-      console.log('🔄 Alterando disponibilidade do item:', itemId, 'para pausado:', isPaused)
+      console.log('🔄 Alterando disponibilidade do item:', itemId, 'para Indisponível:', isPaused)
       
       const response = await fetch(`/api/items/${itemId}`, {
         method: 'PATCH',
@@ -231,7 +231,9 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         name: `${item.name} (Cópia)`,
         description: item.description,
         price: item.price,
-        image: item.image
+        image: item.image,
+        isactive: item.isactive,
+        isarchived: item.isarchived
       }
 
       const response = await fetch(`/api/stores/${store.id}/categories/${category.id}/items`, {
@@ -245,9 +247,13 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
       if (response.ok) {
         console.log('✅ Item duplicado com sucesso')
         fetchStore() // Recarregar dados
+      } else {
+        console.error('❌ Erro ao duplicar:', response.status)
+        const errorText = await response.text()
+        console.error('❌ Detalhes do erro:', errorText)
       }
     } catch (error) {
-      console.error('Erro ao duplicar item:', error)
+      console.error('💥 Erro ao duplicar item:', error)
     }
   }
 

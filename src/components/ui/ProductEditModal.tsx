@@ -4,6 +4,7 @@ import { Fragment, useState, useEffect } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import ImageUpload from '@/components/ImageUpload'
+import { Switch } from '@/components/ui/Switch'
 
 interface Item {
   id: string
@@ -69,6 +70,10 @@ export default function ProductEditModal({
     setFormData(prev => ({ ...prev, image: imageUrl }))
   }
 
+  const handleRemoveImage = () => {
+    setFormData(prev => ({ ...prev, image: '' }))
+  }
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-50" onClose={onClose}>
@@ -110,92 +115,95 @@ export default function ProductEditModal({
                   </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                  {/* Nome do Produto */}
-                  <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                      Nome do Produto
-                    </label>
-                    <input
-                      type="text"
-                      id="name"
-                      required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    />
-                  </div>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
+                    {/* Coluna da Imagem */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700">
+                        Imagem do Produto
+                      </label>
+                      <ImageUpload
+                        onUpload={handleImageUpload}
+                        onRemove={handleRemoveImage}
+                        currentImage={formData.image}
+                        type="item"
+                        storeid={product?.id || "1"}
+                        placeholder="Clique para adicionar uma imagem"
+                      />
+                    </div>
 
-                  {/* Descrição */}
-                  <div>
-                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                      Descrição
-                    </label>
-                    <textarea
-                      id="description"
-                      rows={3}
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      value={formData.description}
-                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    />
-                  </div>
-
-                  {/* Preço */}
-                  <div>
-                    <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                      Preço (R$)
-                    </label>
-                    <input
-                      type="number"
-                      id="price"
-                      step="0.01"
-                      min="0"
-                      required
-                      className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                      value={formData.price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
-                    />
-                  </div>
-
-                  {/* Upload de Imagem */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Imagem do Produto
-                    </label>
-                    <ImageUpload
-                      onUpload={handleImageUpload}
-                      currentImage={formData.image}
-                      type="item"
-                      storeid={product?.id || "1"}
-                      placeholder="Clique para adicionar uma imagem"
-                    />
+                    {/* Coluna dos Campos */}
+                    <div className="flex flex-col justify-between gap-4">
+                      {/* Nome do Produto */}
+                      <div className="mt-2">
+                        <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                          Nome do Produto
+                        </label>
+                        <input
+                          type="text"
+                          id="name"
+                          name="name"
+                          autoComplete="off"
+                          required
+                          className="mt-1 block w-full rounded-md bg-gray-100 shadow-inner shadow-[inset_0_2px_4px_0_rgb(0,0,0,0.1),inset_0_4px_8px_0_rgb(0,0,0,0.1)] focus:outline-none sm:text-sm text-gray-900 px-4 py-2"
+                          value={formData.name}
+                          onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                        />
+                      </div>
+                      {/* Descrição */}
+                      <div className="flex-grow">
+                        <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                          Descrição
+                        </label>
+                        <textarea
+                          id="description"
+                          name="description"
+                          rows={4}
+                          className="mt-1 block w-full rounded-md bg-gray-100 shadow-inner shadow-[inset_0_2px_4px_0_rgb(0,0,0,0.1),inset_0_4px_8px_0_rgb(0,0,0,0.1)] focus:outline-none sm:text-sm text-gray-900 px-4 py-2"
+                          value={formData.description}
+                          onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                        />
+                      </div>
+                      {/* Preço */}
+                      <div>
+                        <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                          Preço (R$)
+                        </label>
+                        <input
+                          type="number"
+                          id="price"
+                          name="price"
+                          min="0"
+                          required
+                          className="mt-1 block w-full rounded-md bg-gray-100 shadow-inner shadow-[inset_0_2px_4px_0_rgb(0,0,0,0.1),inset_0_4px_8px_0_rgb(0,0,0,0.1)] focus:outline-none sm:text-sm text-gray-900 px-4 py-2"
+                          value={formData.price}
+                          onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                        />
+                      </div>
+                    </div>
                   </div>
 
                   {/* Status */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <div className="flex items-center">
-                      <input
+                  <div className="flex flex-wrap justify-start gap-x-6 gap-y-2">
+                    <div className="flex items-center space-x-2">
+                      <Switch
                         id="isactive"
-                        type="checkbox"
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
                         checked={formData.isactive}
-                        onChange={(e) => setFormData(prev => ({ ...prev, isactive: e.target.checked }))}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isactive: checked }))}
                       />
-                      <label htmlFor="isactive" className="ml-2 block text-sm text-gray-900">
-                        Produto Ativo
+                      <label htmlFor="isactive" className="text-sm text-gray-900 w-[150px] flex-shrink-0">
+                        {formData.isactive ? 'Produto Ativo' : 'Produto Desativado'}
                       </label>
                     </div>
 
-                    <div className="flex items-center">
-                      <input
+                    <div className="flex items-center space-x-2">
+                      <Switch
                         id="isArchived"
-                        type="checkbox"
-                        className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
-                        checked={formData.isarchived}
-                        onChange={(e) => setFormData(prev => ({ ...prev, isarchived: e.target.checked }))}
+                        checked={!formData.isarchived}
+                        onCheckedChange={(checked) => setFormData(prev => ({ ...prev, isarchived: !checked }))}
                       />
-                      <label htmlFor="isArchived" className="ml-2 block text-sm text-gray-900">
-                        Indisponível
+                      <label htmlFor="isArchived" className="text-sm text-gray-900 w-[150px] flex-shrink-0">
+                        {formData.isarchived ? 'Produto Indisponível' : 'Produto Disponível'}
                       </label>
                     </div>
                   </div>

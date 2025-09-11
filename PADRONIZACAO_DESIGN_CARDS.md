@@ -59,10 +59,10 @@ Aplicação **consistente** do novo design de cards com switch em **toda a aplic
 - **Comportamento**: Atualiza badge e opacity do card
 - **API**: `PATCH /api/items/{id}` com `{ isactive: boolean }`
 
-### **2. Controle de Pausa (Disponível/Pausado)**
+### **2. Controle de Pausa (Disponível/Indisponível)**
 - **Função**: Pausa temporária sem desativar
 - **Visual**: Ícone play/pause + badge amarelo
-- **Comportamento**: Overlay na imagem quando pausado
+- **Comportamento**: Overlay na imagem quando Indisponível
 - **API**: `PATCH /api/items/{id}` com `{ isarchived: boolean }`
 
 ### **3. Ações Principais**
@@ -183,7 +183,7 @@ const handleDelete = async (itemId: string) => {
 
 ### **2. Controle de Pausa**
 1. Clique no ícone de pause (⏸️) 
-2. **Resultado**: Overlay na imagem + badge "Pausado" amarelo
+2. **Resultado**: Overlay na imagem + badge "Indisponível" amarelo
 3. Clique no play (▶️) para retomar
 
 ### **3. Menu de Ações**

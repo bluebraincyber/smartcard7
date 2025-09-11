@@ -103,6 +103,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
               alt={imageAlt || name}
               size="sm"
               variant="rounded"
+              priority={true}
             />
             
             {/* Badges */}
@@ -175,6 +176,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
             size={sizes[size].image}
             variant="square"
             className="w-full"
+            priority={true}
           />
           
           {/* Overlay com ações */}

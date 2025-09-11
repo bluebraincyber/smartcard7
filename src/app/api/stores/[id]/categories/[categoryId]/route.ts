@@ -14,7 +14,7 @@ interface CategoryUpdateData {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string; categoryId: string } }
+  { params }: { params: Promise<{ id: string; categoryId: string }> }
 ) {
   try {
     const session = await auth() as Session | null
@@ -22,7 +22,7 @@ export async function GET(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const resolvedParams = params
+    const resolvedParams = await params
 
     // Verificar se a loja pertence ao usuário
     const storeResult = await pool.query(
@@ -40,7 +40,7 @@ export async function GET(
         c.*,
         COUNT(i.id) as items_count
       FROM categories c
-      LEFT JOIN items i ON c.id = i."categoryId"
+      LEFT JOIN items i ON c.id = i.categoryid
       WHERE c.id = $1 AND c.storeid = $2
       GROUP BY c.id`,
       [resolvedParams.categoryId, resolvedParams.id]
@@ -66,7 +66,7 @@ export async function GET(
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string; categoryId: string } }
+  { params }: { params: Promise<{ id: string; categoryId: string }> }
 ) {
   try {
     const session = await auth() as Session | null
@@ -74,7 +74,7 @@ export async function PATCH(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const resolvedParams = params
+    const resolvedParams = await params
 
     // Verificar se a loja pertence ao usuário
     const storeResult = await pool.query(
@@ -151,7 +151,7 @@ export async function PATCH(
     
     // Buscar contagem de itens
     const existingItemsCountResult = await pool.query(
-      'SELECT COUNT(*) as count FROM items WHERE "categoryId" = $1',
+      'SELECT COUNT(*) as count FROM items WHERE categoryid = $1',
       [resolvedParams.categoryId]
     )
     
@@ -171,7 +171,7 @@ export async function PATCH(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string; categoryId: string } }
+  { params }: { params: Promise<{ id: string; categoryId: string }> }
 ) {
   try {
     const session = await auth() as Session | null
@@ -179,7 +179,7 @@ export async function DELETE(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const resolvedParams = params
+    const resolvedParams = await params
 
     // Verificar se a loja pertence ao usuário
     const storeResult = await pool.query(
@@ -197,7 +197,7 @@ export async function DELETE(
         c.id,
         COUNT(i.id) as items_count
       FROM categories c
-      LEFT JOIN items i ON c.id = i."categoryId"
+      LEFT JOIN items i ON c.id = i.categoryid
       WHERE c.id = $1 AND c.storeid = $2
       GROUP BY c.id`,
       [resolvedParams.categoryId, resolvedParams.id]
@@ -212,7 +212,7 @@ export async function DELETE(
     // If there are items, delete them first
     if (itemsCount > 0) {
       await pool.query(
-        'DELETE FROM items WHERE "categoryId" = $1',
+        'DELETE FROM items WHERE categoryid = $1',
         [resolvedParams.categoryId]
       )
     }

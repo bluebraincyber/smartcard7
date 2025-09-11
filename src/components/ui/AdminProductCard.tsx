@@ -88,7 +88,7 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
               />
             </div>
 
-            {/* Overlay de produto pausado */}
+            {/* Overlay de produto Indisponível */}
             {isPaused && (
               <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
                 <div className="bg-white/90 backdrop-blur-sm rounded-full p-2">
@@ -148,7 +148,7 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
                   : 'bg-blue-100 text-blue-800'
               )}
             >
-              {isPaused ? 'Pausado' : 'Disponível'}
+              {isPaused ? 'Indisponível' : 'Disponível'}
             </span>
           </div>
 

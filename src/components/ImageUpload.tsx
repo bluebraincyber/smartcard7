@@ -146,23 +146,23 @@ export default function ImageUpload({
       
       {currentImage ? (
         <div className="relative group">
-          <div className="relative w-full h-48 rounded-lg overflow-hidden border-2 border-gray-200">
+          <div className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-gray-200">
             <Image
-              src={currentImage}
-              alt="Imagem carregada"
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              priority // Preview principal, acima da dobra
+              src={currentImage || '/images/placeholder.png'}
+              alt="Current product image"
+              fill={true}
+              className="object-cover rounded-md"
+              priority={true}
             />
           </div>
           
           {/* Overlay com botões */}
-          <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center space-x-2">
+          <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 space-x-2">
             <button
               onClick={handleClick}
               className="bg-white text-gray-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-50 flex items-center"
               disabled={uploading}
+              type="button"
             >
               <Upload className="h-4 w-4 mr-1" />
               Trocar
@@ -171,6 +171,7 @@ export default function ImageUpload({
               <button
                 onClick={handleRemove}
                 className="bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700 flex items-center"
+                type="button"
               >
                 <X className="h-4 w-4 mr-1" />
                 Remover
@@ -185,10 +186,10 @@ export default function ImageUpload({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={`
-            w-full h-48 border-2 border-dashed rounded-lg cursor-pointer transition-colors
+            w-full aspect-square border-2 border-dashed rounded-lg cursor-pointer transition-colors
             flex flex-col items-center justify-center space-y-2
-            ${dragOver 
-              ? 'border-blue-500 bg-blue-50' 
+            ${dragOver
+              ? 'border-blue-500 bg-blue-50'
               : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
             }
             ${uploading ? 'pointer-events-none opacity-50' : ''}

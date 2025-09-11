@@ -40,7 +40,7 @@ Novos ícones adicionados no estilo Material Design:
 |-------|-----|-----------|
 | `EditIcon` | Editar produto | Ícone de edição elegante |
 | `PauseIcon` | Pausar produto | Pausar temporariamente |
-| `PlayIcon` | Retomar produto | Retomar produto pausado |
+| `PlayIcon` | Retomar produto | Retomar produto Indisponível |
 | `CopyIcon` | Duplicar produto | Criar cópia do item |
 | `TrashIcon` | Excluir produto | Remover item |
 | `MoreIcon` | Menu de ações | Ações secundárias |
@@ -92,11 +92,11 @@ interface AdminProductCardProps {
 - **UX**: Permite controle rápido sem abrir modais
 - **Estado**: Reflete imediatamente no badge "Ativo/Inativo"
 
-### 2. **Controle de Pausa (Disponível/Pausado)**
+### 2. **Controle de Pausa (Disponível/Indisponível)**
 - **Função**: Pausa temporária sem desativar
-- **Visual**: Ícone de play/pause + badge amarelo quando pausado
+- **Visual**: Ícone de play/pause + badge amarelo quando Indisponível
 - **Caso de uso**: Produto ativo mas temporariamente sem estoque
-- **Overlay**: Indicação visual na imagem quando pausado
+- **Overlay**: Indicação visual na imagem quando Indisponível
 
 ### 3. **Ações Principais (Visíveis)**
 - **Editar** (✏️): Abre formulário de edição
@@ -108,7 +108,7 @@ interface AdminProductCardProps {
 
 ### 5. **Estados Visuais**
 - **Produto Inativo**: Card com opacity reduzida
-- **Produto Pausado**: Overlay na imagem + badge amarelo
+- **Produto Indisponível**: Overlay na imagem + badge amarelo
 - **Hover Effects**: Elevação sutil e sombra
 - **Badges**: Status coloridos e informativos
 
@@ -158,7 +158,7 @@ const handleDelete = async (itemId: string) => {
 |--------|--------|-------|------|
 | **Ativo** | `bg-green-600` | `bg-green-100 text-green-800` | `opacity-100` |
 | **Inativo** | `bg-gray-200` | `bg-gray-100 text-gray-800` | `opacity-60` |
-| **Pausado** | - | `bg-yellow-100 text-yellow-800` | Overlay |
+| **Indisponível** | - | `bg-yellow-100 text-yellow-800` | Overlay |
 | **Disponível** | - | `bg-blue-100 text-blue-800` | Normal |
 
 ### Responsividade
@@ -249,9 +249,9 @@ import { AdminProductCard } from '@/components/ui/AdminProductCard';
 
 2. **Pause/Resume**
    - ✅ Pausar produto disponível
-   - ✅ Retomar produto pausado
-   - ✅ Overlay visual quando pausado
-   - ✅ Badge muda para "Pausado"
+   - ✅ Retomar produto Indisponível
+   - ✅ Overlay visual quando Indisponível
+   - ✅ Badge muda para "Indisponível"
 
 3. **Ações do Menu**
    - ✅ Menu abre/fecha corretamente
@@ -282,7 +282,7 @@ import { AdminProductCard } from '@/components/ui/AdminProductCard';
    - Salvar ordem no banco
 
 2. **Filtros e Busca**
-   - Filtrar por status (ativo/inativo/pausado)
+   - Filtrar por status (ativo/inativo/Indisponível)
    - Busca por nome/descrição
    - Ordenação por preço/nome/data
 
