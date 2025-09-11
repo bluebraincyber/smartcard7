@@ -2,7 +2,7 @@ BEGIN;
 
 -- troque o hash por um bcrypt de verdade do seu ambiente
 INSERT INTO users (name, email, password_hash)
-VALUES ('Admin', 'admin@smartcard.local', '$2a$10$N1k1w6k3bY/EXEMPLOHASHxxxxxx')
+VALUES ('Admin User', 'admin@example.com', '$2a$10$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36vrQ8O5pO1MZ4dQfY2Kq6a')
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO stores (userid, name, slug, description, active)

@@ -32,7 +32,7 @@ Durante a revisão dos arquivos, as seguintes observações foram feitas:
 ### 2.3. `src/lib/db.ts`
 
 - **Status:** OK. A conexão com o banco de dados via `pg` e o uso de variáveis de ambiente estão corretos.
-- **Melhorias Potenciais:** A função `sql` personalizada é útil, mas para queries mais complexas ou para evitar SQL injection em cenários mais dinâmicos, um ORM (Object-Relational Mapper) como Prisma ou Drizzle ORM pode ser considerado. No entanto, para o escopo atual, a abordagem é aceitável.
+- **Melhorias Potenciais:** A função `sql` personalizada é útil, mas para queries mais complexas ou para evitar SQL injection em cenários mais dinâmicos, Drizzle ORM pode ser considerado. No entanto, para o escopo atual, a abordagem é aceitável.
 
 ### 2.4. `src/lib/authOptions.ts`
 

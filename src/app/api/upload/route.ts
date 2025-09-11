@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from "next-auth/next";
+// Remove duplicate import since authOptions is already imported from '@/lib/authOptions'
 import { authOptions } from '@/lib/authOptions'
 import type { Session } from 'next-auth'
 import { writeFile, mkdir } from 'fs/promises'
@@ -139,7 +140,7 @@ export async function POST(request: NextRequest) {
       console.error('❌ Erro ao processar arquivo:', fileError)
       
       // Fallback: retornar placeholder image válida
-      const placeholderUrl = 'https://via.placeholder.com/400x300/f3f4f6/9ca3af?text=Imagem+do+Produto'
+      const placeholderUrl = '/images/placeholder.png'
       console.log('🔄 Usando placeholder:', placeholderUrl)
       
       return NextResponse.json({
@@ -155,7 +156,7 @@ export async function POST(request: NextRequest) {
     console.error('❌ Erro geral no upload:', error)
     
     // Fallback final
-    const placeholderUrl = 'https://via.placeholder.com/400x300/f3f4f6/9ca3af?text=Erro+Upload'
+    const placeholderUrl = '/images/error-placeholder.png'
     return NextResponse.json({
       url: placeholderUrl,
       filename: 'error-placeholder.png',

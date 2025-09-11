@@ -1,13 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import pool from '@/lib/db'
 import { trackEvent } from '@/lib/analytics'
+import logger from '@/lib/logger'
 
 export const runtime = 'nodejs'
 
 export async function POST(request: NextRequest) {
+  const requestId = request.headers.get('x-request-id') || 'N/A';
   try {
     const body = await request.json()
-    console.log('📈 Analytics request body:', body)
+    logger.debug('Analytics request body:', { body, requestId })
     
     const { storeid, storeId, event, data } = body
     
@@ -15,7 +17,7 @@ export async function POST(request: NextRequest) {
     const finalStoreId = storeid || storeId
     
     if (!finalStoreId || !event) {
-      console.log('❌ Analytics: Parâmetros obrigatórios ausentes:', { finalStoreId, event })
+      logger.warn('Parâmetros obrigatórios ausentes para analytics:', { finalStoreId, event, requestId })
       return NextResponse.json(
         { error: 'Store ID and event are required' },
         { status: 400 }
@@ -29,7 +31,7 @@ export async function POST(request: NextRequest) {
     )
 
     if (storeResult.rows.length === 0) {
-      console.log('❌ Analytics: Loja não encontrada:', finalStoreId)
+      logger.warn('Loja não encontrada para analytics:', { storeId: finalStoreId, requestId })
       return NextResponse.json(
         { error: 'Store not found' },
         { status: 404 }
@@ -45,13 +47,14 @@ export async function POST(request: NextRequest) {
       event,
       data,
       userAgent,
-      ipAddress
+      ipAddress,
+      requestId
     })
 
-    console.log('✅ Analytics: Evento registrado com sucesso')
+    logger.info('Evento de analytics registrado com sucesso.', { requestId, storeId: finalStoreId, event })
     return NextResponse.json({ success: true })
-  } catch (error) {
-    console.error('Analytics tracking error:', error)
+  } catch (error: any) {
+    logger.error('Erro no tracking de analytics:', { error: error.message, stack: error.stack, requestId })
     return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
   }
 }

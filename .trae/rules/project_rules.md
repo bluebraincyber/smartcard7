@@ -3,7 +3,7 @@
 ## Contexto do Projeto
 - Nome: <preencher>
 - Domínio: <preencher>
-- Banco/ORM: <Postgres + Prisma/Drizzle>
+- Banco/ORM: <Postgres /Drizzle>
 - Auth: <NextAuth/Clerk>
 - Deploy: <Vercel/Outro>
 - Integrações: <ex.: Stripe, Notion, WhatsApp, etc.>
@@ -57,11 +57,6 @@
 - Reproduzir local com seed.
 - Ver logs/Sentry → hipótese → fix minimal-intrusive.
 - Adicionar teste que falhava.
-
-### 4) **Migração**
-- Planejar por lotes com feature flags e rollback.
-- Scripts de migração (Prisma `migrate`).
-- Testes de regressão.
 
 ### 5) **Hardening**
 - Passar checklist de segurança e headers.

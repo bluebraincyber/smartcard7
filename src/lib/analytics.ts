@@ -1,4 +1,5 @@
 import pool from '@/lib/db';
+import logger from '@/lib/logger';
 
 export interface AnalyticsEvent {
   storeid: string;
@@ -6,6 +7,7 @@ export interface AnalyticsEvent {
   data?: Record<string, unknown>;
   userAgent?: string;
   ipAddress?: string;
+  requestId?: string; // Added for correlation
 }
 
 interface WhatsappClickData {
@@ -21,11 +23,13 @@ export async function trackEvent({
   event,
   data,
   userAgent,
-  ipAddress
+  ipAddress,
+  requestId // Recebe o requestId
 }: AnalyticsEvent) {
   try {
     // Verificar se analytics está habilitado
     if (process.env.ANALYTICS_ENABLED !== 'true') {
+      logger.debug('Analytics desabilitado, ignorando evento.', { storeid, event, requestId });
       return;
     }
 
@@ -44,16 +48,20 @@ export async function trackEvent({
       )`,
       [storeid, event, JSON.stringify(data || {}), userAgent || null, ipAddress || null]
     );
+    logger.info('Evento de analytics registrado com sucesso.', { storeid, event, data, requestId });
   } catch (error) {
-    console.error('Erro ao registrar evento de analytics:', error);
+    logger.error('Erro ao registrar evento de analytics:', { 
+      error: error instanceof Error ? error.message : String(error),
+      storeid, 
+      event, 
+      requestId 
+    });
   }
 }
 
-export async function getStoreAnalytics(storeid: string, days: number = 30) {
-  const startDate = new Date();
-  startDate.setDate(startDate.getDate() - days);
-
+export async function getAnalyticsSummary(storeid: string) {
   try {
+    logger.info('Buscando resumo de analytics para loja.', { storeid });
     // Total de visitas
     const totalsResult = await pool.query(
       `SELECT
@@ -62,7 +70,7 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
       FROM analytics 
       WHERE "storeid" = $1 
         AND timestamp >= $2`,
-      [storeid, startDate.toISOString()]
+      [storeid, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()]
     );
     const totalVisits = parseInt(totalsResult.rows[0].total_visits);
     const totalWhatsAppClicks = parseInt(totalsResult.rows[0].total_whatsapp_clicks);
@@ -77,7 +85,7 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
       WHERE "storeid" = $1 
         AND event = 'whatsapp_click' 
         AND timestamp >= $2`,
-      [storeid, startDate.toISOString()]
+      [storeid, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()]
     );
     const whatsappClicks = whatsappClicksResult.rows;
 
@@ -97,7 +105,7 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
       WHERE "storeid" = $1 
         AND event = 'item_view' 
         AND timestamp >= $2`,
-      [storeid, startDate.toISOString()]
+      [storeid, new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString()]
     );
     const itemViews = itemViewsResult.rows;
 
@@ -129,7 +137,7 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
         AND timestamp >= $2
       GROUP BY day
       ORDER BY day ASC`,
-      [storeid, startDate.toISOString()]
+      [storeid, new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()]
     );
 
     const dailyAggregates = dailyAggregatesResult.rows.reduce<Record<string, { visits: number; whatsappClicks: number }>>((acc, row: any) => {
@@ -153,7 +161,10 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
       dailyVisits
     };
   } catch (error) {
-    console.error('Erro ao buscar analytics:', error);
+    logger.error('Erro ao buscar analytics:', { 
+      error: error instanceof Error ? error.message : String(error),
+      storeid 
+    });
     return {
       totalVisits: 0,
       totalWhatsAppClicks: 0,
@@ -165,15 +176,9 @@ export async function getStoreAnalytics(storeid: string, days: number = 30) {
   }
 }
 
-export async function getGlobalAnalytics(userid: string) {
+export async function getGlobalAnalyticsSummary(storeids: string[]) {
   try {
-    // Buscar todas as lojas do usuário
-    const storesResult = await pool.query(
-      `SELECT id FROM stores WHERE "userid" = $1`,
-      [userid]
-    );
-    const stores = storesResult.rows;
-    const storeids = stores.map(store => store.id);
+    logger.info('Buscando resumo de analytics global.', { storeids });
 
     if (storeids.length === 0) {
       return {
@@ -224,13 +229,16 @@ export async function getGlobalAnalytics(userid: string) {
     const activestoreids = activestoreidsResult.rows;
 
     return {
-      totalStores: stores.length,
+      totalStores: storeids.length,
       totalVisits,
       totalClicks,
       activeStores: activestoreids.length
     };
   } catch (error) {
-    console.error('Erro ao buscar analytics globais:', error);
+    logger.error('Erro ao buscar analytics globais:', { 
+      error: error instanceof Error ? error.message : String(error),
+      storeids 
+    });
     return {
       totalStores: 0,
       totalVisits: 0,

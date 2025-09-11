@@ -1,21 +1,22 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { logRequest } from './lib/logger';
 
-export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl
-  const hostname = request.headers.get('host') || ''
-  
-  // Log para debug
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Middleware:', { pathname, hostname })
-  }
-  
-  // Permitir todas as rotas por enquanto (debug)
-  return NextResponse.next()
+export function middleware(request: NextRequest) {
+  const response = NextResponse.next();
+  logRequest(request, response);
+  return response;
 }
 
 export const config = {
   matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
     '/((?!api|_next/static|_next/image|favicon.ico).*)',
-  ]
-}
+  ],
+};
