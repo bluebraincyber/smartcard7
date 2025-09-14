@@ -1,7 +1,8 @@
-import type { AuthOptions } from 'next-auth';
+import type { AuthOptions, Session } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compare } from 'bcryptjs';
 import pool from '@/lib/db';
+import { JWT } from 'next-auth/jwt';
 
 export const authOptions: AuthOptions = {
     providers: [
@@ -18,30 +19,22 @@ export const authOptions: AuthOptions = {
           }
 
           try {
-            console.log('Attempting to authenticate user:', credentials.email);
-            console.log('Credentials received:', credentials);
             const { rows } = await pool.query(
               `SELECT id, email, name, password_hash 
               FROM users 
               WHERE email = $1
               LIMIT 1`, [credentials.email.toLowerCase().trim()]
             );
-            console.log('Database query result:', rows);
             
             const user = rows[0];
-            console.log('User object from DB:', user);
             if (!user) {
-              console.log('User not found for email:', credentials.email);
               return null;
             }
-            console.log('User found:', user.email);
 
             const valid = await compare(credentials.password, user.password_hash);
             if (!valid) {
-              console.log('Invalid password for user:', user.email);
               return null;
             }
-            console.log('Password valid for user:', user.email);
 
             return { 
               id: String(user.id), 
@@ -65,18 +58,29 @@ export const authOptions: AuthOptions = {
       error: '/auth/error',
     },
     callbacks: {
-      async jwt({ token, user }: { token: any, user: any }) {
+      async jwt({ token, user }: { token: JWT, user: any }) {
         if (user) {
           token.id = user.id;
         }
         return token;
       },
       
-      async session({ session, token }: { session: any, token: any }) {
-        if (session?.user) {
-          session.user.id = token.id as string;
+      async session({ session, token }: { session: Session, token: JWT }) {
+        if (session?.user && token?.id) {
+          session.user.id = token.id;
         }
         return session;
+      },
+      async redirect({ url, baseUrl }) {
+        // Allows us to redirect to the callbackUrl set in the form
+        if (url.startsWith(baseUrl)) {
+          return url;
+        }
+        // Allows relative callback URLs
+        if (url.startsWith("/")) {
+          return new URL(url, baseUrl).toString();
+        }
+        return baseUrl;
       },
     },
 };

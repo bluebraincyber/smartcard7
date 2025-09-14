@@ -18,16 +18,20 @@ export default function HomePage() {
             </Link>
             <div className="flex items-center space-x-4">
               {status === 'loading' ? (
-                <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+                <div className="flex items-center space-x-4">
+                  <div className="animate-pulse bg-gray-200 h-8 w-16 rounded"></div>
+                  <div className="animate-pulse bg-gray-200 h-8 w-20 rounded"></div>
+                </div>
               ) : session ? (
                 <div className="flex items-center space-x-4">
-                  <span className="text-gray-700">Olá, {session.user?.name || session.user?.email}</span>
+                  <span className="text-gray-700 hidden sm:inline">Olá, {session.user?.name || session.user?.email}</span>
                   <Link
                     href="/dashboard"
                     className="flex items-center text-blue-600 hover:text-blue-700 px-3 py-2 rounded-md text-sm font-medium"
                   >
                     <User className="h-4 w-4 mr-1" />
-                    Meu Painel
+                    <span className="hidden sm:inline">Meu Painel</span>
+                    <span className="sm:hidden">Painel</span>
                   </Link>
                   <button
                     onClick={() => signOut({ callbackUrl: '/' })}
@@ -40,17 +44,30 @@ export default function HomePage() {
                 <>
                   <Link
                     href="/auth/login"
-                    className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium"
+                    className="text-gray-600 hover:text-gray-900 px-3 py-2 rounded-md text-sm font-medium transition-colors"
                   >
                     Entrar
                   </Link>
                   <Link
                     href="/auth/register"
-                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors shadow-sm"
                   >
                     Criar Conta
                   </Link>
                 </>
+              )}
+              
+              {/* Fallback - sempre mostrar opções de login se algo der errado */}
+              {status !== 'loading' && !session && (
+                <div className="flex items-center space-x-2 ml-2">
+                  <span className="text-xs text-gray-400">|</span>
+                  <Link
+                    href="/auth/login"
+                    className="text-xs text-blue-600 hover:text-blue-700"
+                  >
+                    Login
+                  </Link>
+                </div>
               )}
             </div>
           </div>
@@ -71,19 +88,29 @@ export default function HomePage() {
             <div className="rounded-md shadow">
               <Link
                 href="/auth/register"
-                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10"
+                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 md:py-4 md:text-lg md:px-10 transition-colors"
               >
                 Começar Agora
               </Link>
             </div>
             <div className="mt-3 rounded-md shadow sm:mt-0 sm:ml-3">
               <Link
-                href="#demo"
-                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10"
+                href="/auth/login"
+                className="w-full flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-blue-600 bg-white hover:bg-gray-50 md:py-4 md:text-lg md:px-10 border-2 border-blue-600 transition-colors"
               >
-                Ver Demo
+                Já tenho conta
               </Link>
             </div>
+          </div>
+          
+          {/* Link de login adicional */}
+          <div className="mt-4 text-center">
+            <Link
+              href="/auth/login"
+              className="text-sm text-blue-600 hover:text-blue-700 underline"
+            >
+              Acessar minha conta existente
+            </Link>
           </div>
         </div>
 
@@ -186,12 +213,20 @@ export default function HomePage() {
           <p className="text-lg text-gray-500 mb-8">
             Crie seu cartão digital em menos de 5 minutos
           </p>
-          <Link
-            href="/auth/register"
-            className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
-          >
-            Criar Meu Cartão Digital
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+            <Link
+              href="/auth/register"
+              className="inline-flex items-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+            >
+              Criar Meu Cartão Digital
+            </Link>
+            <Link
+              href="/auth/login"
+              className="inline-flex items-center px-8 py-3 border-2 border-blue-600 text-base font-medium rounded-md text-blue-600 bg-white hover:bg-blue-50 transition-colors"
+            >
+              Fazer Login
+            </Link>
+          </div>
         </div>
       </main>
 

@@ -49,11 +49,7 @@ export default function DashboardClient({ session }: DashboardClientProps) {
         const userStores = data.stores || []
         setStores(userStores)
         
-        // Redirecionamento automático se o usuário tiver apenas uma loja
-        if (userStores.length === 1) {
-          router.push(`/dashboard/store/${userStores[0].id}`)
-          return
-        }
+        // Não redirecionar automaticamente para evitar loops
       }
     } catch (error) {
       console.error('Erro ao buscar lojas:', error)

@@ -2,7 +2,7 @@
 
 import { useSession, signOut } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { 
   LayoutDashboard, 
@@ -13,7 +13,6 @@ import {
   Menu,
   X
 } from 'lucide-react'
-import { useState } from 'react'
 
 export default function DashboardLayout({
   children,
@@ -25,20 +24,32 @@ export default function DashboardLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   useEffect(() => {
-    if (status === 'loading') return // Still loading
-    if (!session) router.push('/auth/login')
-  }, [session, status, router])
+    if (status === 'unauthenticated') {
+      console.log('Dashboard: Redirecionando para login')
+      router.replace('/auth/login')
+    }
+  }, [status, router])
 
   if (status === 'loading') {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Verificando autenticação...</p>
+        </div>
       </div>
     )
   }
 
   if (!session) {
-    return null
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Redirecionando para login...</p>
+        </div>
+      </div>
+    )
   }
 
   const navigation = [

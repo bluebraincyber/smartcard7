@@ -318,47 +318,49 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
         )}
         
         {/* Store Info Card */}
-        <div className="bg-white mx-3 sm:mx-4 -mt-6 sm:-mt-8 relative z-10 rounded-xl shadow-lg border border-gray-100">
-          <div className="p-4 sm:p-6">
-            <div className="flex items-start space-x-3 sm:space-x-4">
-              {/* Profile Image */}
-              <div className="flex-shrink-0">
-                {store.profileImage ? (
-                  <Image 
-                    src={store.profileImage} 
-                    alt={`Logo da ${store.name}`}
-                    width={64}
-                    height={64}
-                    className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover border-2 border-white shadow-md"
-                    priority // Logo geralmente acima da dobra
-                  />
-                ) : (
-                  <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-white shadow-md">
-                    <svg className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h8v2H6V8zm0 4h12v2H6v-2z"/>
-                    </svg>
-                  </div>
-                )}
-              </div>
-              
-              {/* Store Details */}
-              <div className="flex-1 min-w-0">
-                <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{store.name}</h1>
-                {store.description && (
-                  <p className="text-gray-600 text-sm mb-2 sm:mb-3 leading-relaxed">{store.description}</p>
-                )}
-                
-                {/* Store Info */}
-                <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
-                  {store.address && (
-                    <div className="flex items-center">
-                      <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-gray-400 flex-shrink-0" />
-                      <span className="truncate">{store.address}</span>
+        <div className="max-w-4xl mx-auto px-3 sm:px-4">
+          <div className="bg-white -mt-6 sm:-mt-8 relative z-10 rounded-xl shadow-lg border border-gray-100">
+            <div className="p-4 sm:p-6">
+              <div className="flex items-start space-x-3 sm:space-x-4">
+                {/* Profile Image */}
+                <div className="flex-shrink-0">
+                  {store.profileImage ? (
+                    <Image 
+                      src={store.profileImage} 
+                      alt={`Logo da ${store.name}`}
+                      width={64}
+                      height={64}
+                      className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl object-cover border-2 border-white shadow-md"
+                      priority // Logo geralmente acima da dobra
+                    />
+                  ) : (
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gray-100 rounded-xl flex items-center justify-center border-2 border-white shadow-md">
+                      <svg className="h-6 w-6 sm:h-8 sm:w-8 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h8v2H6V8zm0 4h12v2H6v-2z"/>
+                      </svg>
                     </div>
                   )}
-                  <div className="flex items-center">
-                    <Phone className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-gray-400 flex-shrink-0" />
-                    <span>{store.whatsapp}</span>
+                </div>
+                
+                {/* Store Details */}
+                <div className="flex-1 min-w-0">
+                  <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1">{store.name}</h1>
+                  {store.description && (
+                    <p className="text-gray-600 text-sm mb-2 sm:mb-3 leading-relaxed">{store.description}</p>
+                  )}
+                  
+                  {/* Store Info */}
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-2 sm:gap-4 text-xs sm:text-sm text-gray-600">
+                    {store.address && (
+                      <div className="flex items-center">
+                        <MapPin className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-gray-400 flex-shrink-0" />
+                        <span className="truncate">{store.address}</span>
+                      </div>
+                    )}
+                    <div className="flex items-center">
+                      <Phone className="h-3 w-3 sm:h-4 sm:w-4 mr-1 text-gray-400 flex-shrink-0" />
+                      <span>{store.whatsapp}</span>
+                    </div>
                   </div>
                 </div>
               </div>

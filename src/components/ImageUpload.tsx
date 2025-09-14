@@ -12,6 +12,7 @@ interface ImageUploadProps {
   storeid: string
   className?: string
   placeholder?: string
+  variant?: 'large' | 'medium' | 'small' | 'compact'
 }
 
 export default function ImageUpload({
@@ -21,11 +22,55 @@ export default function ImageUpload({
   type,
   storeid,
   className = '',
-  placeholder = 'Clique para adicionar uma imagem'
+  placeholder = 'Clique para adicionar uma imagem',
+  variant = 'medium'
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  // Definir classes baseadas na variante
+  const getVariantClasses = () => {
+    switch (variant) {
+      case 'large':
+        return {
+          container: 'w-full aspect-square max-w-sm mx-auto',
+          icon: 'h-12 w-12',
+          text: 'text-base',
+          subtext: 'text-sm'
+        }
+      case 'medium':
+        return {
+          container: 'w-full aspect-square max-w-xs mx-auto',
+          icon: 'h-8 w-8',
+          text: 'text-sm',
+          subtext: 'text-xs'
+        }
+      case 'small':
+        return {
+          container: 'w-full aspect-square max-w-[120px] mx-auto',
+          icon: 'h-6 w-6',
+          text: 'text-xs',
+          subtext: 'text-xs'
+        }
+      case 'compact':
+        return {
+          container: 'w-full aspect-square max-w-[80px] mx-auto',
+          icon: 'h-4 w-4',
+          text: 'text-xs',
+          subtext: 'text-xs'
+        }
+      default:
+        return {
+          container: 'w-full aspect-square',
+          icon: 'h-8 w-8',
+          text: 'text-sm',
+          subtext: 'text-xs'
+        }
+    }
+  }
+
+  const variantClasses = getVariantClasses()
 
   const handleFileSelect = async (file: File) => {
     if (!file) return
@@ -146,7 +191,7 @@ export default function ImageUpload({
       
       {currentImage ? (
         <div className="relative group">
-          <div className="relative w-full aspect-square rounded-lg overflow-hidden border-2 border-gray-200">
+          <div className={`relative ${variantClasses.container} rounded-lg overflow-hidden border-2 border-gray-200`}>
             <Image
               src={currentImage || '/images/placeholder.png'}
               alt="Current product image"
@@ -156,28 +201,41 @@ export default function ImageUpload({
             />
           </div>
           
-          {/* Overlay com botões */}
-          <div className="absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 space-x-2">
+          {/* Overlay com botões - só mostra em telas maiores para variantes pequenas */}
+          <div className={`absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 space-x-1 ${
+            variant === 'compact' || variant === 'small' ? 'hidden sm:flex' : 'flex'
+          }`}>
             <button
               onClick={handleClick}
-              className="bg-white text-gray-700 px-3 py-2 rounded-md text-sm font-medium hover:bg-gray-50 flex items-center"
+              className={`bg-white text-gray-700 px-2 py-1 rounded text-xs font-medium hover:bg-gray-50 flex items-center ${
+                variant === 'compact' ? 'px-1 py-0.5' : 'px-2 py-1'
+              }`}
               disabled={uploading}
               type="button"
             >
-              <Upload className="h-4 w-4 mr-1" />
-              Trocar
+              <Upload className={`${variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
+              {variant === 'compact' ? '↻' : 'Trocar'}
             </button>
             {onRemove && (
               <button
                 onClick={handleRemove}
-                className="bg-red-600 text-white px-3 py-2 rounded-md text-sm font-medium hover:bg-red-700 flex items-center"
+                className={`bg-red-600 text-white px-2 py-1 rounded text-xs font-medium hover:bg-red-700 flex items-center ${
+                  variant === 'compact' ? 'px-1 py-0.5' : 'px-2 py-1'
+                }`}
                 type="button"
               >
-                <X className="h-4 w-4 mr-1" />
-                Remover
+                <X className={`${variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
+                {variant === 'compact' ? '×' : 'Remover'}
               </button>
             )}
           </div>
+          
+          {/* Indicador mobile para variantes pequenas */}
+          {(variant === 'compact' || variant === 'small') && (
+            <div className="absolute top-1 right-1 bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs sm:hidden">
+              <Upload className="h-2 w-2" />
+            </div>
+          )}
         </div>
       ) : (
         <div
@@ -186,8 +244,8 @@ export default function ImageUpload({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={`
-            w-full aspect-square border-2 border-dashed rounded-lg cursor-pointer transition-colors
-            flex flex-col items-center justify-center space-y-2
+            ${variantClasses.container} border-2 border-dashed rounded-lg cursor-pointer transition-colors
+            flex flex-col items-center justify-center space-y-1
             ${dragOver
               ? 'border-blue-500 bg-blue-50'
               : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
@@ -197,21 +255,25 @@ export default function ImageUpload({
         >
           {uploading ? (
             <>
-              <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
-              <p className="text-sm text-gray-600">Fazendo upload...</p>
+              <Loader2 className={`${variantClasses.icon} text-blue-500 animate-spin`} />
+              <p className={`${variantClasses.text} text-gray-600`}>Fazendo upload...</p>
             </>
           ) : (
             <>
-              <ImageIcon className="h-8 w-8 text-gray-400" />
-              <p className="text-sm text-gray-600 text-center px-4">
-                {placeholder}
+              <ImageIcon className={`${variantClasses.icon} text-gray-400`} />
+              <p className={`${variantClasses.text} text-gray-600 text-center px-2`}>
+                {variant === 'compact' ? 'Imagem' : placeholder}
               </p>
-              <p className="text-xs text-gray-500">
-                Arraste e solte ou clique para selecionar
-              </p>
-              <p className="text-xs text-gray-400">
-                JPEG, PNG ou WebP (máx. 5MB)
-              </p>
+              {variant !== 'compact' && (
+                <>
+                  <p className={`${variantClasses.subtext} text-gray-500 text-center`}>
+                    {variant === 'small' ? 'Clique aqui' : 'Arraste e solte ou clique para selecionar'}
+                  </p>
+                  <p className={`${variantClasses.subtext} text-gray-400 text-center`}>
+                    JPEG, PNG ou WebP (máx. 5MB)
+                  </p>
+                </>
+              )}
             </>
           )}
         </div>

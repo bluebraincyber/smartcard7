@@ -176,16 +176,33 @@ export async function getAnalyticsSummary(storeid: string) {
   }
 }
 
-export async function getGlobalAnalyticsSummary(storeids: string[]) {
+export async function getGlobalAnalytics(userIds: string[]) {
   try {
-    logger.info('Buscando resumo de analytics global.', { storeids });
+    console.log('Buscando resumo de analytics global.', { userIds });
 
-    if (storeids.length === 0) {
+    if (userIds.length === 0) {
       return {
         totalStores: 0,
         totalVisits: 0,
-        totalClicks: 0,
-        activeStores: 0
+        totalClicks: 0
+      };
+    }
+
+    // Primeiro, buscar todas as lojas do usuário
+    const storesResult = await pool.query(
+      'SELECT id FROM stores WHERE userid = ANY($1) AND isactive = true',
+      [userIds]
+    );
+    const storeIds = storesResult.rows.map(row => row.id);
+    const totalStores = storeIds.length;
+
+    console.log(`Encontradas ${totalStores} lojas ativas para o usuário`);
+
+    if (storeIds.length === 0) {
+      return {
+        totalStores: 0,
+        totalVisits: 0,
+        totalClicks: 0
       };
     }
 
@@ -196,54 +213,37 @@ export async function getGlobalAnalyticsSummary(storeids: string[]) {
     const totalVisitsResult = await pool.query(
       `SELECT COUNT(*) as count
       FROM analytics 
-      WHERE "storeid" = ANY($1)
+      WHERE storeid = ANY($1)
         AND event = 'visit' 
         AND timestamp >= $2`,
-      [storeids, last30Days.toISOString()]
+      [storeIds, last30Days.toISOString()]
     );
-    const totalVisits = parseInt(totalVisitsResult.rows[0].count);
+    const totalVisits = parseInt(totalVisitsResult.rows[0].count) || 0;
 
     // Total de cliques
     const totalClicksResult = await pool.query(
       `SELECT COUNT(*) as count
       FROM analytics 
-      WHERE "storeid" = ANY($1)
+      WHERE storeid = ANY($1)
         AND event = 'whatsapp_click' 
         AND timestamp >= $2`,
-      [storeids, last30Days.toISOString()]
+      [storeIds, last30Days.toISOString()]
     );
-    const totalClicks = parseInt(totalClicksResult.rows[0].count);
+    const totalClicks = parseInt(totalClicksResult.rows[0].count) || 0;
 
-    // Lojas ativas (com pelo menos 1 clique na semana)
-    const lastWeek = new Date();
-    lastWeek.setDate(lastWeek.getDate() - 7);
-
-    const activestoreidsResult = await pool.query(
-      `SELECT DISTINCT "storeid"
-      FROM analytics 
-      WHERE "storeid" = ANY($1)
-        AND event = 'whatsapp_click' 
-        AND timestamp >= $2`,
-      [storeids, lastWeek.toISOString()]
-    );
-    const activestoreids = activestoreidsResult.rows;
+    console.log(`Analytics: ${totalStores} lojas, ${totalVisits} visitas, ${totalClicks} cliques`);
 
     return {
-      totalStores: storeids.length,
+      totalStores,
       totalVisits,
-      totalClicks,
-      activeStores: activestoreids.length
+      totalClicks
     };
   } catch (error) {
-    logger.error('Erro ao buscar analytics globais:', { 
-      error: error instanceof Error ? error.message : String(error),
-      storeids 
-    });
+    console.error('Erro ao buscar analytics globais:', error);
     return {
       totalStores: 0,
       totalVisits: 0,
-      totalClicks: 0,
-      activeStores: 0
+      totalClicks: 0
     };
   }
 }

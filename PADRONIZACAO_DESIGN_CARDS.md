@@ -10,17 +10,26 @@ Aplicação **consistente** do novo design de cards com switch em **toda a aplic
 **Arquivo:** `/src/app/dashboard/store/[id]/store-page-client.tsx`
 - ✅ **ANTES**: Cards básicos sem interatividade
 - ✅ **DEPOIS**: `AdminProductCard` com switch integrado
-- ✅ **Localização**: Página principal da loja (screenshot atual)
+- ✅ **LOCALIZAÇÃO**: Página principal da loja (screenshot atual)
+- ✅ **NOVO**: Card "Novo Item" com design padronizado
 
 ### **2. Página de Itens de Categoria**
 **Arquivo:** `/src/app/dashboard/store/[id]/categories/[categoryId]/items/page.tsx`
 - ✅ **ANTES**: Lista simples de itens
 - ✅ **DEPOIS**: `AdminProductCard` com todas as funcionalidades
-- ✅ **Localização**: Ao gerenciar itens de uma categoria específica
+- ✅ **LOCALIZAÇÃO**: Ao gerenciar itens de uma categoria específica
+
+### **3. Card "Novo Item" Corrigido**
+**Arquivo:** `AddItemCard` component in `store-page-client.tsx`
+- ✅ **ANTES**: Design básico com border dashed
+- ✅ **DEPOIS**: Visual consistente com `AdminProductCard`
+- ✅ **MELHORIAS**: Mesma estrutura, hover effects, layout unificado
 
 ## 🎨 **Design Unificado**
 
 ### **Estrutura Visual Padronizada:**
+
+**AdminProductCard (Produtos Existentes):**
 ```
 ┌─────────────────────────────┐
 │ [🔘]           [Imagem]     │ ← Switch + Imagem
@@ -35,6 +44,22 @@ Aplicação **consistente** do novo design de cards com switch em **toda a aplic
 └─────────────────────────────┘
 ```
 
+**AddItemCard (Novo Item):**
+```
+┌─────────────────────────────┐
+│           [⊕ Grande]        │ ← Ícone Plus centralizado
+│        Gradiente sutil      │
+│                             │
+│ Novo Item                   │ ← Título
+│ Clique para adicionar...    │ ← Subtítulo
+│ Configure nome e preço      │ ← Placeholder preço
+│                             │
+│ [Novo Produto]              │ ← Badge azul
+│                             │
+│    [⊕ Adicionar]            │ ← Call-to-action
+└─────────────────────────────┘
+```
+
 ### **Grid Responsivo Unificado:**
 ```typescript
 // Padrão aplicado em todas as páginas
@@ -42,6 +67,9 @@ Aplicação **consistente** do novo design de cards com switch em **toda a aplic
   {items.map((item) => (
     <AdminProductCard key={item.id} {...props} />
   ))}
+  
+  {/* Card Novo Item */}
+  <AddItemCard categoryId={category.id} categoryName={category.name} />
 </div>
 ```
 

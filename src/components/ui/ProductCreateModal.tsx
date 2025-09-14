@@ -1,65 +1,79 @@
 'use client'
 
-import { Fragment, useState, useEffect } from 'react'
+import { Fragment, useState } from 'react'
 import { Dialog, Transition } from '@headlessui/react'
 import { X } from 'lucide-react'
 import ImageUpload from '@/components/ImageUpload'
 
-interface Item {
-  id: string
-  name: string
-  description?: string
-  price: number
-  image?: string
-  isactive: boolean
-  isarchived: boolean
-}
-
-interface ProductEditModalProps {
+interface ProductCreateModalProps {
   isOpen: boolean
   onClose: () => void
-  onSave: (productData: Partial<Item>) => Promise<void>
-  product: Item | null
+  onSave: (productData: {
+    name: string
+    description: string
+    price: number
+    image: string
+    isactive: boolean
+    isarchived: boolean
+    categoryId: string
+  }) => Promise<void>
+  categoryId: string
+  categoryName: string
+  storeId: string
 }
 
-export default function ProductEditModal({
+export default function ProductCreateModal({
   isOpen,
   onClose,
   onSave,
-  product
-}: ProductEditModalProps) {
+  categoryId,
+  categoryName,
+  storeId
+}: ProductCreateModalProps) {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    price: 0,
+    price: '',
     image: '',
     isactive: true,
-    isarchived: false
+    isavailable: true
   })
   const [isLoading, setIsLoading] = useState(false)
 
-  useEffect(() => {
-    if (product) {
-      setFormData({
-        name: product.name || '',
-        description: product.description || '',
-        price: product.price || 0,
-        image: product.image || '',
-        isactive: product.isactive ?? true,
-        isarchived: product.isarchived ?? false
-      })
-    }
-  }, [product])
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    if (!formData.name.trim() || !formData.price) {
+      alert('Nome e preço são obrigatórios')
+      return
+    }
+
     setIsLoading(true)
     
     try {
-      await onSave(formData)
+      await onSave({
+        name: formData.name.trim(),
+        description: formData.description.trim(),
+        price: parseFloat(formData.price.replace(',', '.')),
+        image: formData.image.trim(),
+        isactive: formData.isactive,
+        isarchived: !formData.isavailable,
+        categoryId: categoryId
+      })
+      
+      // Reset form
+      setFormData({
+        name: '',
+        description: '',
+        price: '',
+        image: '',
+        isactive: true,
+        isavailable: true
+      })
+      
       onClose()
     } catch (error) {
-      console.error('Erro ao salvar produto:', error)
+      console.error('Erro ao criar produto:', error)
     } finally {
       setIsLoading(false)
     }
@@ -69,7 +83,7 @@ export default function ProductEditModal({
     setFormData(prev => ({ ...prev, image: imageUrl }))
   }
 
-  const handleToggleChange = (field: 'isactive' | 'isarchived') => {
+  const handleToggleChange = (field: 'isactive' | 'isavailable') => {
     setFormData(prev => ({
       ...prev,
       [field]: !prev[field]
@@ -144,7 +158,7 @@ export default function ProductEditModal({
                 <div className="px-6 py-4 border-b border-gray-200">
                   <div className="flex items-center justify-between">
                     <Dialog.Title as="h3" className="text-lg font-medium text-gray-900">
-                      Editar Produto
+                      Criar Produto - {categoryName}
                     </Dialog.Title>
                     <button
                       type="button"
@@ -168,7 +182,7 @@ export default function ProductEditModal({
                             onUpload={handleImageUpload}
                             currentImage={formData.image}
                             type="item"
-                            storeid={product?.id || '1'}
+                            storeid={storeId}
                             placeholder="Arraste ou clique para adicionar imagem"
                             variant="medium"
                           />
@@ -223,7 +237,7 @@ export default function ProductEditModal({
                             step="0.01"
                             min="0"
                             value={formData.price}
-                            onChange={(e) => setFormData(prev => ({ ...prev, price: parseFloat(e.target.value) || 0 }))}
+                            onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
                             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="0.00"
                           />
@@ -250,8 +264,8 @@ export default function ProductEditModal({
                               <p className="text-xs text-gray-500">Em estoque</p>
                             </div>
                             <ToggleSwitch
-                              enabled={!formData.isarchived}
-                              onChange={() => handleToggleChange('isarchived')}
+                              enabled={formData.isavailable}
+                              onChange={() => handleToggleChange('isavailable')}
                             />
                           </div>
                         </div>
@@ -274,7 +288,7 @@ export default function ProductEditModal({
                       disabled={isLoading}
                       className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      {isLoading ? 'Salvando...' : 'Salvar'}
+                      {isLoading ? 'Criando...' : 'Criar Item'}
                     </button>
                   </div>
                 </form>

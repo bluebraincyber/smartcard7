@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import { ArrowLeft, Check, Store, Utensils, Scissors, Coffee, Sparkles, Package, Plus, Trash2, Save } from 'lucide-react'
+import { ArrowLeft, Check, Store, Utensils, Scissors, Coffee, Sparkles, Package, Plus, Trash2, Save, X } from 'lucide-react'
 import ImageUpload from '@/components/ImageUpload'
 
 interface Template {
@@ -305,7 +305,7 @@ export default function OnboardingPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-4xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Header */}
         <div className="mb-8">
           <Link
@@ -326,45 +326,45 @@ export default function OnboardingPage() {
             </p>
           </div>
 
-          {/* Progress Steps */}
-          <div className="flex justify-center mb-8">
-            <div className="flex items-center space-x-4">
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+          {/* Progress Steps - Responsivo Compacto */}
+          <div className="flex justify-center mb-6 px-2">
+            <div className="flex items-center w-full max-w-xs">
+              <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                 step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
               }`}>
-                {step > 1 ? <Check className="h-4 w-4" /> : '1'}
+                {step > 1 ? <Check className="h-3 w-3" /> : '1'}
               </div>
-              <div className={`h-1 w-16 ${
+              <div className={`flex-1 h-0.5 mx-1 ${
                 step >= 2 ? 'bg-blue-600' : 'bg-gray-200'
               }`}></div>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+              <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                 step >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
               }`}>
-                {step > 2 ? <Check className="h-4 w-4" /> : '2'}
+                {step > 2 ? <Check className="h-3 w-3" /> : '2'}
               </div>
-              <div className={`h-1 w-16 ${
+              <div className={`flex-1 h-0.5 mx-1 ${
                 step >= 3 ? 'bg-blue-600' : 'bg-gray-200'
               }`}></div>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+              <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                 step >= 3 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
               }`}>
-                {step > 3 ? <Check className="h-4 w-4" /> : '3'}
+                {step > 3 ? <Check className="h-3 w-3" /> : '3'}
               </div>
-              <div className={`h-1 w-16 ${
+              <div className={`flex-1 h-0.5 mx-1 ${
                 step >= 4 ? 'bg-blue-600' : 'bg-gray-200'
               }`}></div>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+              <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                 step >= 4 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
               }`}>
-                {step > 4 ? <Check className="h-4 w-4" /> : '4'}
+                {step > 4 ? <Check className="h-3 w-3" /> : '4'}
               </div>
-              <div className={`h-1 w-16 ${
+              <div className={`flex-1 h-0.5 mx-1 ${
                 step >= 5 ? 'bg-blue-600' : 'bg-gray-200'
               }`}></div>
-              <div className={`flex items-center justify-center w-8 h-8 rounded-full ${
+              <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
                 step >= 5 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
               }`}>
-                {step > 5 ? <Check className="h-4 w-4" /> : '5'}
+                {step > 5 ? <Check className="h-3 w-3" /> : '5'}
               </div>
             </div>
           </div>
@@ -491,6 +491,7 @@ export default function OnboardingPage() {
                 type="store"
                 storeid={store?.id || ''}
                 placeholder="Adicione a imagem da sua loja"
+                variant="medium"
               />
             </div>
 
@@ -511,65 +512,147 @@ export default function OnboardingPage() {
           </div>
         )}
 
-        {/* Step 4: Categories */}
+        {/* Step 4: Categories with Products Grid */}
         {step === 4 && (
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900">
-                  Organize seu catálogo em categorias
-                </h2>
-                <p className="text-gray-600 mt-1">
-                  Categorias ajudam os clientes a encontrar produtos mais facilmente.
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <div className="text-center mb-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2">
+                Organize seu catálogo em categorias
+              </h2>
+              <p className="text-gray-600 text-sm mb-4">
+                Categorias ajudam os clientes a encontrar produtos mais facilmente.
+              </p>
+            </div>
+
+            {/* Lista de Categorias com Grid de Produtos */}
+            <div className="space-y-6 mb-6 max-w-4xl mx-auto">
+              {store?.categories?.map((category) => {
+                const categoryItems = store?.items?.filter(item => item.categoryId === category.id) || []
+                
+                return (
+                  <div key={category.id} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                    {/* Header da Categoria */}
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 text-lg">{category.name}</h3>
+                        {category.description && (
+                          <p className="text-gray-600 text-sm mt-1">{category.description}</p>
+                        )}
+                      </div>
+                      <button
+                        onClick={() => handleDeleteCategory(category.id)}
+                        className="text-red-600 hover:text-red-700 p-2 rounded-md hover:bg-red-50 transition-colors"
+                        title="Remover categoria"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                    
+                    {/* Imagem da Categoria */}
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Imagem da categoria
+                      </label>
+                      <div className="w-20 h-20">
+                        <ImageUpload
+                          onUpload={(url) => handleCategoryImageUpload(category.id, url)}
+                          currentImage={category.image}
+                          type="category"
+                          storeid={store?.id || ''}
+                          placeholder="Imagem"
+                          variant="compact"
+                        />
+                      </div>
+                    </div>
+
+                    {/* Grid de Produtos da Categoria */}
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-medium text-gray-800 text-sm">
+                          Produtos ({categoryItems.length})
+                        </h4>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+                        {/* Produtos Existentes */}
+                        {categoryItems.map((item) => (
+                          <div key={item.id} className="group relative bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md transition-shadow">
+                            {/* Imagem do Produto */}
+                            <div className="aspect-square mb-2">
+                              <ImageUpload
+                                onUpload={(url) => handleItemImageUpload(item.id, url)}
+                                currentImage={item.image}
+                                type="item"
+                                storeid={store?.id || ''}
+                                placeholder="Produto"
+                                variant="compact"
+                              />
+                            </div>
+                            
+                            {/* Info do Produto */}
+                            <div className="text-center">
+                              <h5 className="font-medium text-gray-900 text-xs truncate" title={item.name}>
+                                {item.name}
+                              </h5>
+                              <p className="text-green-600 font-semibold text-xs mt-1">
+                                R$ {item.price.toFixed(2)}
+                              </p>
+                            </div>
+                            
+                            {/* Botão Delete - Aparece no Hover */}
+                            <button
+                              onClick={() => handleDeleteItem(item.id)}
+                              className="absolute top-1 right-1 opacity-0 group-hover:opacity-100 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 transition-all duration-200"
+                              title="Remover produto"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          </div>
+                        ))}
+                        
+                        {/* Card "Novo Item" */}
+                        <div
+                          onClick={() => {
+                            setNewItem({ ...newItem, categoryId: category.id })
+                            setShowAddItem(true)
+                          }}
+                          className="group cursor-pointer transition-all duration-200 border-2 border-dashed border-gray-300 hover:border-blue-400 hover:bg-blue-50 rounded-lg aspect-square flex flex-col items-center justify-center bg-gray-50 hover:shadow-md"
+                        >
+                          {/* Ícone + com animação */}
+                          <div className="w-8 h-8 rounded-full border-2 border-gray-400 group-hover:border-blue-500 group-hover:bg-blue-500 flex items-center justify-center transition-all duration-200 group-hover:scale-110">
+                            <Plus className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors duration-200" />
+                          </div>
+                          
+                          {/* Texto */}
+                          <p className="mt-2 text-xs font-medium text-gray-500 group-hover:text-blue-600 transition-colors duration-200 text-center">
+                            Novo Item
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )
+              }) || []}
+              
+              {/* Card "Nova Categoria" quando não há categorias ou botão adicional */}
+              <div
+                onClick={() => setShowAddCategory(true)}
+                className="group cursor-pointer transition-all duration-200 border-2 border-dashed border-blue-300 hover:border-blue-500 hover:bg-blue-50 rounded-lg p-6 flex flex-col items-center justify-center bg-blue-25 hover:shadow-md"
+              >
+                <div className="w-12 h-12 rounded-full border-2 border-blue-400 group-hover:border-blue-600 group-hover:bg-blue-600 flex items-center justify-center transition-all duration-200 group-hover:scale-110">
+                  <Plus className="w-6 h-6 text-blue-400 group-hover:text-white transition-colors duration-200" />
+                </div>
+                <p className="mt-3 text-sm font-medium text-blue-600 group-hover:text-blue-700 transition-colors duration-200">
+                  Nova Categoria
                 </p>
               </div>
-              <button
-                onClick={() => setShowAddCategory(true)}
-                className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center"
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Nova Categoria
-              </button>
             </div>
 
-            {/* Lista de Categorias */}
-            <div className="space-y-4 mb-6">
-              {store?.categories?.map((category) => (
-                <div key={category.id} className="border rounded-lg p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">{category.name}</h3>
-                      {category.description && (
-                        <p className="text-gray-600 text-sm mt-1">{category.description}</p>
-                      )}
-                    </div>
-                    <button
-                      onClick={() => handleDeleteCategory(category.id)}
-                      className="text-red-600 hover:text-red-700 ml-4"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </div>
-                  
-                  <div className="mt-4 max-w-xs">
-                    <ImageUpload
-                      onUpload={(url) => handleCategoryImageUpload(category.id, url)}
-                      currentImage={category.image}
-                      type="category"
-                      storeid={store?.id || ''}
-                      placeholder="Imagem da categoria"
-                      className="h-32"
-                    />
-                  </div>
-                </div>
-              )) || []}
-            </div>
-
-            {/* Formulário Nova Categoria */}
+            {/* Formulário Nova Categoria - Compacto e Responsivo */}
             {showAddCategory && (
-              <div className="border rounded-lg p-4 bg-gray-50 mb-6">
-                <h3 className="font-medium text-gray-900 mb-4">Nova Categoria</h3>
-                <div className="space-y-4">
+              <div className="border-2 border-blue-200 rounded-lg p-4 bg-blue-50 mb-6 max-w-2xl mx-auto">
+                <h3 className="font-semibold text-gray-900 mb-3 text-center">Nova Categoria</h3>
+                <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Nome da Categoria *
@@ -578,59 +661,130 @@ export default function OnboardingPage() {
                       type="text"
                       value={newCategory.name}
                       onChange={(e) => setNewCategory({ ...newCategory, name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                       placeholder="Ex: Bebidas, Lanches, Sobremesas"
                     />
                   </div>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Descrição
+                      Descrição (opcional)
                     </label>
-                    <textarea
+                    <input
+                      type="text"
                       value={newCategory.description}
                       onChange={(e) => setNewCategory({ ...newCategory, description: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      rows={2}
-                      placeholder="Descrição opcional da categoria"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                      placeholder="Descrição da categoria"
                     />
                   </div>
-                  <div className="flex space-x-3">
-                    <button
-                      onClick={handleAddCategory}
-                      disabled={!newCategory.name.trim() || saving}
-                      className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center"
-                    >
-                      {saving ? (
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                      ) : (
-                        <Save className="h-4 w-4 mr-2" />
-                      )}
-                      Salvar
-                    </button>
-                    <button
-                      onClick={() => {
-                        setShowAddCategory(false)
-                        setNewCategory({ name: '', description: '' })
-                      }}
-                      className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400"
-                    >
-                      Cancelar
-                    </button>
-                  </div>
+                </div>
+                <div className="flex justify-center gap-3 mt-4">
+                  <button
+                    onClick={handleAddCategory}
+                    disabled={!newCategory.name.trim() || saving}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 disabled:opacity-50 flex items-center text-sm font-medium"
+                  >
+                    {saving ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    Salvar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddCategory(false)
+                      setNewCategory({ name: '', description: '' })
+                    }}
+                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 text-sm font-medium"
+                  >
+                    Cancelar
+                  </button>
                 </div>
               </div>
             )}
 
-            <div className="flex justify-center space-x-4">
+            {/* Formulário Novo Item - Compacto */}
+            {showAddItem && (
+              <div className="border-2 border-green-200 rounded-lg p-4 bg-green-50 mb-6 max-w-2xl mx-auto">
+                <h3 className="font-semibold text-gray-900 mb-3 text-center">Novo Produto</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Nome do Produto *
+                    </label>
+                    <input
+                      type="text"
+                      value={newItem.name}
+                      onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                      placeholder="Ex: Hambúrguer Artesanal"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Preço *
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      value={newItem.price}
+                      onChange={(e) => setNewItem({ ...newItem, price: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                      placeholder="0.00"
+                    />
+                  </div>
+                  <div className="sm:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Descrição (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={newItem.description}
+                      onChange={(e) => setNewItem({ ...newItem, description: e.target.value })}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500 text-sm"
+                      placeholder="Descrição do produto"
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-center gap-3 mt-4">
+                  <button
+                    onClick={handleAddItem}
+                    disabled={!newItem.name.trim() || !newItem.categoryId || saving}
+                    className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 disabled:opacity-50 flex items-center text-sm font-medium"
+                  >
+                    {saving ? (
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                    ) : (
+                      <Save className="h-4 w-4 mr-2" />
+                    )}
+                    Salvar
+                  </button>
+                  <button
+                    onClick={() => {
+                      setShowAddItem(false)
+                      setNewItem({ name: '', description: '', price: 0, categoryId: '' })
+                    }}
+                    className="bg-gray-300 text-gray-700 px-4 py-2 rounded-md hover:bg-gray-400 text-sm font-medium"
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Botões de Navegação */}
+            <div className="flex flex-col sm:flex-row justify-center gap-3 mt-6">
               <button
                 onClick={() => setStep(3)}
-                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="w-full sm:w-auto px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
               >
                 Voltar
               </button>
               <button
                 onClick={() => setStep(5)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="w-full sm:w-auto px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
                 Próximo
               </button>
@@ -712,7 +866,8 @@ export default function OnboardingPage() {
                             type="item"
                             storeid={store?.id || ''}
                             placeholder="Foto do produto"
-                            className="h-32"
+                            variant="small"
+                            className="mx-auto"
                           />
                         </div>
                       ))}

@@ -3,7 +3,8 @@ import NextAuth, { type AuthOptions } from "next-auth";
  import CredentialsProvider from 'next-auth/providers/credentials';
  import { compare } from 'bcryptjs';
  
- export const authOptions: AuthOptions = {
+ export const authOptions: NextAuthOptions = {
+  debug: true,
      
      providers: [
       CredentialsProvider({
@@ -77,25 +78,14 @@ import NextAuth, { type AuthOptions } from "next-auth";
       },
       
       async redirect({ url, baseUrl }: { url: string; baseUrl: string; }) {
-        // Corrigir URLs relativas
+        // Always redirect to the callbackUrl if it's a full URL or a relative path
+        if (url.startsWith(baseUrl)) {
+          return url;
+        }
         if (url.startsWith("/")) {
           return `${baseUrl}${url}`;
         }
-        
-        // Permitir callback URLs do mesmo host
-        try {
-          const urlObj = new URL(url);
-          const baseUrlObj = new URL(baseUrl);
-          
-          if (urlObj.hostname === baseUrlObj.hostname) {
-            return url;
-          }
-        } catch {
-          // Se a URL for inválida, redirecionar para o dashboard
-          return `${baseUrl}/dashboard`;
-        }
-        
-        // Default: redirecionar para o dashboard
+        // Fallback to dashboard if no valid callbackUrl is provided
         return `${baseUrl}/dashboard`;
       },
     },

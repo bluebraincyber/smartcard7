@@ -3,12 +3,13 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Upload, X } from 'lucide-react'
+import { ArrowLeft, X } from 'lucide-react'
+import ImageUpload from '@/components/ImageUpload'
 
 interface Store {
   id: string
   name: string
-  slug?: string // Adicionar slug
+  slug?: string
 }
 
 interface Category {
@@ -29,7 +30,9 @@ export default function NewItemPage() {
     name: '',
     description: '',
     price: '',
-    image: ''
+    image: '',
+    isactive: true,
+    isavailable: true
   })
 
   useEffect(() => {
@@ -40,7 +43,6 @@ export default function NewItemPage() {
     try {
       console.log('Buscando dados para store:', params.id, 'categoria:', params.categoryId)
       
-      // Buscar dados da loja
       const storeResponse = await fetch(`/api/stores/${params.id}`)
       if (storeResponse.ok) {
         const storeData = await storeResponse.json()
@@ -52,7 +54,6 @@ export default function NewItemPage() {
           slug: storeData.slug
         })
         
-        // Encontrar categoria específica - CORRIGIDO: comparar como string
         const foundCategory = storeData.categories?.find((cat: any) => String(cat.id) === String(params.categoryId))
         console.log('Procurando categoria ID:', params.categoryId)
         console.log('Categorias disponíveis:', storeData.categories?.map((c: any) => ({ id: c.id, name: c.name })))
@@ -84,6 +85,20 @@ export default function NewItemPage() {
     }))
   }
 
+  const handleToggleChange = (field: 'isactive' | 'isavailable') => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }))
+  }
+
+  const handleImageUpload = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      image: url
+    }))
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -92,16 +107,18 @@ export default function NewItemPage() {
       return
     }
 
-    const priceToSend = parseFloat(formData.price.replace(',', '.'));
+    const priceToSend = parseFloat(formData.price.replace(',', '.'))
 
     console.log('Sending item data:', {
       name: formData.name.trim(),
       description: formData.description.trim() || null,
       price: priceToSend,
       image: formData.image.trim() || null,
-      categoryId: parseInt(String(params.categoryId)), // CORRIGIDO: garantir que seja número
-      slug: store.slug // Adicionar slug se disponível
-    });
+      categoryId: parseInt(String(params.categoryId)),
+      isactive: formData.isactive,
+      isarchived: !formData.isavailable,
+      slug: store?.slug
+    })
 
     setCreating(true)
     try {
@@ -115,8 +132,10 @@ export default function NewItemPage() {
           description: formData.description.trim() || null,
           price: priceToSend,
           image: formData.image.trim() || null,
-          categoryId: parseInt(String(params.categoryId)), // CORRIGIDO: garantir que seja número
-          slug: store?.slug // Adicionar slug se disponível
+          categoryId: parseInt(String(params.categoryId)),
+          isactive: formData.isactive,
+          isarchived: !formData.isavailable,
+          slug: store?.slug
         }),
       })
 
@@ -136,44 +155,41 @@ export default function NewItemPage() {
     }
   }
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    // Verificar tamanho (máximo 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      alert('Arquivo muito grande. Máximo 5MB.')
-      return
-    }
-
-    // Verificar tipo
-    if (!file.type.startsWith('image/')) {
-      alert('Por favor, selecione uma imagem.')
-      return
-    }
-
-    const formDataUpload = new FormData()
-    formDataUpload.append('file', file)
-
-    try {
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        body: formDataUpload,
-      })
-
-      if (response.ok) {
-        const data = await response.json()
-        setFormData(prev => ({
-          ...prev,
-          image: data.url
-        }))
-      } else {
-        alert('Erro ao fazer upload da imagem')
-      }
-    } catch (error) {
-      console.error('Erro no upload:', error)
-      alert('Erro ao fazer upload da imagem')
-    }
+  // Componente Toggle Switch
+  const ToggleSwitch = ({ 
+    enabled, 
+    onChange, 
+    disabled = false 
+  }: {
+    enabled: boolean
+    onChange: () => void
+    disabled?: boolean
+  }) => {
+    return (
+      <button
+        type="button"
+        onClick={() => !disabled && onChange()}
+        disabled={disabled}
+        className={`
+          w-10 h-5 relative inline-flex items-center rounded-full transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
+          ${enabled 
+            ? 'bg-green-600 hover:bg-green-700' 
+            : 'bg-gray-200 hover:bg-gray-300'
+          }
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+        `}
+        role="switch"
+        aria-checked={enabled}
+      >
+        <span className="sr-only">{enabled ? 'Desativar' : 'Ativar'}</span>
+        <span
+          className={`
+            w-4 h-4 inline-block rounded-full bg-white shadow-lg transform transition-transform duration-200 ease-in-out
+            ${enabled ? 'translate-x-5' : 'translate-x-0'}
+          `}
+        />
+      </button>
+    )
   }
 
   if (loading) {
@@ -201,142 +217,153 @@ export default function NewItemPage() {
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <Link
-          href={`/dashboard/store/${params.id}`}
-          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar à Loja
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold text-gray-900">
-          Novo Item - {category.name}
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Adicione um novo item à categoria "{category.name}" na loja {store.name}
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-8">
+          <Link
+            href={`/dashboard/store/${params.id}`}
+            className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Voltar à Loja
+          </Link>
+          <h1 className="mt-2 text-2xl font-bold text-gray-900">
+            Novo Item - {category.name}
+          </h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Adicione um novo item à categoria "{category.name}" na loja {store.name}
+          </p>
+        </div>
 
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Nome */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Nome do Item *
-              </label>
-              <input
-                type="text"
-                name="name"
-                id="name"
-                required
-                value={formData.name}
-                onChange={handleInputChange}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Ex: Pizza Margherita"
-              />
-            </div>
-
-            {/* Descrição */}
-            <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
-                Descrição
-              </label>
-              <textarea
-                name="description"
-                id="description"
-                rows={3}
-                value={formData.description}
-                onChange={handleInputChange}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Descreva o item..."
-              />
-            </div>
-
-            {/* Preço */}
-            <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700">
-                Preço *
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500 sm:text-sm">R$</span>
-                </div>
-                <input
-                  type="number"
-                  name="price"
-                  id="price"
-                  required
-                  step="0.01"
-                  min="0"
-                  value={formData.price}
-                  onChange={handleInputChange}
-                  className="block w-full pl-12 pr-12 border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                  placeholder="0.00"
-                />
-              </div>
-            </div>
-
-            {/* Upload de Imagem */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Imagem do Item
-              </label>
-              <div className="mt-1">
-                {formData.image ? (
-                  <div className="relative inline-block">
-                    <img
-                      src={formData.image}
-                      alt="Preview"
-                      className="h-32 w-32 object-cover rounded-lg border border-gray-300"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setFormData(prev => ({ ...prev, image: '' }))}
-                      className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md">
-                    <div className="space-y-1 text-center">
-                      <Upload className="mx-auto h-12 w-12 text-gray-400" />
-                      <div className="flex text-sm text-gray-600">
-                        <label
-                          htmlFor="image-upload"
-                          className="relative cursor-pointer bg-white rounded-md font-medium text-blue-600 hover:text-blue-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-blue-500"
-                        >
-                          <span>Fazer upload de imagem</span>
-                          <input
-                            id="image-upload"
-                            type="file"
-                            accept="image/*"
-                            onChange={handleImageUpload}
-                            className="sr-only"
-                          />
-                        </label>
-                      </div>
-                      <p className="text-xs text-gray-500">PNG, JPG até 5MB</p>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Botões */}
-            <div className="flex justify-end space-x-3">
+        {/* Modal-style Card */}
+        <div className="bg-white shadow-xl rounded-lg overflow-hidden max-w-4xl mx-auto">
+          <div className="px-6 py-4 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <h2 className="text-lg font-medium text-gray-900">Criar Produto</h2>
               <Link
                 href={`/dashboard/store/${params.id}`}
-                className="bg-white py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X className="h-6 w-6" />
+              </Link>
+            </div>
+          </div>
+          
+          <form onSubmit={handleSubmit}>
+            <div className="p-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {/* Coluna Esquerda - Imagem */}
+                <div>
+                  <h3 className="text-sm font-medium text-gray-700 mb-3">Imagem do Produto</h3>
+                  <div className="w-full max-w-sm">
+                    <ImageUpload
+                      onUpload={handleImageUpload}
+                      currentImage={formData.image}
+                      type="item"
+                      storeid={store.id}
+                      placeholder="Arraste ou clique para adicionar imagem"
+                      variant="medium"
+                    />
+                  </div>
+                </div>
+                
+                {/* Coluna Direita - Campos */}
+                <div className="space-y-4">
+                  {/* Nome do Produto */}
+                  <div>
+                    <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+                      Nome do Produto
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      id="name"
+                      required
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="Ex: Pizza Margherita"
+                    />
+                  </div>
+
+                  {/* Descrição */}
+                  <div>
+                    <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+                      Descrição
+                    </label>
+                    <textarea
+                      name="description"
+                      id="description"
+                      rows={3}
+                      value={formData.description}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                      placeholder="Descreva o produto..."
+                    />
+                  </div>
+
+                  {/* Preço */}
+                  <div>
+                    <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+                      Preço (R$)
+                    </label>
+                    <input
+                      type="number"
+                      name="price"
+                      id="price"
+                      required
+                      step="0.01"
+                      min="0"
+                      value={formData.price}
+                      onChange={handleInputChange}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      placeholder="0.00"
+                    />
+                  </div>
+
+                  {/* Toggles */}
+                  <div className="grid grid-cols-2 gap-4 pt-4">
+                    {/* Produto Ativo */}
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Produto Ativo</label>
+                        <p className="text-xs text-gray-500">Visível na loja</p>
+                      </div>
+                      <ToggleSwitch
+                        enabled={formData.isactive}
+                        onChange={() => handleToggleChange('isactive')}
+                      />
+                    </div>
+
+                    {/* Produto Disponível */}
+                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
+                      <div>
+                        <label className="text-sm font-medium text-gray-700">Produto Disponível</label>
+                        <p className="text-xs text-gray-500">Em estoque</p>
+                      </div>
+                      <ToggleSwitch
+                        enabled={formData.isavailable}
+                        onChange={() => handleToggleChange('isavailable')}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Footer com botões */}
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+              <Link
+                href={`/dashboard/store/${params.id}`}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
                 Cancelar
               </Link>
               <button
                 type="submit"
                 disabled={creating}
-                className="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {creating ? 'Criando...' : 'Criar Item'}
               </button>

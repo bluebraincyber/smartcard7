@@ -11,24 +11,7 @@ export default async function DashboardPage() {
     redirect('/auth/login')
   }
 
-  // Buscar lojas do usuário e redirecionar automaticamente
-  try {
-    const storesResult = await pool.query(
-      'SELECT id, name, slug FROM stores WHERE "userid" = $1 AND isactive = true ORDER BY created_at ASC LIMIT 1',
-      [session.user.id]
-    )
-    
-    if (storesResult.rows.length > 0) {
-      const firstStore = storesResult.rows[0]
-      // Verificar se a loja realmente existe e é válida
-      if (firstStore.id && firstStore.name) {
-        redirect(`/dashboard/store/${firstStore.id}`)
-      }
-    }
-  } catch (error) {
-    console.error('Erro ao buscar lojas:', error)
-    // Em caso de erro, continuar para o dashboard normal
-  }
+  // Dashboard principal - não redireciona automaticamente para evitar loops
 
   return <DashboardClient session={session} />
 }

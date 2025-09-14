@@ -153,20 +153,41 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
               </div>
             )}
 
-            {/* Nome da Loja */}
-            <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                Nome da Loja *
-              </label>
-              <input
-                type="text"
-                id="name"
-                required
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Ex: Minha Loja Incrível"
-              />
+            {/* Campos Principais - Grid Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Nome da Loja */}
+              <div>
+                <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                  Nome da Loja *
+                </label>
+                <input
+                  type="text"
+                  id="name"
+                  required
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Ex: Minha Loja Incrível"
+                />
+              </div>
+
+              {/* Tipo de Negócio */}
+              <div>
+                <label htmlFor="businessType" className="block text-sm font-medium text-gray-700">
+                  Tipo de Negócio
+                </label>
+                <select
+                  id="businessType"
+                  value={formData.businessType}
+                  onChange={(e) => handleInputChange('businessType', e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                >
+                  <option value="general">Geral</option>
+                  <option value="restaurant">Restaurante</option>
+                  <option value="retail">Varejo</option>
+                  <option value="service">Serviços</option>
+                </select>
+              </div>
             </div>
 
             {/* Slug */}
@@ -224,56 +245,41 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
               />
             </div>
 
-            {/* WhatsApp */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
-                WhatsApp *
-              </label>
-              <input
-                type="tel"
-                id="phone"
-                required
-                value={formData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="(11) 99999-9999"
-              />
+            {/* Contato - Grid Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* WhatsApp */}
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                  WhatsApp *
+                </label>
+                <input
+                  type="tel"
+                  id="phone"
+                  required
+                  value={formData.phone}
+                  onChange={(e) => handleInputChange('phone', e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="(11) 99999-9999"
+                />
+              </div>
+
+              {/* Endereço */}
+              <div>
+                <label htmlFor="address" className="block text-sm font-medium text-gray-700">
+                  Endereço
+                </label>
+                <input
+                  type="text"
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                  placeholder="Rua, número, bairro, cidade"
+                />
+              </div>
             </div>
 
-            {/* Endereço */}
-            <div>
-              <label htmlFor="address" className="block text-sm font-medium text-gray-700">
-                Endereço
-              </label>
-              <input
-                type="text"
-                id="address"
-                value={formData.address}
-                onChange={(e) => handleInputChange('address', e.target.value)}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                placeholder="Rua, número, bairro, cidade"
-              />
-            </div>
-
-            {/* Tipo de Negócio */}
-            <div>
-              <label htmlFor="businessType" className="block text-sm font-medium text-gray-700">
-                Tipo de Negócio
-              </label>
-              <select
-                id="businessType"
-                value={formData.businessType}
-                onChange={(e) => handleInputChange('businessType', e.target.value)}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-              >
-                <option value="general">Geral</option>
-                <option value="restaurant">Restaurante</option>
-                <option value="retail">Varejo</option>
-                <option value="service">Serviços</option>
-              </select>
-            </div>
-
-            {/* Imagens */}
+            {/* Imagens - Layout Otimizado */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -284,9 +290,12 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
                   currentImage={formData.coverImage}
                   type="store"
                   storeid={store.id}
-                  className="w-full h-32"
-                  placeholder="Clique para adicionar uma imagem de capa"
+                  variant="medium"
+                  placeholder="Arraste e solte ou clique para selecionar"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Imagem de fundo da sua loja (recomendado: 800x400px)
+                </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -297,9 +306,12 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
                   currentImage={formData.profileImage}
                   type="store"
                   storeid={store.id}
-                  className="w-full h-32"
-                  placeholder="Clique para adicionar um logo"
+                  variant="medium"
+                  placeholder="Clique para adicionar logo"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Logo da sua empresa (recomendado: quadrado 400x400px)
+                </p>
               </div>
             </div>
 

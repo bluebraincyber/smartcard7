@@ -21,7 +21,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: '(?<slug>.*)\.smartcard\.app',
+              value: '(?<slug>.*)\\.smartcard\\.app',
             },
           ],
         },
@@ -31,7 +31,7 @@ const nextConfig = {
           has: [
             {
               type: 'host',
-              value: '(?<slug>.*)\.smartcard\.app',
+              value: '(?<slug>.*)\\.smartcard\\.app',
             },
           ],
         },
@@ -43,11 +43,6 @@ const nextConfig = {
       {
         protocol: 'https',
         hostname: '**',
-      },
-      {
-        protocol: 'http',
-        hostname: 'localhost',
-        port: '3000',
       },
     ],
     // Desabilitar otimização de imagens para domínios externos problemáticos
@@ -87,6 +82,17 @@ const nextConfig = {
         ],
       },
     ];
+  },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals.push('pg-native');
+    }
+    // Resolver problemas com crypto no edge runtime
+    config.resolve = config.resolve || {};
+    config.resolve.fallback = config.resolve.fallback || {};
+    config.resolve.fallback.crypto = false;
+    
+    return config;
   },
 };
 
