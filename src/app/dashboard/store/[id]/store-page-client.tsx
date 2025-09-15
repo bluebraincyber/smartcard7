@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import StoreSelector from '@/components/store/StoreSelector'
 import { ArrowLeft, Plus, Edit, Trash2, Eye, ExternalLink, Check, X, Loader2 as LoaderIcon, Pencil, Camera, Upload, Copy, MoreVertical } from 'lucide-react'
 import ConfirmationModal from '@/components/ui/ConfirmationModal'
 import ProductEditModal from '@/components/ui/ProductEditModal'
@@ -76,6 +77,25 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
     businessType: (store as any).businessType || 'general'
   })
   const [saving, setSaving] = useState(false)
+  const [hasMultipleStores, setHasMultipleStores] = useState(false)
+  
+  // Check if user has multiple stores
+  useEffect(() => {
+    const checkMultipleStores = async () => {
+      try {
+        const response = await fetch('/api/stores')
+        if (response.ok) {
+          const data = await response.json()
+          setHasMultipleStores(data.stores?.length > 1 || false)
+        }
+      } catch (error) {
+        console.error('Error checking stores:', error)
+      }
+    }
+    
+    checkMultipleStores()
+  }, [])
+  
   const [imageModal, setImageModal] = useState<{
     isOpen: boolean
     type: 'cover' | 'profile' | null
@@ -1009,11 +1029,11 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link
-                href="/dashboard"
+                href="/dashboard/products"
                 className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar ao Dashboard
+                Voltar para Seleção de Lojas
               </Link>
             </div>
             <div className="flex items-center space-x-3">
@@ -1027,6 +1047,16 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                 <ExternalLink className="ml-2 h-4 w-4" />
               </Link>
             </div>
+          </div>
+        </div>
+
+        {/* Store Header */}
+        <div className="mb-6">
+          <div className="text-center sm:text-left">
+            <h1 className="text-2xl font-bold text-gray-900">{store.name}</h1>
+            <p className="mt-1 text-sm text-gray-600">
+              Gerencie as categorias e produtos desta loja
+            </p>
           </div>
         </div>
 

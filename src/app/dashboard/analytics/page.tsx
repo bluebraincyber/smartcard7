@@ -1,216 +1,72 @@
-"use client";
+'use client'
 
-import { Suspense, useState, useEffect, useMemo } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs';
-import { Skeleton } from '@/components/ui/Skeleton';
-import { Button } from '@/components/ui/Button';
-import { Download, RefreshCw } from 'lucide-react';
-import dynamic from 'next/dynamic';
-
-// Dynamically import the analytics components with SSR disabled
-const AnalyticsV1 = dynamic(() => import('./analytics-v1'), {
-  ssr: false,
-  loading: () => <AnalyticsSkeleton />
-});
-
-const AnalyticsV2 = dynamic(() => import('./analytics-v2'), {
-  ssr: false,
-  loading: () => <AnalyticsSkeleton />
-});
+import { Suspense, useState, useEffect, useMemo } from 'react'
+import { ArrowLeft, BarChart3, Users, TrendingDown, Clock, Download, RefreshCw, Eye, MousePointer, Globe, Calendar } from 'lucide-react'
+import Link from 'next/link'
+import dynamic from 'next/dynamic'
 
 // Dynamically import charts
 const ActiveUsers24hChart = dynamic(() => import('@/components/charts/ActiveUsers24hChart'), {
   ssr: false,
   loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
-});
-
-// Icons
-const UsersIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-  </svg>
-);
-
-const TrendingDownIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
-  </svg>
-);
-
-const ClockIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>
-);
-
-const DownloadIcon = ({ className }: { className?: string }) => (
-  <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-  </svg>
-);
-
-function AnalyticsSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
-          <Card key={i}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <Skeleton className="h-4 w-[100px]" />
-              <Skeleton className="h-4 w-4" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-8 w-[100px] mb-2" />
-              <Skeleton className="h-4 w-[150px]" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        {[...Array(2)].map((_, i) => (
-          <Card key={i} className="h-[400px]">
-            <CardHeader>
-              <Skeleton className="h-6 w-[200px]" />
-              <Skeleton className="h-4 w-[150px]" />
-            </CardHeader>
-            <CardContent>
-              <Skeleton className="h-[300px] w-full" />
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-// MetricCard component
-const MetricCard = ({ 
-  title, 
-  value, 
-  change, 
-  icon: Icon, 
-  color 
-}: { 
-  title: string; 
-  value: string; 
-  change: number; 
-  icon: any; 
-  color: string 
-}) => {
-  const isPositive = change > 0;
-  const colorClasses = {
-    blue: 'bg-blue-50 text-blue-600',
-    orange: 'bg-orange-50 text-orange-600',
-    green: 'bg-green-50 text-green-600'
-  };
-
-  return (
-    <div className="bg-white rounded-2xl border border-gray-200 p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
-      <div className="flex items-center justify-between mb-4">
-        <div className={`p-3 rounded-xl ${colorClasses[color as keyof typeof colorClasses]}`}>
-          <Icon className="w-6 h-6" />
-        </div>
-        <div className={`flex items-center gap-1 text-sm font-medium ${
-          isPositive ? 'text-green-600' : 'text-red-600'
-        }`}>
-          <span>{isPositive ? '+' : ''}{change}%</span>
-        </div>
-      </div>
-      <div>
-        <p className="text-2xl font-bold text-gray-900 mb-1">{value}</p>
-        <p className="text-sm text-gray-600">{title}</p>
-      </div>
-    </div>
-  );
-};
-
-// Simple BarChart component inline
-const SimpleBarChart = ({ data }: { data: { name: string; views: number }[] }) => {
-  if (!data || data.length === 0) {
-    return (
-      <div className="h-64 flex items-center justify-center text-gray-500">
-        Nenhum dado disponível
-      </div>
-    );
-  }
-
-  const maxViews = Math.max(...data.map(item => item.views));
-
-  return (
-    <div className="space-y-4">
-      {data.map((item, index) => (
-        <div key={index} className="flex items-center gap-4">
-          <div className="w-20 text-sm text-gray-600 text-right">{item.name}</div>
-          <div className="flex-1 flex items-center gap-2">
-            <div 
-              className="bg-blue-500 h-6 rounded transition-all duration-300 hover:bg-blue-600"
-              style={{ width: `${(item.views / maxViews) * 100}%`, minWidth: '8px' }}
-            />
-            <span className="text-sm text-gray-700 font-medium">{item.views.toLocaleString()}</span>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-};
+})
 
 // Tipos para os dados
 interface ActiveUserData {
-  name: string;  // Formato: "DD/MM"
-  users: number;
+  name: string
+  users: number
 }
 
 interface PageViewData {
-  name: string;
-  views: number;
+  name: string
+  views: number
 }
 
 interface MetricsData {
-  totalUsers: { value: string; change: number };
-  bounceRate: { value: string; change: number };
-  avgSession: { value: string; change: number };
+  totalUsers: { value: string; change: number }
+  bounceRate: { value: string; change: number }
+  avgSession: { value: string; change: number }
+  totalViews: { value: string; change: number }
 }
 
 interface AnalyticsData {
-  activeUsers: ActiveUserData[];
-  pageViews: PageViewData[];
-  metrics: MetricsData;
+  activeUsers: ActiveUserData[]
+  pageViews: PageViewData[]
+  metrics: MetricsData
 }
 
 // Função para gerar dados simulados baseados no período
 const generateMockData = (days: number): AnalyticsData => {
-  const now = new Date();
-  const activeUsers: ActiveUserData[] = [];
-  const pageViews: PageViewData[] = [];
+  const now = new Date()
+  const activeUsers: ActiveUserData[] = []
+  const pageViews: PageViewData[] = []
   
   // Gerar dados de usuários ativos para o período
   for (let i = days; i >= 0; i--) {
-    const date = new Date(now);
-    date.setDate(date.getDate() - i);
+    const date = new Date(now)
+    date.setDate(date.getDate() - i)
     
-    // Variação aleatória baseada no dia para parecer mais realista
-    const baseUsers = 300 + (Math.sin(i) * 100);
-    const randomVariation = Math.floor(Math.random() * 200) - 100;
-    const users = Math.max(100, Math.floor(baseUsers + randomVariation));
+    const baseUsers = 300 + (Math.sin(i) * 100)
+    const randomVariation = Math.floor(Math.random() * 200) - 100
+    const users = Math.max(100, Math.floor(baseUsers + randomVariation))
     
     activeUsers.push({
       name: date.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' }),
       users: users
-    });
+    })
   }
   
   // Gerar visualizações de página
-  const pages = ["Home", "Dashboard", "Settings", "Reports", "Profile", "Analytics"];
+  const pages = ['Dashboard', 'Produtos', 'Financeiro', 'Configurações', 'Relatórios', 'Perfil']
   pages.forEach(page => {
     pageViews.push({
       name: page,
       views: Math.floor(Math.random() * 1000) + 100
-    });
-  });
+    })
+  })
   
-  // Calcular métricas
-  const totalUsers = activeUsers.reduce((sum, day) => sum + day.users, 0);
+  const totalUsers = activeUsers.reduce((sum, day) => sum + day.users, 0)
+  const totalViews = pageViews.reduce((sum, page) => sum + page.views, 0)
   
   return {
     activeUsers,
@@ -218,201 +74,473 @@ const generateMockData = (days: number): AnalyticsData => {
     metrics: {
       totalUsers: { 
         value: totalUsers > 1000 ? `${(totalUsers / 1000).toFixed(1)}K` : totalUsers.toString(),
-        change: Math.floor(Math.random() * 20) - 5 // Variação aleatória entre -5 e 15
+        change: Math.floor(Math.random() * 20) - 5
+      },
+      totalViews: { 
+        value: totalViews > 1000 ? `${(totalViews / 1000).toFixed(1)}K` : totalViews.toString(),
+        change: Math.floor(Math.random() * 25) - 10
       },
       bounceRate: { 
-        value: `${Math.floor(Math.random() * 30) + 10}%`, 
+        value: `${Math.floor(Math.random() * 30) + 15}%`, 
         change: Math.floor(Math.random() * 10) - 5
       },
       avgSession: { 
-        value: `${Math.floor(Math.random() * 5) + 1}.${Math.floor(Math.random() * 9)} min`, 
+        value: `${Math.floor(Math.random() * 5) + 2}.${Math.floor(Math.random() * 9)} min`, 
         change: Math.floor(Math.random() * 15) - 5
       }
     }
-  };
+  }
 }
 
-// Generate mock data for ActiveUsers24hChart (last 24 hours)
+// Generate mock data for ActiveUsers24hChart
 const generate24hActiveUsersData = () => {
-  const data = [];
-  const now = new Date();
+  const data = []
+  const now = new Date()
   for (let i = 23; i >= 0; i--) {
-    const date = new Date(now.getTime() - i * 60 * 60 * 1000); // Hourly data
-    data.push({ x: date, y: Math.floor(Math.random() * 1000) + 500 }); // Random users between 500 and 1500
+    const date = new Date(now.getTime() - i * 60 * 60 * 1000)
+    data.push({ x: date, y: Math.floor(Math.random() * 500) + 200 })
   }
-  return data;
-};
+  return data
+}
 
-// Dados iniciais para evitar erros de carregamento
 const initialData: AnalyticsData = {
   activeUsers: [],
   pageViews: [],
   metrics: {
     totalUsers: { value: '0', change: 0 },
+    totalViews: { value: '0', change: 0 },
     bounceRate: { value: '0%', change: 0 },
     avgSession: { value: '0 min', change: 0 }
   }
-};
+}
 
-// This is the main page component
 export default function AnalyticsPage() {
-  const [dateRange, setDateRange] = useState<"7" | "30" | "90">("30");
-  const [isLoading, setIsLoading] = useState(false);
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(initialData);
+  const [dateRange, setDateRange] = useState<'7' | '30' | '90'>('30')
+  const [isLoading, setIsLoading] = useState(false)
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(initialData)
 
   // Gerar dados baseados no período selecionado
   useEffect(() => {
     const loadData = async () => {
-      setIsLoading(true);
+      setIsLoading(true)
       try {
-        // Simular carregamento
-        await new Promise(resolve => setTimeout(resolve, 500));
-        const days = parseInt(dateRange);
-        const result = generateMockData(days);
-        setAnalyticsData(result);
+        await new Promise(resolve => setTimeout(resolve, 500))
+        const days = parseInt(dateRange)
+        const result = generateMockData(days)
+        setAnalyticsData(result)
       } catch (error) {
-        console.error('Erro ao carregar dados:', error);
+        console.error('Erro ao carregar dados:', error)
       } finally {
-        setIsLoading(false);
+        setIsLoading(false)
       }
-    };
+    }
 
-    loadData();
-  }, [dateRange]);
+    loadData()
+  }, [dateRange])
   
-  const activeUsers24hData = useMemo(() => generate24hActiveUsersData(), [dateRange]);
+  const activeUsers24hData = useMemo(() => generate24hActiveUsersData(), [dateRange])
 
   function downloadCSV() {
     const rows = [
-      ["Mês", "Usuários Ativos"],
+      ['Data', 'Usuários Ativos'],
       ...analyticsData.activeUsers.map((r: { name: string; users: number }) => [r.name, String(r.users)])
-    ];
-    const csv = rows.map((r: any[]) => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `usuarios-ativos_${dateRange}dias.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    ]
+    const csv = rows.map((r: any[]) => r.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(',')).join('\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `analytics_${dateRange}dias.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const quickActions = [
+    {
+      title: 'Relatório Completo',
+      description: 'Gere relatório detalhado dos dados',
+      action: downloadCSV,
+      icon: Download,
+      color: 'blue'
+    },
+    {
+      title: 'Atualizar Dados',
+      description: 'Sincronize com dados mais recentes',
+      action: () => window.location.reload(),
+      icon: RefreshCw,
+      color: 'green'
+    },
+    {
+      title: 'Configurar Alertas',
+      description: 'Defina alertas para métricas importantes',
+      action: () => alert('Em desenvolvimento'),
+      icon: Clock,
+      color: 'purple'
+    },
+    {
+      title: 'Insights Avançados',
+      description: 'Análises detalhadas de comportamento',
+      action: () => alert('Em desenvolvimento'),
+      icon: BarChart3,
+      color: 'orange'
+    }
+  ]
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col items-center justify-center h-64">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 opacity-20 animate-pulse"></div>
+            </div>
+            <span className="mt-4 text-gray-700 font-medium">Carregando analytics...</span>
+          </div>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto max-w-7xl px-6 py-8">
-        <header className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">Analytics</h1>
-              <p className="text-gray-600">Acompanhe o desempenho da sua aplicação</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <Link
+                href="/dashboard"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-gray-200"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Dashboard
+              </Link>
             </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <select
-                  className="appearance-none rounded-xl border border-gray-200 bg-white px-4 py-2 pr-8 text-sm font-medium text-gray-700 transition-all hover:border-gray-300 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 cursor-pointer"
-                  value={dateRange}
-                  onChange={(e) => setDateRange(e.target.value as "7" | "30" | "90")}
+          </div>
+        </div>
+
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <div className="relative mb-8">
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg mb-6">
+              <BarChart3 className="h-10 w-10 text-white" />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-purple-600 opacity-20 rounded-full blur-xl scale-150"></div>
+          </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
+            Analytics
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Acompanhe o desempenho da sua aplicação com métricas detalhadas e insights valiosos
+          </p>
+        </div>
+
+        {/* Period Selector */}
+        <div className="flex justify-center mb-12">
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-2">
+            <div className="flex items-center space-x-1">
+              {[
+                { value: '7', label: '7 dias' },
+                { value: '30', label: '30 dias' },
+                { value: '90', label: '90 dias' }
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  onClick={() => setDateRange(option.value as '7' | '30' | '90')}
+                  className={`px-6 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                    dateRange === option.value
+                      ? 'bg-purple-600 text-white shadow-md'
+                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                  }`}
                   disabled={isLoading}
                 >
-                  <option value="7">Últimos 7 dias</option>
-                  <option value="30">Últimos 30 dias</option>
-                  <option value="90">Últimos 90 dias</option>
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
-                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                {isLoading && (
-                  <div className="absolute right-8 top-1/2 -translate-y-1/2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-blue-500 border-t-transparent"></div>
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Analytics Overview Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+          {/* Total Users */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <Users className="w-6 h-6 text-white" />
+              </div>
+              <div className={`flex items-center text-xs font-medium ${
+                analyticsData.metrics.totalUsers.change >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {analyticsData.metrics.totalUsers.change >= 0 ? '+' : ''}{analyticsData.metrics.totalUsers.change}%
+              </div>
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">
+              {analyticsData.metrics.totalUsers.value}
+            </div>
+            <p className="text-sm text-gray-600">Total de usuários</p>
+          </div>
+
+          {/* Total Views */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
+                <Eye className="w-6 h-6 text-white" />
+              </div>
+              <div className={`flex items-center text-xs font-medium ${
+                analyticsData.metrics.totalViews.change >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {analyticsData.metrics.totalViews.change >= 0 ? '+' : ''}{analyticsData.metrics.totalViews.change}%
+              </div>
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">
+              {analyticsData.metrics.totalViews.value}
+            </div>
+            <p className="text-sm text-gray-600">Visualizações</p>
+          </div>
+
+          {/* Bounce Rate */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+                <TrendingDown className="w-6 h-6 text-white" />
+              </div>
+              <div className={`flex items-center text-xs font-medium ${
+                analyticsData.metrics.bounceRate.change <= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {analyticsData.metrics.bounceRate.change >= 0 ? '+' : ''}{analyticsData.metrics.bounceRate.change}%
+              </div>
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">
+              {analyticsData.metrics.bounceRate.value}
+            </div>
+            <p className="text-sm text-gray-600">Taxa de rejeição</p>
+          </div>
+
+          {/* Average Session */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
+                <Clock className="w-6 h-6 text-white" />
+              </div>
+              <div className={`flex items-center text-xs font-medium ${
+                analyticsData.metrics.avgSession.change >= 0 ? 'text-green-600' : 'text-red-600'
+              }`}>
+                {analyticsData.metrics.avgSession.change >= 0 ? '+' : ''}{analyticsData.metrics.avgSession.change}%
+              </div>
+            </div>
+            <div className="text-2xl font-bold text-gray-900 mb-1">
+              {analyticsData.metrics.avgSession.value}
+            </div>
+            <p className="text-sm text-gray-600">Duração média</p>
+          </div>
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          {/* Active Users Chart */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 p-8">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Usuários Ativos (24h)</h2>
+              <p className="text-gray-600">Atividade dos usuários nas últimas 24 horas</p>
+            </div>
+            <Suspense fallback={<div className="h-64 bg-gray-100 animate-pulse rounded-lg" />}>
+              <ActiveUsers24hChart data={activeUsers24hData} height={256} maWindow={7} />
+            </Suspense>
+          </div>
+
+          {/* Page Views Chart */}
+          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 p-8">
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">Visualizações por Página</h2>
+              <p className="text-gray-600">Páginas mais acessadas no período</p>
+            </div>
+            <PageViewsChart data={analyticsData.pageViews} />
+          </div>
+        </div>
+
+        {/* Quick Actions */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 p-8 mb-12">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+              Ações Rápidas
+            </h2>
+            <p className="text-gray-600">
+              Ferramentas para análise e exportação de dados
+            </p>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {quickActions.map((action, index) => (
+              <QuickActionCard
+                key={index}
+                action={action.action}
+                icon={action.icon}
+                title={action.title}
+                description={action.description}
+                color={action.color as any}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Geographic Data */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 p-8">
+          <div className="mb-8">
+            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Distribuição Geográfica</h2>
+            <p className="text-gray-600">Localização dos usuários por região</p>
+          </div>
+          
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Map Placeholder */}
+            <div className="lg:col-span-2">
+              <div className="h-80 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center">
+                <div className="text-center">
+                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Globe className="w-8 h-8 text-blue-600" />
                   </div>
-                )}
-              </div>
-              <button
-                onClick={downloadCSV}
-                className="flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-all hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-500/25 focus:outline-none focus:ring-2 focus:ring-blue-500/50"
-              >
-                <DownloadIcon className="w-4 h-4" />
-                Exportar Relatório
-              </button>
-            </div>
-          </div>
-        </header>
-
-        {/* Cards de métricas */}
-        <section className="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
-          <MetricCard 
-            title="Total de Usuários" 
-            value={analyticsData.metrics.totalUsers.value} 
-            change={analyticsData.metrics.totalUsers.change}
-            icon={UsersIcon}
-            color="blue"
-          />
-          <MetricCard 
-            title="Taxa de Rejeição" 
-            value={analyticsData.metrics.bounceRate.value} 
-            change={analyticsData.metrics.bounceRate.change}
-            icon={TrendingDownIcon}
-            color="orange"
-          />
-          <MetricCard 
-            title="Duração Média" 
-            value={analyticsData.metrics.avgSession.value} 
-            change={analyticsData.metrics.avgSession.change}
-            icon={ClockIcon}
-            color="green"
-          />
-        </section>
-
-        {/* Gráficos */}
-        <section className="mb-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="p-6">
-              <Suspense fallback={<div className="h-64 bg-gray-100 animate-pulse rounded-lg" />}>
-                <ActiveUsers24hChart data={activeUsers24hData} height={256} maWindow={7} />
-              </Suspense>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl border border-gray-200 overflow-hidden">
-            <div className="p-6">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Visualizações por Página</h3>
-              <SimpleBarChart data={analyticsData.pageViews} />
-            </div>
-          </div>
-        </section>
-
-        {/* Mapa de geolocalização */}
-        <section className="bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-gray-100 hover:-translate-y-1">
-          <div className="p-6 border-b border-gray-100">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-green-50 rounded-lg">
-                <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-              </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">Mapa de Usuários</h3>
-                <p className="text-sm text-gray-500">Distribuição geográfica</p>
-              </div>
-            </div>
-          </div>
-          <div className="p-6">
-            <div className="flex h-64 items-center justify-center bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl">
-              <div className="text-center">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-1.447-.894L15 4m0 13V4m-6 3l6-3" />
-                  </svg>
+                  <p className="text-gray-700 font-medium">Mapa Interativo</p>
+                  <p className="text-sm text-gray-500 mt-1">Integração em desenvolvimento</p>
                 </div>
-                <p className="text-gray-600 font-medium">Componente de Mapa</p>
-                <p className="text-sm text-gray-500 mt-1">Integração em desenvolvimento</p>
               </div>
             </div>
+
+            {/* Geographic Stats */}
+            <div className="space-y-4">
+              {[
+                { country: 'Brasil', percentage: 78, users: '2.4K' },
+                { country: 'Estados Unidos', percentage: 12, users: '387' },
+                { country: 'Portugal', percentage: 6, users: '194' },
+                { country: 'Argentina', percentage: 4, users: '129' }
+              ].map((stat, index) => (
+                <div key={index} className="bg-gray-50 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-sm font-medium text-gray-900">{stat.country}</span>
+                    <span className="text-sm text-gray-600">{stat.users}</span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <div 
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${stat.percentage}%` }}
+                    ></div>
+                  </div>
+                  <div className="text-xs text-gray-500 mt-1">{stat.percentage}% do total</div>
+                </div>
+              ))}
+            </div>
           </div>
-        </section>
+        </div>
       </div>
     </div>
-  );
+  )
+}
+
+// Page Views Chart Component
+function PageViewsChart({ data }: { data: PageViewData[] }) {
+  if (!data || data.length === 0) {
+    return (
+      <div className="h-64 flex items-center justify-center text-gray-500">
+        Nenhum dado disponível
+      </div>
+    )
+  }
+
+  const maxViews = Math.max(...data.map(item => item.views))
+
+  return (
+    <div className="space-y-4">
+      {data.map((item, index) => (
+        <div key={index} className="flex items-center gap-4">
+          <div className="w-20 text-sm text-gray-600 text-right font-medium">{item.name}</div>
+          <div className="flex-1 flex items-center gap-3">
+            <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
+              <div 
+                className="bg-gradient-to-r from-purple-500 to-purple-600 h-full rounded-full transition-all duration-500 ease-out"
+                style={{ width: `${(item.views / maxViews) * 100}%` }}
+              />
+            </div>
+            <span className="text-sm text-gray-700 font-semibold w-16 text-right">
+              {item.views.toLocaleString()}
+            </span>
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// Quick Action Card Component
+function QuickActionCard({ 
+  action, 
+  icon: Icon, 
+  title, 
+  description, 
+  color 
+}: {
+  action: () => void
+  icon: any
+  title: string
+  description: string
+  color: 'blue' | 'green' | 'purple' | 'orange'
+}) {
+  const colorClasses = {
+    blue: {
+      bg: 'from-blue-500 to-blue-600 group-hover:from-blue-600 group-hover:to-blue-700',
+      text: 'text-blue-600 group-hover:text-blue-700',
+      border: 'group-hover:border-blue-200',
+      bgHover: 'from-blue-50 to-blue-100'
+    },
+    green: {
+      bg: 'from-green-500 to-green-600 group-hover:from-green-600 group-hover:to-green-700',
+      text: 'text-green-600 group-hover:text-green-700',
+      border: 'group-hover:border-green-200',
+      bgHover: 'from-green-50 to-green-100'
+    },
+    purple: {
+      bg: 'from-purple-500 to-purple-600 group-hover:from-purple-600 group-hover:to-purple-700',
+      text: 'text-purple-600 group-hover:text-purple-700',
+      border: 'group-hover:border-purple-200',
+      bgHover: 'from-purple-50 to-purple-100'
+    },
+    orange: {
+      bg: 'from-orange-500 to-orange-600 group-hover:from-orange-600 group-hover:to-orange-700',
+      text: 'text-orange-600 group-hover:text-orange-700',
+      border: 'group-hover:border-orange-200',
+      bgHover: 'from-orange-50 to-orange-100'
+    }
+  }
+
+  const classes = colorClasses[color]
+
+  return (
+    <div className="group relative">
+      {/* Hover Background Effect */}
+      <div className={`absolute inset-0 bg-gradient-to-br ${classes.bgHover} rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10 scale-105`}></div>
+      
+      <button
+        onClick={action}
+        className={`w-full h-full bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300 text-center ${classes.border}`}
+      >
+        <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br ${classes.bg} transition-all duration-300 mb-6 shadow-md group-hover:shadow-lg`}>
+          <Icon className="h-7 w-7 text-white" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 mb-3 transition-colors">
+          {title}
+        </h3>
+        <p className="text-sm text-gray-600 leading-relaxed mb-4">
+          {description}
+        </p>
+        <div className={`inline-flex items-center ${classes.text} text-sm font-medium transition-all duration-200`}>
+          Executar
+          <svg className="w-4 h-4 ml-2 -mr-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </div>
+      </button>
+    </div>
+  )
 }

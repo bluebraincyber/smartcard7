@@ -8,7 +8,7 @@
   "files.eol": "\n",
   "workbench.editor.enablePreview": false,
   "workbench.editor.enablePreviewFromQuickOpen": false,
-  "workbench.editor.showTabs": true,
+  "workbench.editor.showTabs": "multiple",
   "workbench.startupEditor": "welcomePage",
   "window.openFoldersInNewWindow": "on",
   "browser.preview.port": 3000,

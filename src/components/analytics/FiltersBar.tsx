@@ -6,7 +6,7 @@ import { DateRange } from 'react-day-picker';
 import { format, subDays } from 'date-fns';
 import { Calendar as CalendarIcon } from 'lucide-react';
 import { useAnalytics } from './context';
-import { Button } from '@/components/ui/button';
+import { Button } from '@/components/ui/Button';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
