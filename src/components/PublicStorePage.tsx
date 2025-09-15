@@ -1,32 +1,4 @@
-{/* Dropdown Menu */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-[2147483646] bg-black/20 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)}>
-          <div className="absolute top-16 left-0 right-0 bg-card/95 backdrop-blur-md border border-border shadow-xl mx-4 rounded-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 gap-2">
-                <Link href="/" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-muted group-hover:bg-primary/10 transition-colors duration-200">
-                    <Home className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
-                  </div>
-                  <span className="text-foreground text-sm sm:text-base font-medium">Página Inicial</span>
-                </Link>
-                <Link href="/auth/register" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-muted group-hover:bg-secondary/10 transition-colors duration-200">
-                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-secondary transition-colors duration-200" />
-                  </div>
-                  <span className="text-foreground text-sm sm:text-base font-medium">Criar Minha Loja</span>
-                </Link>
-                <Link href="/dashboard" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-muted group-hover:bg-accent/10 transition-colors duration-200">
-                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-accent transition-colors duration-200" />
-                  </div>
-                  <span className="text-foreground text-sm sm:text-base font-medium">Painel Administrativo</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+'use client'
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { MapPin, Phone, MessageCircle, ShoppingCart, Plus, Minus, Menu, Home, User, Settings } from 'lucide-react'
@@ -272,6 +244,36 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
           </span>
         )}
       </button>
+
+      {/* Dropdown Menu */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-[2147483646] bg-black/20 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)}>
+          <div className="absolute top-16 left-0 right-0 bg-card/95 backdrop-blur-md border border-border shadow-xl mx-4 rounded-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 sm:p-6">
+              <div className="grid grid-cols-1 gap-2">
+                <Link href="/" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
+                  <div className="p-2 rounded-lg bg-muted group-hover:bg-primary/10 transition-colors duration-200">
+                    <Home className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
+                  </div>
+                  <span className="text-foreground text-sm sm:text-base font-medium">Página Inicial</span>
+                </Link>
+                <Link href="/auth/register" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
+                  <div className="p-2 rounded-lg bg-muted group-hover:bg-secondary/10 transition-colors duration-200">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-secondary transition-colors duration-200" />
+                  </div>
+                  <span className="text-foreground text-sm sm:text-base font-medium">Criar Minha Loja</span>
+                </Link>
+                <Link href="/dashboard" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
+                  <div className="p-2 rounded-lg bg-muted group-hover:bg-accent/10 transition-colors duration-200">
+                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-accent transition-colors duration-200" />
+                  </div>
+                  <span className="text-foreground text-sm sm:text-base font-medium">Painel Administrativo</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Store Hero Section */}
       <div className="relative">
