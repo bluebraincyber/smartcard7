@@ -1,36 +1,62 @@
+/* ===== SMARTCARD7 - DESIGN TOKENS UNIFICADO ===== */
+/* Sistema de temas light/dark consistente */
+
+/* Base Colors - Tema Claro (Default) */
 :root {
-  /* Brand Colors */
+  /* === BRAND COLORS === */
   --brand-red: #EA1D2C;
+  --brand-red-hover: #d11a28;
   --accent-purple: #7A3BFF;
+  --accent-purple-hover: #6b32e6;
   --success: #1DB954;
   --warning: #F59E0B;
   --error: #EF4444;
 
-  /* Text Colors */
-  --text-strong: #111418;
-  --text: #1F2937;
-  --text-muted: #4B5563;
-  --text-light: #6B7280;
-  --text-placeholder: #9CA3AF;
-  --text-inverse: #FFFFFF;
-
-  /* Background Colors */
-  --bg: #FFFFFF;
-  --bg-soft: #F7F7F9;
-  --bg-muted: #F3F4F6;
-  --bg-input: #FFFFFF;
-  --bg-input-disabled: #F9FAFB;
-  --chip-bg: #F3F4F6;
+  /* === BACKGROUND SYSTEM === */
+  --background: #ffffff;
+  --foreground: #111418;
+  --bg: #ffffff;
+  --bg-soft: #f7f7f9;
+  --bg-muted: #f3f4f6;
+  --bg-input: #ffffff;
+  --bg-input-disabled: #f9fafb;
+  --chip-bg: #f3f4f6;
   --overlay: rgba(0, 0, 0, 0.5);
 
-  /* Border Colors */
-  --border: #D1D5DB;
-  --border-light: #E5E7EB;
-  --border-input: #D1D5DB;
+  /* === TEXT COLORS === */
+  --text-strong: #111418;
+  --text: #1f2937;
+  --text-muted: #4b5563;
+  --text-light: #6b7280;
+  --text-placeholder: #9ca3af;
+  --text-inverse: #ffffff;
+
+  /* === BORDER COLORS === */
+  --border: #e2e8f0;
+  --border-light: #f1f5f9;
+  --border-input: #d1d5db;
   --border-focus: var(--brand-red);
   --border-error: var(--error);
 
-  /* Typography Scale */
+  /* === COMPONENT COLORS === */
+  --card: #f9fafb;
+  --card-foreground: #111827;
+  --popover: #ffffff;
+  --popover-foreground: #111827;
+  --primary: #e11d48;
+  --primary-foreground: #f8fafc;
+  --secondary: #4f46e5;
+  --secondary-foreground: #f8fafc;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #4f46e5;
+  --accent-foreground: #f8fafc;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --input: #e2e8f0;
+  --ring: #e11d48;
+
+  /* === TYPOGRAPHY === */
   --font-family-primary: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   --font-family-secondary: 'Roboto', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-family-mono: 'JetBrains Mono', 'Fira Code', monospace;
@@ -56,7 +82,7 @@
   --leading-normal: 1.5;
   --leading-relaxed: 1.75;
 
-  /* Spacing Scale (4dp grid base) */
+  /* === SPACING === */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -69,7 +95,7 @@
   --space-16: 64px;
   --space-20: 80px;
 
-  /* Border Radius */
+  /* === BORDER RADIUS === */
   --radius-sm: 4px;
   --radius: 8px;
   --radius-md: 12px;
@@ -77,20 +103,20 @@
   --radius-xl: 24px;
   --radius-full: 9999px;
 
-  /* Shadows / Elevation */
+  /* === SHADOWS === */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
   --shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
   --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
   --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1), 0 10px 10px rgba(0, 0, 0, 0.04);
   
-  /* Elevation levels (Material Design inspired) */
+  /* Elevation levels */
   --elevation-1: 0 1px 3px rgba(17, 20, 24, 0.08);
-  --elevation-2: 0 4px 16px rgba(17, 20, 24, 0.08); /* Card padrão */
-  --elevation-6: 0 8px 24px rgba(17, 20, 24, 0.12); /* Bottom sheet/Bar fixa */
-  --elevation-8: 0 12px 32px rgba(17, 20, 24, 0.16); /* Floating chips FAB-like */
+  --elevation-2: 0 4px 16px rgba(17, 20, 24, 0.08);
+  --elevation-6: 0 8px 24px rgba(17, 20, 24, 0.12);
+  --elevation-8: 0 12px 32px rgba(17, 20, 24, 0.16);
 
-  /* Component Heights */
+  /* === COMPONENT HEIGHTS === */
   --height-appbar: 56px;
   --height-appbar-lg: 64px;
   --height-bottom-nav: 64px;
@@ -102,13 +128,13 @@
   --height-input: 44px;
   --height-touch-target: 44px;
 
-  /* Breakpoints */
+  /* === BREAKPOINTS === */
   --breakpoint-sm: 640px;
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
 
-  /* Z-index Scale */
+  /* === Z-INDEX === */
   --z-dropdown: 1000;
   --z-sticky: 1020;
   --z-fixed: 1030;
@@ -118,32 +144,88 @@
   --z-tooltip: 1070;
   --z-toast: 1080;
 
-  /* Animation Durations */
+  /* === ANIMATIONS === */
   --duration-fast: 120ms;
   --duration-normal: 200ms;
   --duration-slow: 300ms;
-
-  /* Animation Easings */
   --ease-in: cubic-bezier(0.4, 0, 1, 1);
   --ease-out: cubic-bezier(0, 0, 0.2, 1);
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Dark mode variables (for future implementation) */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #1a1a1a;
-    --bg-soft: #2a2a2a;
-    --bg-muted: #3a3a3a;
-    --text-strong: #ffffff;
-    --text: #e5e5e5;
-    --text-muted: #a3a3a3;
-    --border: #404040;
-    --border-light: #525252;
-  }
+/* ===== DARK THEME ===== */
+:root[data-theme="dark"],
+.dark {
+  color-scheme: dark;
+  
+  /* === BRAND COLORS (Ajustados para dark) === */
+  --brand-red: #ff4757;
+  --brand-red-hover: #ff6b7a;
+  --accent-purple: #9c75ff;
+  --accent-purple-hover: #b08dff;
+  --success: #20c997;
+  --warning: #ffd43b;
+  --error: #ff8787;
+
+  /* === BACKGROUND SYSTEM === */
+  --background: #0f172a;
+  --foreground: #f8fafc;
+  --bg: #0f172a;
+  --bg-soft: #1e293b;
+  --bg-muted: #334155;
+  --bg-input: #1e293b;
+  --bg-input-disabled: #0f172a;
+  --chip-bg: #334155;
+  --overlay: rgba(0, 0, 0, 0.7);
+
+  /* === TEXT COLORS === */
+  --text-strong: #f8fafc;
+  --text: #e2e8f0;
+  --text-muted: #94a3b8;
+  --text-light: #64748b;
+  --text-placeholder: #64748b;
+  --text-inverse: #0f172a;
+
+  /* === BORDER COLORS === */
+  --border: #334155;
+  --border-light: #475569;
+  --border-input: #334155;
+  --border-focus: var(--brand-red);
+  --border-error: var(--error);
+
+  /* === COMPONENT COLORS === */
+  --card: #1e293b;
+  --card-foreground: #f8fafc;
+  --popover: #1e293b;
+  --popover-foreground: #f8fafc;
+  --primary: #f43f5e;
+  --primary-foreground: #0f172a;
+  --secondary: #6366f1;
+  --secondary-foreground: #f8fafc;
+  --muted: #334155;
+  --muted-foreground: #94a3b8;
+  --accent: #6366f1;
+  --accent-foreground: #f8fafc;
+  --destructive: #ef4444;
+  --destructive-foreground: #f8fafc;
+  --input: #334155;
+  --ring: #f43f5e;
+
+  /* === SHADOWS (Ajustados para dark) === */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 1px 3px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.4), 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.5), 0 4px 6px rgba(0, 0, 0, 0.3);
+  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.6), 0 10px 10px rgba(0, 0, 0, 0.3);
+  
+  /* Elevation levels para dark */
+  --elevation-1: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --elevation-2: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --elevation-6: 0 8px 24px rgba(0, 0, 0, 0.5);
+  --elevation-8: 0 12px 32px rgba(0, 0, 0, 0.6);
 }
 
-/* Base reset and typography */
+/* ===== BASE STYLES ===== */
 * {
   box-sizing: border-box;
 }
@@ -152,15 +234,17 @@ body {
   font-family: var(--font-family-primary);
   font-size: var(--text-base);
   line-height: var(--leading-normal);
-  color: var(--text);
-  background-color: var(--bg);
+  color: var(--foreground);
+  background-color: var(--background);
   margin: 0;
   padding: 0;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  transition: background-color var(--duration-normal) var(--ease-out), 
+              color var(--duration-normal) var(--ease-out);
 }
 
-/* Typography utilities */
+/* ===== TYPOGRAPHY UTILITIES ===== */
 .text-xs { font-size: var(--text-xs); }
 .text-sm { font-size: var(--text-sm); }
 .text-base { font-size: var(--text-base); }

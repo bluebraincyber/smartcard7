@@ -8,7 +8,7 @@ import dynamic from 'next/dynamic'
 // Dynamically import charts
 const ActiveUsers24hChart = dynamic(() => import('@/components/charts/ActiveUsers24hChart'), {
   ssr: false,
-  loading: () => <div className="h-64 bg-gray-100 animate-pulse rounded-lg" />
+  loading: () => <div className="h-64 bg-muted animate-pulse rounded-lg" />
 })
 
 // Tipos para os dados
@@ -188,14 +188,14 @@ export default function AnalyticsPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <div className="min-h-screen bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col items-center justify-center h-64">
             <div className="relative">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-purple-200 border-t-purple-600"></div>
-              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-purple-400 to-purple-600 opacity-20 animate-pulse"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-border border-t-accent"></div>
+              <div className="absolute inset-0 rounded-full bg-accent opacity-20 animate-pulse"></div>
             </div>
-            <span className="mt-4 text-gray-700 font-medium">Carregando analytics...</span>
+            <span className="mt-4 text-foreground font-medium">Carregando analytics...</span>
           </div>
         </div>
       </div>
@@ -203,10 +203,7 @@ export default function AnalyticsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-      
+    <div className="min-h-screen bg-background">
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-12">
@@ -214,7 +211,7 @@ export default function AnalyticsPage() {
             <div className="flex items-center space-x-4">
               <Link
                 href="/dashboard"
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-gray-200"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-card hover:bg-muted rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-border"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Dashboard
@@ -226,22 +223,22 @@ export default function AnalyticsPage() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="relative mb-8">
-            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-purple-500 to-purple-600 shadow-lg mb-6">
-              <BarChart3 className="h-10 w-10 text-white" />
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-accent shadow-lg mb-6">
+              <BarChart3 className="h-10 w-10 text-accent-foreground" />
             </div>
-            <div className="absolute inset-0 bg-gradient-to-r from-purple-400 to-purple-600 opacity-20 rounded-full blur-xl scale-150"></div>
+            <div className="absolute inset-0 bg-accent opacity-20 rounded-full blur-xl scale-150"></div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold text-foreground mb-4">
             Analytics
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Acompanhe o desempenho da sua aplicação com métricas detalhadas e insights valiosos
           </p>
         </div>
 
         {/* Period Selector */}
         <div className="flex justify-center mb-12">
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-2">
+          <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-2">
             <div className="flex items-center space-x-1">
               {[
                 { value: '7', label: '7 dias' },
@@ -253,8 +250,8 @@ export default function AnalyticsPage() {
                   onClick={() => setDateRange(option.value as '7' | '30' | '90')}
                   className={`px-6 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                     dateRange === option.value
-                      ? 'bg-purple-600 text-white shadow-md'
-                      : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+                      ? 'bg-accent text-accent-foreground shadow-md'
+                      : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   }`}
                   disabled={isLoading}
                 >
@@ -268,108 +265,108 @@ export default function AnalyticsPage() {
         {/* Analytics Overview Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {/* Total Users */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300">
+          <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
-                <Users className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-primary flex items-center justify-center">
+                <Users className="w-6 h-6 text-primary-foreground" />
               </div>
               <div className={`flex items-center text-xs font-medium ${
-                analyticsData.metrics.totalUsers.change >= 0 ? 'text-green-600' : 'text-red-600'
+                analyticsData.metrics.totalUsers.change >= 0 ? 'text-success' : 'text-destructive'
               }`}>
                 {analyticsData.metrics.totalUsers.change >= 0 ? '+' : ''}{analyticsData.metrics.totalUsers.change}%
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">
+            <div className="text-2xl font-bold text-foreground mb-1">
               {analyticsData.metrics.totalUsers.value}
             </div>
-            <p className="text-sm text-gray-600">Total de usuários</p>
+            <p className="text-sm text-muted-foreground">Total de usuários</p>
           </div>
 
           {/* Total Views */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300">
+          <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-green-500 to-green-600 flex items-center justify-center">
-                <Eye className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-secondary flex items-center justify-center">
+                <Eye className="w-6 h-6 text-secondary-foreground" />
               </div>
               <div className={`flex items-center text-xs font-medium ${
-                analyticsData.metrics.totalViews.change >= 0 ? 'text-green-600' : 'text-red-600'
+                analyticsData.metrics.totalViews.change >= 0 ? 'text-success' : 'text-destructive'
               }`}>
                 {analyticsData.metrics.totalViews.change >= 0 ? '+' : ''}{analyticsData.metrics.totalViews.change}%
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">
+            <div className="text-2xl font-bold text-foreground mb-1">
               {analyticsData.metrics.totalViews.value}
             </div>
-            <p className="text-sm text-gray-600">Visualizações</p>
+            <p className="text-sm text-muted-foreground">Visualizações</p>
           </div>
 
           {/* Bounce Rate */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300">
+          <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-500 to-orange-600 flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-warning flex items-center justify-center">
                 <TrendingDown className="w-6 h-6 text-white" />
               </div>
               <div className={`flex items-center text-xs font-medium ${
-                analyticsData.metrics.bounceRate.change <= 0 ? 'text-green-600' : 'text-red-600'
+                analyticsData.metrics.bounceRate.change <= 0 ? 'text-success' : 'text-destructive'
               }`}>
                 {analyticsData.metrics.bounceRate.change >= 0 ? '+' : ''}{analyticsData.metrics.bounceRate.change}%
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">
+            <div className="text-2xl font-bold text-foreground mb-1">
               {analyticsData.metrics.bounceRate.value}
             </div>
-            <p className="text-sm text-gray-600">Taxa de rejeição</p>
+            <p className="text-sm text-muted-foreground">Taxa de rejeição</p>
           </div>
 
           {/* Average Session */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 p-6 hover:shadow-xl transition-all duration-300">
+          <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-purple-500 to-purple-600 flex items-center justify-center">
-                <Clock className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center">
+                <Clock className="w-6 h-6 text-accent-foreground" />
               </div>
               <div className={`flex items-center text-xs font-medium ${
-                analyticsData.metrics.avgSession.change >= 0 ? 'text-green-600' : 'text-red-600'
+                analyticsData.metrics.avgSession.change >= 0 ? 'text-success' : 'text-destructive'
               }`}>
                 {analyticsData.metrics.avgSession.change >= 0 ? '+' : ''}{analyticsData.metrics.avgSession.change}%
               </div>
             </div>
-            <div className="text-2xl font-bold text-gray-900 mb-1">
+            <div className="text-2xl font-bold text-foreground mb-1">
               {analyticsData.metrics.avgSession.value}
             </div>
-            <p className="text-sm text-gray-600">Duração média</p>
+            <p className="text-sm text-muted-foreground">Duração média</p>
           </div>
         </div>
 
         {/* Charts Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
           {/* Active Users Chart */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 p-8">
+          <div className="bg-card backdrop-blur-sm rounded-3xl shadow-xl border border-border p-8">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Usuários Ativos (24h)</h2>
-              <p className="text-gray-600">Atividade dos usuários nas últimas 24 horas</p>
+              <h2 className="text-xl font-semibold text-foreground mb-2">Usuários Ativos (24h)</h2>
+              <p className="text-muted-foreground">Atividade dos usuários nas últimas 24 horas</p>
             </div>
-            <Suspense fallback={<div className="h-64 bg-gray-100 animate-pulse rounded-lg" />}>
+            <Suspense fallback={<div className="h-64 bg-muted animate-pulse rounded-lg" />}>
               <ActiveUsers24hChart data={activeUsers24hData} height={256} maWindow={7} />
             </Suspense>
           </div>
 
           {/* Page Views Chart */}
-          <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 p-8">
+          <div className="bg-card backdrop-blur-sm rounded-3xl shadow-xl border border-border p-8">
             <div className="mb-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Visualizações por Página</h2>
-              <p className="text-gray-600">Páginas mais acessadas no período</p>
+              <h2 className="text-xl font-semibold text-foreground mb-2">Visualizações por Página</h2>
+              <p className="text-muted-foreground">Páginas mais acessadas no período</p>
             </div>
             <PageViewsChart data={analyticsData.pageViews} />
           </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 p-8 mb-12">
+        <div className="bg-card backdrop-blur-sm rounded-3xl shadow-xl border border-border p-8 mb-12">
           <div className="mb-8 text-center">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">
+            <h2 className="text-2xl font-semibold text-foreground mb-2">
               Ações Rápidas
             </h2>
-            <p className="text-gray-600">
+            <p className="text-muted-foreground">
               Ferramentas para análise e exportação de dados
             </p>
           </div>
@@ -389,22 +386,22 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Geographic Data */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 p-8">
+        <div className="bg-card backdrop-blur-sm rounded-3xl shadow-xl border border-border p-8">
           <div className="mb-8">
-            <h2 className="text-2xl font-semibold text-gray-900 mb-2">Distribuição Geográfica</h2>
-            <p className="text-gray-600">Localização dos usuários por região</p>
+            <h2 className="text-2xl font-semibold text-foreground mb-2">Distribuição Geográfica</h2>
+            <p className="text-muted-foreground">Localização dos usuários por região</p>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Map Placeholder */}
             <div className="lg:col-span-2">
-              <div className="h-80 bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl flex items-center justify-center">
+              <div className="h-80 bg-muted rounded-2xl flex items-center justify-center">
                 <div className="text-center">
-                  <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Globe className="w-8 h-8 text-blue-600" />
+                  <div className="w-16 h-16 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Globe className="w-8 h-8 text-primary" />
                   </div>
-                  <p className="text-gray-700 font-medium">Mapa Interativo</p>
-                  <p className="text-sm text-gray-500 mt-1">Integração em desenvolvimento</p>
+                  <p className="text-foreground font-medium">Mapa Interativo</p>
+                  <p className="text-sm text-muted-foreground mt-1">Integração em desenvolvimento</p>
                 </div>
               </div>
             </div>
@@ -417,18 +414,18 @@ export default function AnalyticsPage() {
                 { country: 'Portugal', percentage: 6, users: '194' },
                 { country: 'Argentina', percentage: 4, users: '129' }
               ].map((stat, index) => (
-                <div key={index} className="bg-gray-50 rounded-xl p-4">
+                <div key={index} className="bg-muted rounded-xl p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-sm font-medium text-gray-900">{stat.country}</span>
-                    <span className="text-sm text-gray-600">{stat.users}</span>
+                    <span className="text-sm font-medium text-foreground">{stat.country}</span>
+                    <span className="text-sm text-muted-foreground">{stat.users}</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
+                  <div className="w-full bg-border rounded-full h-2">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      className="bg-primary h-2 rounded-full transition-all duration-300"
                       style={{ width: `${stat.percentage}%` }}
                     ></div>
                   </div>
-                  <div className="text-xs text-gray-500 mt-1">{stat.percentage}% do total</div>
+                  <div className="text-xs text-muted-foreground mt-1">{stat.percentage}% do total</div>
                 </div>
               ))}
             </div>
@@ -443,7 +440,7 @@ export default function AnalyticsPage() {
 function PageViewsChart({ data }: { data: PageViewData[] }) {
   if (!data || data.length === 0) {
     return (
-      <div className="h-64 flex items-center justify-center text-gray-500">
+      <div className="h-64 flex items-center justify-center text-muted-foreground">
         Nenhum dado disponível
       </div>
     )
@@ -455,15 +452,15 @@ function PageViewsChart({ data }: { data: PageViewData[] }) {
     <div className="space-y-4">
       {data.map((item, index) => (
         <div key={index} className="flex items-center gap-4">
-          <div className="w-20 text-sm text-gray-600 text-right font-medium">{item.name}</div>
+          <div className="w-20 text-sm text-muted-foreground text-right font-medium">{item.name}</div>
           <div className="flex-1 flex items-center gap-3">
-            <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
+            <div className="flex-1 bg-border rounded-full h-3 overflow-hidden">
               <div 
-                className="bg-gradient-to-r from-purple-500 to-purple-600 h-full rounded-full transition-all duration-500 ease-out"
+                className="bg-accent h-full rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${(item.views / maxViews) * 100}%` }}
               />
             </div>
-            <span className="text-sm text-gray-700 font-semibold w-16 text-right">
+            <span className="text-sm text-foreground font-semibold w-16 text-right">
               {item.views.toLocaleString()}
             </span>
           </div>
@@ -489,28 +486,28 @@ function QuickActionCard({
 }) {
   const colorClasses = {
     blue: {
-      bg: 'from-blue-500 to-blue-600 group-hover:from-blue-600 group-hover:to-blue-700',
-      text: 'text-blue-600 group-hover:text-blue-700',
-      border: 'group-hover:border-blue-200',
-      bgHover: 'from-blue-50 to-blue-100'
+      bg: 'bg-primary group-hover:bg-primary/90',
+      text: 'text-primary group-hover:text-primary/80',
+      border: 'group-hover:border-primary/50',
+      bgHover: 'bg-primary/10'
     },
     green: {
-      bg: 'from-green-500 to-green-600 group-hover:from-green-600 group-hover:to-green-700',
-      text: 'text-green-600 group-hover:text-green-700',
-      border: 'group-hover:border-green-200',
-      bgHover: 'from-green-50 to-green-100'
+      bg: 'bg-secondary group-hover:bg-secondary/90',
+      text: 'text-secondary group-hover:text-secondary/80',
+      border: 'group-hover:border-secondary/50',
+      bgHover: 'bg-secondary/10'
     },
     purple: {
-      bg: 'from-purple-500 to-purple-600 group-hover:from-purple-600 group-hover:to-purple-700',
-      text: 'text-purple-600 group-hover:text-purple-700',
-      border: 'group-hover:border-purple-200',
-      bgHover: 'from-purple-50 to-purple-100'
+      bg: 'bg-accent group-hover:bg-accent/90',
+      text: 'text-accent group-hover:text-accent/80',
+      border: 'group-hover:border-accent/50',
+      bgHover: 'bg-accent/10'
     },
     orange: {
-      bg: 'from-orange-500 to-orange-600 group-hover:from-orange-600 group-hover:to-orange-700',
-      text: 'text-orange-600 group-hover:text-orange-700',
-      border: 'group-hover:border-orange-200',
-      bgHover: 'from-orange-50 to-orange-100'
+      bg: 'bg-destructive group-hover:bg-destructive/90',
+      text: 'text-destructive group-hover:text-destructive/80',
+      border: 'group-hover:border-destructive/50',
+      bgHover: 'bg-destructive/10'
     }
   }
 
@@ -519,19 +516,19 @@ function QuickActionCard({
   return (
     <div className="group relative">
       {/* Hover Background Effect */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${classes.bgHover} rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10 scale-105`}></div>
+      <div className={`absolute inset-0 ${classes.bgHover} rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10 scale-105`}></div>
       
       <button
         onClick={action}
-        className={`w-full h-full bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-gray-200 hover:shadow-2xl transition-all duration-300 text-center ${classes.border}`}
+        className={`w-full h-full bg-card backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-border hover:shadow-2xl transition-all duration-300 text-center ${classes.border}`}
       >
-        <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-gradient-to-br ${classes.bg} transition-all duration-300 mb-6 shadow-md group-hover:shadow-lg`}>
+        <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-2xl ${classes.bg} transition-all duration-300 mb-6 shadow-md group-hover:shadow-lg`}>
           <Icon className="h-7 w-7 text-white" />
         </div>
-        <h3 className="text-lg font-semibold text-gray-900 mb-3 transition-colors">
+        <h3 className="text-lg font-semibold text-foreground mb-3 transition-colors">
           {title}
         </h3>
-        <p className="text-sm text-gray-600 leading-relaxed mb-4">
+        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
           {description}
         </p>
         <div className={`inline-flex items-center ${classes.text} text-sm font-medium transition-all duration-200`}>

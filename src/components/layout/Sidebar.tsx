@@ -22,14 +22,19 @@ export function Sidebar() {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 hidden h-screen bg-white transition-all duration-300 ease-in-out md:block",
+        "fixed left-0 top-0 z-40 hidden h-screen transition-all duration-300 ease-in-out md:block",
+        "bg-card border-r border-border shadow-lg",
         isOpen ? "w-64" : "w-16"
       )}
     >
       <div className="flex h-14 items-center justify-end px-3">
         <button
           onClick={toggle}
-          className="flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100"
+          className="
+            flex h-9 w-9 items-center justify-center rounded-md 
+            text-muted-foreground hover:text-foreground
+            hover:bg-muted transition-colors
+          "
           aria-label={isOpen ? "Recolher menu" : "Expandir menu"}
         >
           {isOpen ? (
@@ -50,8 +55,8 @@ export function Sidebar() {
               className={cn(
                 "mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
                 isActive 
-                  ? "bg-blue-50 text-blue-600" 
-                  : "text-gray-700 hover:bg-gray-100 hover:text-gray-900",
+                  ? "bg-primary/10 text-primary border border-primary/20" 
+                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 !isOpen && "justify-center"
               )}
               title={!isOpen ? label : undefined}
@@ -72,8 +77,14 @@ export function Sidebar() {
 
       {/* User profile at the bottom */}
       <div className="absolute bottom-0 left-0 right-0 p-2">
-        <div className="flex items-center gap-2 rounded-lg p-2 text-sm text-gray-700 hover:bg-gray-100">
-          <div className="h-8 w-8 flex-shrink-0 rounded-full bg-indigo-100" />
+        <div className="
+          flex items-center gap-2 rounded-lg p-2 text-sm 
+          text-muted-foreground hover:text-foreground 
+          hover:bg-muted transition-colors
+        ">
+          <div className="h-8 w-8 flex-shrink-0 rounded-full bg-primary/20 flex items-center justify-center">
+            <span className="text-xs font-medium text-primary">U</span>
+          </div>
           <span className={cn(isOpen ? "block" : "md:sr-only")}>Usuário</span>
         </div>
       </div>

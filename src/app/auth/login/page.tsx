@@ -75,13 +75,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-background py-12 px-4">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-foreground">
             SmartCard Login
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             Faça login para acessar o dashboard
           </p>
         </div>
@@ -89,7 +89,7 @@ export default function LoginPage() {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-4">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground">
                 Email
               </label>
               <input
@@ -101,13 +101,13 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:opacity-50"
+                className="input mt-1 block w-full disabled:opacity-50"
                 placeholder="Digite seu email"
               />
             </div>
             
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground">
                 Senha
               </label>
               <input
@@ -119,14 +119,14 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm disabled:opacity-50"
+                className="input mt-1 block w-full disabled:opacity-50"
                 placeholder="Digite sua senha"
               />
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-md p-3 text-red-600 text-sm text-center">
+            <div className="bg-destructive/10 border border-destructive/20 rounded-md p-3 text-destructive text-sm text-center">
               {error}
             </div>
           )}
@@ -135,11 +135,11 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <span className="flex items-center">
-                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                  <svg className="animate-spin -ml-1 mr-3 h-4 w-4" fill="none" viewBox="0 0 24 24">
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                   </svg>
@@ -154,7 +154,7 @@ export default function LoginPage() {
           <div className="text-center">
             <Link
               href="/auth/register"
-              className="text-blue-600 hover:text-blue-500 text-sm"
+              className="text-primary hover:opacity-80 text-sm"
             >
               Não tem conta? Cadastre-se aqui
             </Link>
@@ -163,7 +163,7 @@ export default function LoginPage() {
 
         {/* Debug em desenvolvimento */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="text-xs text-gray-400 text-center mt-4">
+          <div className="text-xs text-muted-foreground text-center mt-4">
             Loading: {isLoading ? 'Yes' : 'No'} | Error: {error || 'None'}
           </div>
         )}

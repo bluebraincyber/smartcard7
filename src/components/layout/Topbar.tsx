@@ -1,12 +1,9 @@
 "use client";
 
 import { MenuIcon } from "lucide-react";
-// import Link from "next/link";
-
-// import { UserAccountNav } from "@/components/layout/user-account-nav";
 import { MobileSidebar } from "@/components/layout/MobileSidebar";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useSidebar } from "@/components/providers/sidebar-provider";
-// import { useUser } from "@clerk/nextjs";
 
 export function Topbar() {
   const { toggle } = useSidebar();
@@ -17,27 +14,35 @@ export function Topbar() {
         <div className="flex items-center">
           <button
             onClick={toggle}
-            className="md:hidden self-center w-10 h-10 flex items-center justify-center p-0 text-base bg-white rounded-full shadow-md hover:bg-gray-100 focus-visible:bg-gray-100 focus-visible:ring-0"
+            className="
+              md:hidden self-center w-10 h-10 flex items-center justify-center p-0 text-base 
+              bg-card border border-border rounded-full shadow-md 
+              hover:bg-muted focus-visible:bg-muted focus-visible:ring-0
+              text-foreground transition-colors
+            "
           >
             <MenuIcon className="h-5 w-5" />
             <span className="sr-only">Toggle Menu</span>
           </button>
           <MobileSidebar />
         </div>
+        
         <div className="absolute left-1/2 transform -translate-x-1/2">
-          <div className="px-3 py-1 rounded-full bg-white/90 backdrop-blur-sm shadow-md text-blue-500 text-sm font-medium">
+          <div className="
+            px-3 py-1 rounded-full 
+            bg-card/90 backdrop-blur-sm shadow-md 
+            border border-border
+            text-primary text-sm font-medium
+            transition-colors
+          ">
             SmartCard
           </div>
         </div>
-        <div className="flex items-center justify-end">
+        
+        <div className="flex items-center gap-2">
+          <ThemeToggle />
           <nav className="flex items-center">
-            {/* {user ? (
-              <UserAccountNav user={user} />
-            ) : (
-              <Link href="/login">
-                <Button className="self-center" size="sm">Entrar</Button>
-              </Link>
-            )} */}
+            {/* Navigation items if needed */}
           </nav>
         </div>
       </div>
