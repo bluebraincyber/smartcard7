@@ -33,12 +33,13 @@ export default async function HealthPage() {
   };
 
   return (
-    <div className="container mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">System Health</h1>
+        <h1 className="text-2xl font-bold text-foreground">System Health</h1>
         <div className="flex items-center space-x-2">
           {getStatusIcon(health.status)}
-          <span className="capitalize">{health.status || 'unknown'}</span>
+          <span className="capitalize text-foreground">{health.status || 'unknown'}</span>
         </div>
       </div>
 
@@ -112,6 +113,7 @@ export default async function HealthPage() {
           </div>
         </CardContent>
       </Card>
+      </div>
     </div>
   );
 }

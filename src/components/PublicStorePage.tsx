@@ -1,26 +1,26 @@
 {/* Dropdown Menu */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-[2147483646] bg-black/20 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)}>
-          <div className="absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-md border border-gray-200/50 shadow-xl mx-4 rounded-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className="absolute top-16 left-0 right-0 bg-card/95 backdrop-blur-md border border-border shadow-xl mx-4 rounded-2xl" onClick={(e) => e.stopPropagation()}>
             <div className="p-4 sm:p-6">
               <div className="grid grid-cols-1 gap-2">
-                <Link href="/" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gray-100/80 transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-blue-100 transition-colors duration-200">
-                    <Home className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-blue-600 transition-colors duration-200" />
+                <Link href="/" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
+                  <div className="p-2 rounded-lg bg-muted group-hover:bg-primary/10 transition-colors duration-200">
+                    <Home className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
                   </div>
-                  <span className="text-gray-900 text-sm sm:text-base font-medium">Página Inicial</span>
+                  <span className="text-foreground text-sm sm:text-base font-medium">Página Inicial</span>
                 </Link>
-                <Link href="/auth/register" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gray-100/80 transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-green-100 transition-colors duration-200">
-                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-green-600 transition-colors duration-200" />
+                <Link href="/auth/register" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
+                  <div className="p-2 rounded-lg bg-muted group-hover:bg-secondary/10 transition-colors duration-200">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-secondary transition-colors duration-200" />
                   </div>
-                  <span className="text-gray-900 text-sm sm:text-base font-medium">Criar Minha Loja</span>
+                  <span className="text-foreground text-sm sm:text-base font-medium">Criar Minha Loja</span>
                 </Link>
-                <Link href="/dashboard" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gray-100/80 transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-purple-100 transition-colors duration-200">
-                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-purple-600 transition-colors duration-200" />
+                <Link href="/dashboard" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
+                  <div className="p-2 rounded-lg bg-muted group-hover:bg-accent/10 transition-colors duration-200">
+                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-accent transition-colors duration-200" />
                   </div>
-                  <span className="text-gray-900 text-sm sm:text-base font-medium">Painel Administrativo</span>
+                  <span className="text-foreground text-sm sm:text-base font-medium">Painel Administrativo</span>
                 </Link>
               </div>
             </div>
@@ -91,10 +91,10 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
   if (!store || !store.id || !store.name) {
     console.error('❌ Dados de store inválidos:', store)
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
-          <h2 className="text-xl font-medium text-gray-900 mb-2">Erro ao carregar loja</h2>
-          <p className="text-gray-500">Os dados da loja estão incompletos.</p>
+          <h2 className="text-xl font-medium text-foreground mb-2">Erro ao carregar loja</h2>
+          <p className="text-muted-foreground">Os dados da loja estão incompletos.</p>
         </div>
       </div>
     )
@@ -239,10 +239,10 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
 
   // 6) Render
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
+    <div className="min-h-screen bg-background">
       {/* ETIQUETA SMARTCARD - colada no topo */}
       <div className="w-full flex justify-center sticky top-0 z-50">
-        <div className="bg-white shadow-lg px-6 py-3 rounded-b-2xl font-bold text-blue-600">
+        <div className="bg-card shadow-lg px-6 py-3 rounded-b-2xl font-bold text-primary">
           SmartCard
         </div>
       </div>
@@ -250,7 +250,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
       {/* Botão hambúrguer (mobile) */}
       <button
         onClick={() => setIsMenuOpen(v => !v)}
-        className="md:hidden fixed top-3 left-4 z-40 p-2 bg-white rounded-full shadow-md"
+        className="md:hidden fixed top-3 left-4 z-40 p-2 bg-card rounded-full shadow-md"
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -259,15 +259,15 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
       <button
         onClick={() => setIsCartOpen(true)}
         className={`hidden md:block fixed top-3 right-4 z-40 relative p-2 sm:p-2.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl ${
-          cart.length > 0 
-            ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800' 
-            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        cart.length > 0 
+        ? 'bg-gradient-to-r from-success to-success/90 text-white hover:from-success/90 hover:to-success/80' 
+        : 'bg-muted text-muted-foreground hover:bg-muted/80'
         }`}
         aria-label="Abrir carrinho"
       >
         <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
         {cart.length > 0 && (
-          <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-md">
+          <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-destructive text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-md">
             {cartCount}
           </span>
         )}
@@ -319,7 +319,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
 
         {/* Store Info Card */}
         <div className="max-w-4xl mx-auto px-3 sm:px-4">
-          <div className="bg-white/95 backdrop-blur-sm -mt-8 sm:-mt-12 relative z-10 rounded-2xl shadow-2xl border border-gray-200/50">
+          <div className="bg-card/95 backdrop-blur-sm -mt-8 sm:-mt-12 relative z-10 rounded-2xl shadow-2xl border border-border">
             <div className="p-5 sm:p-8">
               <div className="flex items-start space-x-4 sm:space-x-6">
                 {/* Profile Image */}
@@ -342,11 +342,11 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                     />
                   ) : null}
                   {/* Fallback sempre presente */}
-                  <div 
-                    className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg"
-                    style={{ display: store.profileImage ? 'none' : 'flex' }}
-                  >
-                    <svg className="h-8 w-8 sm:h-10 sm:w-10 text-gray-400" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <div 
+                      className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-muted to-muted/80 rounded-2xl flex items-center justify-center border-4 border-background shadow-lg"
+                      style={{ display: store.profileImage ? 'none' : 'flex' }}
+                    >
+                      <svg className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h8v2H6V8zm0 4h12v2H6v-2z"/>
                     </svg>
                   </div>
@@ -354,24 +354,24 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
 
                 {/* Store Details */}
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">{store.name}</h1>
+                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">{store.name}</h1>
                   {store.description && (
-                    <p className="text-gray-600 text-sm sm:text-base mb-4 leading-relaxed">{store.description}</p>
+                    <p className="text-muted-foreground text-sm sm:text-base mb-4 leading-relaxed">{store.description}</p>
                   )}
 
                   {/* Store Info */}
-                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm text-gray-600">
+                  <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm text-muted-foreground">
                     {store.address && (
                       <div className="flex items-center">
-                        <div className="p-1.5 rounded-lg bg-blue-50 mr-2">
-                          <MapPin className="h-4 w-4 text-blue-600" aria-hidden="true" />
+                        <div className="p-1.5 rounded-lg bg-primary/10 mr-2">
+                          <MapPin className="h-4 w-4 text-primary" aria-hidden="true" />
                         </div>
                         <span className="truncate">{store.address}</span>
                       </div>
                     )}
                     <div className="flex items-center">
-                      <div className="p-1.5 rounded-lg bg-green-50 mr-2">
-                        <Phone className="h-4 w-4 text-green-600" aria-hidden="true" />
+                      <div className="p-1.5 rounded-lg bg-success/10 mr-2">
+                        <Phone className="h-4 w-4 text-success" aria-hidden="true" />
                       </div>
                       <span>{store.whatsapp}</span>
                     </div>
@@ -387,16 +387,16 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {safeCategories.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
+            <div className="text-muted-foreground mb-4">
               <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
               </svg>
             </div>
-            <h3 className="text-lg font-medium text-gray-900 mb-2">Catálogo em construção</h3>
-            <p className="text-gray-500 mb-4">Em breve teremos produtos disponíveis aqui!</p>
+            <h3 className="text-lg font-medium text-foreground mb-2">Catálogo em construção</h3>
+            <p className="text-muted-foreground mb-4">Em breve teremos produtos disponíveis aqui!</p>
             <button
               onClick={() => sendWhatsAppInquiry('catalog')}
-              className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-2xl hover:from-green-700 hover:to-green-800 transition-all duration-300 text-sm sm:text-base font-semibold shadow-xl hover:shadow-2xl hover:-translate-y-1"
+              className="inline-flex items-center px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-success to-success/90 text-white rounded-2xl hover:from-success/90 hover:to-success/80 transition-all duration-300 text-sm sm:text-base font-semibold shadow-xl hover:shadow-2xl hover:-translate-y-1"
             >
               <MessageCircle className="h-5 w-5 mr-2" aria-hidden="true" />
               Falar no WhatsApp
@@ -410,15 +410,15 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
 
               return (
                 <div key={category.id} className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-gray-200">{category.name}</h2>
+                  <h2 className="text-2xl font-bold mb-4 text-foreground">{category.name}</h2>
                   {available.length === 0 ? (
-                    <p className="text-gray-500 text-center py-8">Nenhum item disponível nesta categoria</p>
+                    <p className="text-muted-foreground text-center py-8">Nenhum item disponível nesta categoria</p>
                   ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                       {available.map(item => (
                         <div
                           key={item.id}
-                          className="bg-white/90 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200/50 p-4 sm:p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                          className="bg-card/90 backdrop-blur-sm rounded-2xl shadow-lg border border-border p-4 sm:p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
                         >
                           <div className="flex items-start space-x-4">
                             {/* Product Image */}
@@ -436,14 +436,14 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                             {/* Product Info */}
                             <div className="flex-1 min-w-0">
                               <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
-                                <h3 className="font-semibold text-gray-900 text-base sm:text-lg mb-1 sm:mb-0 leading-tight">{item.name}</h3>
-                                <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent sm:ml-3">
+                                <h3 className="font-semibold text-foreground text-base sm:text-lg mb-1 sm:mb-0 leading-tight">{item.name}</h3>
+                                <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-success to-success/80 bg-clip-text text-transparent sm:ml-3">
                                   {formatBRL(Number(item.price) || 0)}
                                 </span>
                               </div>
 
                               {item.description && (
-                                <p className="text-xs sm:text-sm text-gray-600 mb-3 sm:mb-4 leading-relaxed line-clamp-2">{item.description}</p>
+                                <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 leading-relaxed line-clamp-2">{item.description}</p>
                               )}
 
                               {/* Add to Cart Controls */}
@@ -452,16 +452,16 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                                   <div className="flex items-center space-x-3">
                                     <button
                                       onClick={() => removeFromCart(item.id)}
-                                      className="bg-red-100 text-red-600 p-2 sm:p-2.5 rounded-xl hover:bg-red-200 transition-all duration-200 shadow-sm hover:shadow-md"
+                                      className="bg-destructive/10 text-destructive p-2 sm:p-2.5 rounded-xl hover:bg-destructive/20 transition-all duration-200 shadow-sm hover:shadow-md"
                                     >
                                       <Minus className="h-4 w-4" aria-hidden="true" />
                                     </button>
-                                    <span className="font-bold text-lg sm:text-xl min-w-[2rem] text-center text-gray-900">
+                                    <span className="font-bold text-lg sm:text-xl min-w-[2rem] text-center text-foreground">
                                       {cart.find(ci => ci.id === item.id)?.quantity || 0}
                                     </span>
                                     <button
                                       onClick={() => addToCart(item)}
-                                      className="bg-green-100 text-green-600 p-2 sm:p-2.5 rounded-xl hover:bg-green-200 transition-all duration-200 shadow-sm hover:shadow-md"
+                                      className="bg-success/10 text-success p-2 sm:p-2.5 rounded-xl hover:bg-success/20 transition-all duration-200 shadow-sm hover:shadow-md"
                                     >
                                       <Plus className="h-4 w-4" aria-hidden="true" />
                                     </button>
@@ -469,7 +469,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                                 ) : (
                                   <button
                                     onClick={() => addToCart(item)}
-                                    className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl"
+                                    className="bg-gradient-to-r from-success to-success/90 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:from-success/90 hover:to-success/80 transition-all duration-200 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl"
                                   >
                                     Adicionar
                                   </button>
@@ -499,24 +499,24 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
           
           {/* Floating Card - Centered */}
           <div className="relative z-10 flex items-center justify-center min-h-full p-4 sm:p-6">
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50 w-full max-w-md max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
+            <div className="bg-card/95 backdrop-blur-md rounded-2xl shadow-2xl border border-border w-full max-w-md max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
               {/* Header */}
-              <div className="p-4 sm:p-6 border-b border-gray-200/50">
+              <div className="p-4 sm:p-6 border-b border-border">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-gradient-to-r from-green-100 to-green-200 rounded-lg">
-                      <ShoppingCart className="h-5 w-5 text-green-600" aria-hidden="true" />
+                    <div className="p-2 bg-gradient-to-r from-success/20 to-success/30 rounded-lg">
+                      <ShoppingCart className="h-5 w-5 text-success" aria-hidden="true" />
                     </div>
                     <div>
-                      <h3 className="text-lg font-bold text-gray-900">Seu Carrinho</h3>
+                      <h3 className="text-lg font-bold text-foreground">Seu Carrinho</h3>
                       {cart.length > 0 && (
-                        <p className="text-sm text-gray-500">{cartCount} {cartCount === 1 ? 'item' : 'itens'}</p>
+                        <p className="text-sm text-muted-foreground">{cartCount} {cartCount === 1 ? 'item' : 'itens'}</p>
                       )}
                     </div>
                   </div>
                   <button 
                     onClick={() => setIsCartOpen(false)} 
-                    className="text-gray-400 hover:text-gray-600 p-2 hover:bg-gray-100 rounded-lg transition-all duration-200" 
+                    className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted rounded-lg transition-all duration-200" 
                     aria-label="Fechar carrinho"
                   >
                     <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -529,14 +529,14 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
               {/* Cart Content */}
               {cart.length === 0 ? (
                 <div className="p-6 sm:p-8 text-center">
-                  <div className="text-gray-400 mb-4">
+                  <div className="text-muted-foreground mb-4">
                     <ShoppingCart className="h-12 w-12 mx-auto" strokeWidth={1} />
                   </div>
-                  <h4 className="text-lg font-medium text-gray-900 mb-2">Carrinho vazio</h4>
-                  <p className="text-gray-500 mb-6">Adicione alguns produtos para começar seu pedido</p>
+                  <h4 className="text-lg font-medium text-foreground mb-2">Carrinho vazio</h4>
+                  <p className="text-muted-foreground mb-6">Adicione alguns produtos para começar seu pedido</p>
                   <button 
                     onClick={() => setIsCartOpen(false)}
-                    className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-3 rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 font-semibold"
+                    className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-xl hover:from-primary/90 hover:to-primary/70 transition-all duration-200 font-semibold"
                   >
                     Continuar Comprando
                   </button>
@@ -547,14 +547,14 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                   <div className="p-4 sm:p-6 max-h-64 sm:max-h-80 overflow-y-auto">
                     <div className="space-y-4">
                       {cart.map(item => (
-                        <div key={item.id} className="bg-gray-50/80 rounded-xl p-4 hover:bg-gray-100/80 transition-colors duration-200">
+                        <div key={item.id} className="bg-muted/80 rounded-xl p-4 hover:bg-muted transition-colors duration-200">
                           <div className="flex items-start justify-between">
                             <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-gray-900 mb-1 truncate">{item.name}</h4>
-                              <p className="text-sm text-gray-600">{formatBRL(Number(item.price) || 0)} cada</p>
+                              <h4 className="font-semibold text-foreground mb-1 truncate">{item.name}</h4>
+                              <p className="text-sm text-muted-foreground">{formatBRL(Number(item.price) || 0)} cada</p>
                             </div>
                             <div className="ml-4 text-right">
-                              <p className="font-bold text-green-600 mb-2">
+                              <p className="font-bold text-success mb-2">
                                 {formatBRL((Number(item.price) || 0) * item.quantity)}
                               </p>
                             </div>
@@ -564,15 +564,15 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                             <div className="flex items-center space-x-3">
                               <button 
                                 onClick={() => removeFromCart(item.id)} 
-                                className="bg-red-100 text-red-600 p-2 rounded-lg hover:bg-red-200 transition-colors duration-200" 
+                                className="bg-destructive/10 text-destructive p-2 rounded-lg hover:bg-destructive/20 transition-colors duration-200" 
                                 aria-label="Diminuir quantidade"
                               >
                                 <Minus className="h-4 w-4" aria-hidden="true" />
                               </button>
-                              <span className="font-bold text-gray-900 min-w-[2rem] text-center">{item.quantity}</span>
+                              <span className="font-bold text-foreground min-w-[2rem] text-center">{item.quantity}</span>
                               <button 
                                 onClick={() => addToCart(item)} 
-                                className="bg-green-100 text-green-600 p-2 rounded-lg hover:bg-green-200 transition-colors duration-200" 
+                                className="bg-success/10 text-success p-2 rounded-lg hover:bg-success/20 transition-colors duration-200" 
                                 aria-label="Aumentar quantidade"
                               >
                                 <Plus className="h-4 w-4" aria-hidden="true" />
@@ -585,17 +585,17 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                   </div>
 
                   {/* Footer */}
-                  <div className="p-4 sm:p-6 border-t border-gray-200/50 bg-gray-50/50">
+                  <div className="p-4 sm:p-6 border-t border-border bg-muted/50">
                     <div className="flex items-center justify-between mb-6">
-                      <span className="text-lg font-bold text-gray-900">Total:</span>
-                      <span className="text-2xl font-bold bg-gradient-to-r from-green-600 to-green-700 bg-clip-text text-transparent">
+                      <span className="text-lg font-bold text-foreground">Total:</span>
+                      <span className="text-2xl font-bold bg-gradient-to-r from-success to-success/80 bg-clip-text text-transparent">
                         {formatBRL(cartTotal)}
                       </span>
                     </div>
 
                     <button 
                       onClick={sendWhatsAppOrder} 
-                      className="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-xl hover:from-green-700 hover:to-green-800 transition-all duration-200 font-bold flex items-center justify-center shadow-lg hover:shadow-xl"
+                      className="w-full bg-gradient-to-r from-success to-success/90 text-white py-4 rounded-xl hover:from-success/90 hover:to-success/80 transition-all duration-200 font-bold flex items-center justify-center shadow-lg hover:shadow-xl"
                     >
                       <MessageCircle className="h-5 w-5 mr-3" aria-hidden="true" />
                       Finalizar no WhatsApp
@@ -613,31 +613,31 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
       {/* WhatsApp FAB */}
       <button
         onClick={() => sendWhatsAppInquiry('general')}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-green-500 to-green-600 text-white p-4 rounded-2xl shadow-2xl hover:from-green-600 hover:to-green-700 transition-all duration-300 z-40 hover:scale-110 hover:-translate-y-1"
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-success to-success/90 text-white p-4 rounded-2xl shadow-2xl hover:from-success/90 hover:to-success/80 transition-all duration-300 z-40 hover:scale-110 hover:-translate-y-1"
         aria-label="Abrir conversa no WhatsApp"
       >
         <MessageCircle className="h-6 w-6" aria-hidden="true" />
       </button>
 
-      <footer className="bg-white border-t border-gray-200 mt-8 sm:mt-12">
+      <footer className="bg-card border-t border-border mt-8 sm:mt-12">
         <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-3 sm:mb-4">
-              <div className="bg-blue-600 text-white p-1.5 sm:p-2 rounded-lg">
+              <div className="bg-primary text-primary-foreground p-1.5 sm:p-2 rounded-lg">
                 <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h8v2H6V8zm0 4h12v2H6v-2z"/>
                 </svg>
               </div>
-              <span className="font-bold text-base sm:text-lg text-gray-900">SmartCard</span>
+              <span className="font-bold text-base sm:text-lg text-foreground">SmartCard</span>
             </div>
-            <p className="text-gray-600 text-xs sm:text-sm mb-3 sm:mb-4">Cartão digital inteligente para pequenos e médios negócios</p>
-            <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm text-gray-500">
-              <Link href="/" className="hover:text-gray-700 transition-colors">Página Inicial</Link>
-              <Link href="/auth/register" className="hover:text-gray-700 transition-colors">Criar Minha Loja</Link>
-              <Link href="/dashboard" className="hover:text-gray-700 transition-colors">Painel Administrativo</Link>
+            <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">Cartão digital inteligente para pequenos e médios negócios</p>
+            <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm text-muted-foreground">
+              <Link href="/" className="hover:text-foreground transition-colors">Página Inicial</Link>
+              <Link href="/auth/register" className="hover:text-foreground transition-colors">Criar Minha Loja</Link>
+              <Link href="/dashboard" className="hover:text-foreground transition-colors">Painel Administrativo</Link>
             </div>
-            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200">
-              <p className="text-gray-500 text-xs">© 2025 SmartCard. Todos os direitos reservados.</p>
+            <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
+              <p className="text-muted-foreground text-xs">© 2025 SmartCard. Todos os direitos reservados.</p>
             </div>
           </div>
         </div>

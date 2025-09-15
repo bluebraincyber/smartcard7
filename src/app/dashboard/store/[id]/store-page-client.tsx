@@ -1019,7 +1019,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-background">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       
@@ -1030,7 +1030,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
             <div className="flex items-center space-x-4">
               <Link
                 href="/dashboard/products"
-                className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-gray-200"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-card/80 hover:bg-card rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-border"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voltar para Seleção de Lojas
@@ -1040,7 +1040,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
               <Link
                 href={`/${store.slug}`}
                 target="_blank"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white/90 hover:bg-white hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 backdrop-blur-sm"
+                className="inline-flex items-center px-4 py-2 border border-border rounded-xl shadow-sm text-sm font-medium text-foreground bg-card/90 hover:bg-card hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 backdrop-blur-sm"
               >
                 <Eye className="mr-2 h-4 w-4" />
                 Visualizar Loja
@@ -1053,26 +1053,26 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="relative mb-8">
-            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-6">
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg mb-6">
               <div className="w-10 h-10 rounded-full" style={{ backgroundColor: store.primaryColor }}></div>
             </div>
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 opacity-20 rounded-full blur-xl scale-150"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-20 rounded-full blur-xl scale-150"></div>
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-4">
             {store.name}
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             Gerencie categorias, produtos e configurações desta loja
           </p>
         </div>
 
         {/* Store Images Preview */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 mb-12">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-card/90 backdrop-blur-sm rounded-3xl shadow-xl border border-border mb-12">
+          <div className="px-6 py-4 border-b border-border">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-medium text-gray-900">Imagens da Loja</h3>
-                <p className="mt-1 text-sm text-gray-600">
+                <h3 className="text-lg font-medium text-foreground">Imagens da Loja</h3>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Como sua loja aparece para os clientes
                 </p>
               </div>
@@ -1085,8 +1085,8 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                 {/* Imagem de Capa - Editável */}
                 {(store.coverImage || store.image) ? (
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Imagem de Capa</h4>
-                    <div className="relative aspect-video rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50 group cursor-pointer" onClick={() => openImageModal('cover')}>
+                    <h4 className="text-sm font-medium text-foreground mb-2">Imagem de Capa</h4>
+                    <div className="relative aspect-video rounded-lg overflow-hidden border-2 border-border bg-muted group cursor-pointer" onClick={() => openImageModal('cover')}>
                       <img
                         src={store.coverImage || store.image}
                         alt="Imagem de capa da loja"
@@ -1094,36 +1094,36 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                       />
                       {/* Overlay de edição */}
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
-                        <div className="bg-white text-gray-700 px-3 py-1.5 rounded-md text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center">
+                        <div className="bg-card text-foreground px-3 py-1.5 rounded-md text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center">
                           <Camera className="h-4 w-4 mr-2" />
                           Trocar Imagem
                         </div>
                       </div>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">Aparece no topo da sua loja</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Aparece no topo da sua loja</p>
                   </div>
                 ) : (
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Imagem de Capa</h4>
+                    <h4 className="text-sm font-medium text-foreground mb-2">Imagem de Capa</h4>
                     <div 
-                      className="relative aspect-video rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 cursor-pointer transition-colors flex items-center justify-center group"
+                      className="relative aspect-video rounded-lg border-2 border-dashed border-border bg-muted hover:border-border/80 hover:bg-muted/80 cursor-pointer transition-colors flex items-center justify-center group"
                       onClick={() => openImageModal('cover')}
                     >
                       <div className="text-center">
-                        <Upload className="h-8 w-8 text-gray-400 mx-auto mb-2" />
-                        <p className="text-sm text-gray-600 font-medium">Adicionar Capa</p>
-                        <p className="text-xs text-gray-500">Clique para fazer upload</p>
+                        <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
+                        <p className="text-sm text-foreground font-medium">Adicionar Capa</p>
+                        <p className="text-xs text-muted-foreground">Clique para fazer upload</p>
                       </div>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">Aparece no topo da sua loja</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Aparece no topo da sua loja</p>
                   </div>
                 )}
                 
                 {/* Logo/Perfil - Editável */}
                 {store.profileImage ? (
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Logo/Perfil</h4>
-                    <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-gray-200 bg-gray-50 max-w-[200px] group cursor-pointer" onClick={() => openImageModal('profile')}>
+                    <h4 className="text-sm font-medium text-foreground mb-2">Logo/Perfil</h4>
+                    <div className="relative aspect-square rounded-lg overflow-hidden border-2 border-border bg-muted max-w-[200px] group cursor-pointer" onClick={() => openImageModal('profile')}>
                       <img
                         src={store.profileImage}
                         alt="Logo da loja"
@@ -1131,37 +1131,37 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                       />
                       {/* Overlay de edição */}
                       <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
-                        <div className="bg-white text-gray-700 px-2 py-1 rounded text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center">
+                        <div className="bg-card text-foreground px-2 py-1 rounded text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center">
                           <Camera className="h-3 w-3 mr-1" />
                           Trocar
                         </div>
                       </div>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">Logo da sua empresa</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Logo da sua empresa</p>
                   </div>
                 ) : (
                   <div>
-                    <h4 className="text-sm font-medium text-gray-700 mb-2">Logo/Perfil</h4>
+                    <h4 className="text-sm font-medium text-foreground mb-2">Logo/Perfil</h4>
                     <div 
-                      className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 cursor-pointer transition-colors max-w-[200px] flex items-center justify-center group"
+                      className="relative aspect-square rounded-lg border-2 border-dashed border-border bg-muted hover:border-border/80 hover:bg-muted/80 cursor-pointer transition-colors max-w-[200px] flex items-center justify-center group"
                       onClick={() => openImageModal('profile')}
                     >
                       <div className="text-center">
-                        <Upload className="h-6 w-6 text-gray-400 mx-auto mb-1" />
-                        <p className="text-xs text-gray-600 font-medium">Adicionar Logo</p>
+                        <Upload className="h-6 w-6 text-muted-foreground mx-auto mb-1" />
+                        <p className="text-xs text-foreground font-medium">Adicionar Logo</p>
                       </div>
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">Logo da sua empresa</p>
+                    <p className="mt-1 text-xs text-muted-foreground">Logo da sua empresa</p>
                   </div>
                 )}
                 
                 {/* Preview Card Combinado */}
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Preview da Loja</h4>
-                  <div className="border-2 border-gray-200 rounded-lg overflow-hidden bg-white max-w-[200px]">
+                  <h4 className="text-sm font-medium text-foreground mb-2">Preview da Loja</h4>
+                  <div className="border-2 border-border rounded-lg overflow-hidden bg-card max-w-[200px]">
                     {/* Header com capa */}
                     {(store.coverImage || store.image) && (
-                      <div className="relative h-20 bg-gray-100">
+                      <div className="relative h-20 bg-muted">
                         <img
                           src={store.coverImage || store.image}
                           alt="Preview capa"
@@ -1177,19 +1177,19 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                           <img
                             src={store.profileImage}
                             alt="Preview logo"
-                            className="w-8 h-8 rounded-full object-cover border border-gray-200"
+                            className="w-8 h-8 rounded-full object-cover border border-border"
                           />
                         )}
                         <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium text-gray-900 truncate">{store.name}</p>
-                          <p className="text-xs text-gray-500 truncate">smartcard.../{store.slug}</p>
+                          <p className="text-xs font-medium text-foreground truncate">{store.name}</p>
+                          <p className="text-xs text-muted-foreground truncate">smartcard.../{store.slug}</p>
                         </div>
                       </div>
-                      <div className="h-2 bg-gray-100 rounded mb-1"></div>
-                      <div className="h-2 bg-gray-100 rounded w-3/4"></div>
+                      <div className="h-2 bg-muted rounded mb-1"></div>
+                      <div className="h-2 bg-muted rounded w-3/4"></div>
                     </div>
                   </div>
-                  <p className="mt-1 text-xs text-gray-500">Como aparece para clientes</p>
+                  <p className="mt-1 text-xs text-muted-foreground">Como aparece para clientes</p>
                 </div>
               </div>
             </div>
@@ -1198,38 +1198,38 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
                 {/* Card Upload Capa */}
                 <div 
-                  className="relative aspect-video rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition-all group"
+                  className="relative aspect-video rounded-lg border-2 border-dashed border-border bg-muted hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all group"
                   onClick={() => openImageModal('cover')}
                 >
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <Upload className="h-10 w-10 text-gray-400 group-hover:text-blue-500 mb-3 transition-colors" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-1">Imagem de Capa</h4>
-                    <p className="text-sm text-gray-600 text-center px-4">
+                    <Upload className="h-10 w-10 text-muted-foreground group-hover:text-primary mb-3 transition-colors" />
+                    <h4 className="text-lg font-medium text-foreground mb-1">Imagem de Capa</h4>
+                    <p className="text-sm text-muted-foreground text-center px-4">
                       Adicione uma imagem de fundo para sua loja
                     </p>
-                    <p className="text-xs text-gray-500 mt-2">Clique para fazer upload</p>
+                    <p className="text-xs text-muted-foreground mt-2">Clique para fazer upload</p>
                   </div>
                 </div>
                 
                 {/* Card Upload Logo */}
                 <div 
-                  className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 bg-gray-50 hover:border-blue-400 hover:bg-blue-50 cursor-pointer transition-all group max-w-[300px] mx-auto"
+                  className="relative aspect-square rounded-lg border-2 border-dashed border-border bg-muted hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all group max-w-[300px] mx-auto"
                   onClick={() => openImageModal('profile')}
                 >
                   <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <Camera className="h-10 w-10 text-gray-400 group-hover:text-blue-500 mb-3 transition-colors" />
-                    <h4 className="text-lg font-medium text-gray-900 mb-1">Logo/Perfil</h4>
-                    <p className="text-sm text-gray-600 text-center px-4">
+                    <Camera className="h-10 w-10 text-muted-foreground group-hover:text-primary mb-3 transition-colors" />
+                    <h4 className="text-lg font-medium text-foreground mb-1">Logo/Perfil</h4>
+                    <p className="text-sm text-muted-foreground text-center px-4">
                       Adicione o logo da sua empresa
                     </p>
-                    <p className="text-xs text-gray-500 mt-2">Clique para fazer upload</p>
+                    <p className="text-xs text-muted-foreground mt-2">Clique para fazer upload</p>
                   </div>
                 </div>
               </div>
               
               {/* Texto explicativo */}
               <div className="text-center mt-6">
-                <p className="text-gray-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   As imagens ajudam a transmitir profissionalismo e personalidade à sua loja.
                 </p>
               </div>
@@ -1237,8 +1237,8 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
           )}
         </div>
         {/* Store Info - Com Inline Editing */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 mb-12">
-          <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-card/90 backdrop-blur-sm rounded-3xl shadow-xl border border-border mb-12">
+          <div className="px-6 py-4 border-b border-border">
             <div className="flex items-center justify-between">
               <div className="flex-1 pr-4">
                 {/* Nome da loja editável */}
@@ -1247,7 +1247,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                     field="name"
                     value={store.name}
                     placeholder="Nome da sua loja"
-                    className="text-2xl font-bold text-gray-900"
+                    className="text-2xl font-bold text-foreground"
                   />
                 </div>
                 {/* URL editável */}
@@ -1258,7 +1258,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
               <div className="flex items-center space-x-4">
                 <div className="flex items-center space-x-2">
                   <span className={`text-xs font-medium ${
-                    store.isactive ? 'text-green-700' : 'text-gray-500'
+                    store.isactive ? 'text-success' : 'text-muted-foreground'
                   }`}>
                     {store.isactive ? 'Ativa' : 'Inativa'}
                   </span>
@@ -1275,7 +1275,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
           <div className="px-6 py-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <dt className="text-sm font-medium text-gray-500 mb-1">WhatsApp</dt>
+                <dt className="text-sm font-medium text-muted-foreground mb-1">WhatsApp</dt>
                 <EditableField
                   field="whatsapp"
                   value={store.whatsapp || ''}
@@ -1284,7 +1284,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                 />
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500 mb-1">Endereço</dt>
+                <dt className="text-sm font-medium text-muted-foreground mb-1">Endereço</dt>
                 <EditableField
                   field="address"
                   value={store.address || ''}
@@ -1292,14 +1292,14 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                 />
               </div>
               <div>
-                <dt className="text-sm font-medium text-gray-500 mb-1">Cor Principal</dt>
+                <dt className="text-sm font-medium text-muted-foreground mb-1">Cor Principal</dt>
                 <EditableColorField />
               </div>
             </div>
             
             {/* Descrição editável */}
             <div className="mt-4">
-              <dt className="text-sm font-medium text-gray-500 mb-1">Descrição</dt>
+              <dt className="text-sm font-medium text-muted-foreground mb-1">Descrição</dt>
               <EditableField
                 field="description"
                 value={store.description || ''}
@@ -1311,18 +1311,18 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         </div>
 
         {/* Categories Section Header */}
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 mb-12">
+        <div className="bg-card/90 backdrop-blur-sm rounded-3xl shadow-xl border border-border mb-12">
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">Categorias e Produtos</h2>
-                <p className="mt-1 text-sm text-gray-600">
+                <h2 className="text-xl font-bold text-foreground">Categorias e Produtos</h2>
+                <p className="mt-1 text-sm text-muted-foreground">
                   Organize seus produtos em categorias para facilitar a navegação dos clientes
                 </p>
               </div>
               <Link
                 href={`/dashboard/store/${store.id}/categories`}
-                className="inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                className="inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Categoria

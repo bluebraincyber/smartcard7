@@ -33,11 +33,11 @@ export default async function TestPage() {
                   <div className="text-sm text-gray-600">
                     Slug: <code className="bg-gray-100 px-1 rounded">{store.slug}</code>
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-muted-foreground">
                     Ativa: {store.isactive ? '✅ Sim' : '❌ Não'}
                   </div>
-                  <div className="text-sm text-gray-600">
-                    URL: <a href={`/${store.slug}`} className="text-blue-600 hover:underline">
+                  <div className="text-sm text-muted-foreground">
+                    URL: <a href={`/${store.slug}`} className="text-primary hover:underline">
                       /{store.slug}
                     </a>
                   </div>
@@ -50,9 +50,9 @@ export default async function TestPage() {
     );
   } catch (error) {
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-4 text-red-600">Erro de Conexão</h1>
-        <pre className="bg-red-50 p-4 rounded text-sm">
+      <div className="min-h-screen bg-background p-8">
+        <h1 className="text-2xl font-bold mb-4 text-destructive">Erro de Conexão</h1>
+        <pre className="bg-destructive/10 border border-destructive/20 p-4 rounded text-sm text-foreground">
           {error.message}
         </pre>
       </div>

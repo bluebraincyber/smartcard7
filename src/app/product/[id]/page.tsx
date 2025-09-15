@@ -166,7 +166,7 @@ export default function ProductPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* App Bar */}
       <AppBar
         title={mockProduct.name}
@@ -178,7 +178,7 @@ export default function ProductPage() {
 
       {/* Product Images */}
       <div className="relative">
-        <div className="aspect-square bg-white">
+        <div className="aspect-square bg-card">
           <ImageThumb
             src={mockProduct.images[currentImageIndex]}
             alt={mockProduct.name}
@@ -194,7 +194,7 @@ export default function ProductPage() {
                 key={index}
                 className={cn(
                   'w-2 h-2 rounded-full transition-colors',
-                  index === currentImageIndex ? 'bg-white' : 'bg-white/50'
+                  index === currentImageIndex ? 'bg-foreground' : 'bg-foreground/50'
                 )}
                 onClick={() => setCurrentImageIndex(index)}
               />
@@ -218,7 +218,7 @@ export default function ProductPage() {
         <div>
           <div className="flex items-center gap-2 mb-2">
             <Text size="sm" color="muted">{mockProduct.category}</Text>
-            <span className="text-gray-300">•</span>
+            <span className="text-muted-foreground/60">•</span>
             <div className="flex items-center gap-1">
               <span className="text-yellow-400">⭐</span>
               <Text size="sm">{mockProduct.rating} ({mockProduct.reviewCount})</Text>
@@ -262,8 +262,8 @@ export default function ProductPage() {
                     className={cn(
                       'cursor-pointer transition-all duration-200',
                       option.selected 
-                        ? 'ring-2 ring-red-500 bg-red-50' 
-                        : 'hover:bg-gray-50'
+                        ? 'ring-2 ring-primary bg-primary/10' 
+                        : 'hover:bg-muted'
                     )}
                     onClick={() => handleCustomizationChange(customization.id, option.id)}
                   >
@@ -274,8 +274,8 @@ export default function ProductPage() {
                             'w-5 h-5 rounded border-2 flex items-center justify-center',
                             customization.type === 'single' ? 'rounded-full' : 'rounded',
                             option.selected 
-                              ? 'bg-red-500 border-red-500' 
-                              : 'border-gray-300'
+                              ? 'bg-primary border-primary' 
+                              : 'border-border'
                           )}>
                             {option.selected && (
                               <div className="w-2 h-2 bg-white rounded-full" />
@@ -309,7 +309,7 @@ export default function ProductPage() {
             value={specialInstructions}
             onChange={(e) => setSpecialInstructions(e.target.value)}
             placeholder="Ex: Sem cebola, ponto da carne bem passado..."
-            className="w-full p-3 rounded-lg resize-none bg-gray-100 shadow-inner shadow-lg focus:outline-none"
+            className="w-full p-3 rounded-lg resize-none bg-muted shadow-inner shadow-lg focus:outline-none"
             rows={3}
             maxLength={200}
           />
@@ -324,7 +324,7 @@ export default function ProductPage() {
         <div>
           <button
             onClick={() => setShowNutrition(!showNutrition)}
-            className="flex items-center justify-between w-full p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+            className="flex items-center justify-between w-full p-3 bg-muted rounded-lg hover:bg-muted/80 transition-colors"
           >
             <Text weight="semibold">Informações Nutricionais</Text>
             <span className={cn(
@@ -336,7 +336,7 @@ export default function ProductPage() {
           </button>
           
           {showNutrition && (
-            <div className="mt-3 p-3 bg-white rounded-lg border">
+            <div className="mt-3 p-3 bg-card rounded-lg border border-border">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Text size="sm" color="muted">Calorias</Text>
@@ -374,7 +374,7 @@ export default function ProductPage() {
       </div>
 
       {/* Bottom Action Bar */}
-      <div className="sticky bottom-0 bg-white border-t border-gray-200 p-4">
+      <div className="sticky bottom-0 bg-card border-t border-border p-4">
         <div className="flex items-center justify-between mb-4">
           <div>
             <Text size="sm" color="muted">Quantidade</Text>
