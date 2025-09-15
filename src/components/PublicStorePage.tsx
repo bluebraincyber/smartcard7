@@ -1,10 +1,39 @@
-'use client'
+{/* Dropdown Menu */}
+      {isMenuOpen && (
+        <div className="fixed inset-0 z-[2147483646] bg-black/20 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)}>
+          <div className="absolute top-16 left-0 right-0 bg-white/95 backdrop-blur-md border border-gray-200/50 shadow-xl mx-4 rounded-2xl" onClick={(e) => e.stopPropagation()}>
+            <div className="p-4 sm:p-6">
+              <div className="grid grid-cols-1 gap-2">
+                <Link href="/" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gray-100/80 transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
+                  <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-blue-100 transition-colors duration-200">
+                    <Home className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-blue-600 transition-colors duration-200" />
+                  </div>
+                  <span className="text-gray-900 text-sm sm:text-base font-medium">Página Inicial</span>
+                </Link>
+                <Link href="/auth/register" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gray-100/80 transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
+                  <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-green-100 transition-colors duration-200">
+                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-green-600 transition-colors duration-200" />
+                  </div>
+                  <span className="text-gray-900 text-sm sm:text-base font-medium">Criar Minha Loja</span>
+                </Link>
+                <Link href="/dashboard" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gray-100/80 transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
+                  <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-purple-100 transition-colors duration-200">
+                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-purple-600 transition-colors duration-200" />
+                  </div>
+                  <span className="text-gray-900 text-sm sm:text-base font-medium">Painel Administrativo</span>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { MapPin, Phone, MessageCircle, ShoppingCart, Plus, Minus, Menu, Home, User, Settings } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { ImageThumb } from './ui/ImageThumb'
+import Topbar from './topbar'
 
 interface Store {
   id: string
@@ -211,83 +240,38 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
   // 6) Render
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-100">
-      {/* Header */}
-      <div className="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-gray-200/50">
-        <div className="max-w-4xl mx-auto px-3 sm:px-4 py-3 sm:py-4">
-          <div className="flex items-center justify-between">
-            {/* SmartCard Logo/Button */}
-            <Link
-              href="/"
-              className="flex items-center space-x-2 sm:space-x-3 text-blue-600 hover:text-blue-700 transition-all duration-200 group"
-              onClick={() => setIsMenuOpen(false)}
-            >
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-2 sm:p-2.5 rounded-xl shadow-lg group-hover:shadow-xl transition-all duration-200">
-                <svg className="h-4 w-4 sm:h-5 sm:w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h8v2H6V8zm0 4h12v2H6v-2z"/>
-                </svg>
-              </div>
-              <span className="font-bold text-base sm:text-lg bg-gradient-to-r from-blue-600 to-blue-700 bg-clip-text text-transparent">SmartCard</span>
-            </Link>
-
-            {/* Menu and Cart */}
-            <div className="flex items-center space-x-2 sm:space-x-3">
-              <button
-                onClick={() => setIsCartOpen(true)}
-                className={`relative p-2 sm:p-2.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl ${
-                  cart.length > 0 
-                    ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800' 
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-                aria-label="Abrir carrinho"
-              >
-                <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-                {cart.length > 0 && (
-                  <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-md">
-                    {cartCount}
-                  </span>
-                )}
-              </button>
-
-              <button
-                onClick={() => setIsMenuOpen(v => !v)}
-                className="p-2 sm:p-2.5 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all duration-200"
-                aria-label="Abrir menu"
-                aria-expanded={isMenuOpen}
-              >
-                <Menu className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-              </button>
-            </div>
-          </div>
+      {/* ETIQUETA SMARTCARD - colada no topo */}
+      <div className="w-full flex justify-center sticky top-0 z-50">
+        <div className="bg-white shadow-lg px-6 py-3 rounded-b-2xl font-bold text-blue-600">
+          SmartCard
         </div>
-
-        {/* Dropdown Menu */}
-        {isMenuOpen && (
-          <div className="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-md border-t border-gray-200/50 shadow-xl z-40">
-            <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
-              <div className="grid grid-cols-1 gap-1 sm:gap-2">
-                <Link href="/" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gray-100/80 transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-blue-100 transition-colors duration-200">
-                    <Home className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-blue-600 transition-colors duration-200" />
-                  </div>
-                  <span className="text-gray-900 text-sm sm:text-base font-medium">Página Inicial</span>
-                </Link>
-                <Link href="/auth/register" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gray-100/80 transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-green-100 transition-colors duration-200">
-                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-green-600 transition-colors duration-200" />
-                  </div>
-                  <span className="text-gray-900 text-sm sm:text-base font-medium">Criar Minha Loja</span>
-                </Link>
-                <Link href="/dashboard" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-gray-100/80 transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-gray-100 group-hover:bg-purple-100 transition-colors duration-200">
-                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-gray-600 group-hover:text-purple-600 transition-colors duration-200" />
-                  </div>
-                  <span className="text-gray-900 text-sm sm:text-base font-medium">Painel Administrativo</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+
+      {/* Botão hambúrguer (mobile) */}
+      <button
+        onClick={() => setIsMenuOpen(v => !v)}
+        className="md:hidden fixed top-3 left-4 z-40 p-2 bg-white rounded-full shadow-md"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+
+      {/* Botão carrinho (desktop) */}
+      <button
+        onClick={() => setIsCartOpen(true)}
+        className={`hidden md:block fixed top-3 right-4 z-40 relative p-2 sm:p-2.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl ${
+          cart.length > 0 
+            ? 'bg-gradient-to-r from-green-600 to-green-700 text-white hover:from-green-700 hover:to-green-800' 
+            : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+        }`}
+        aria-label="Abrir carrinho"
+      >
+        <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
+        {cart.length > 0 && (
+          <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-md">
+            {cartCount}
+          </span>
+        )}
+      </button>
 
       {/* Store Hero Section */}
       <div className="relative">
@@ -513,9 +497,9 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
             onClick={() => setIsCartOpen(false)}
           />
           
-          {/* Floating Card */}
-          <div className="relative z-10 flex justify-end p-4 sm:p-6">
-            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50 w-full max-w-md max-h-[85vh] overflow-hidden animate-in slide-in-from-right-5 duration-300">
+          {/* Floating Card - Centered */}
+          <div className="relative z-10 flex items-center justify-center min-h-full p-4 sm:p-6">
+            <div className="bg-white/95 backdrop-blur-md rounded-2xl shadow-2xl border border-gray-200/50 w-full max-w-md max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
               {/* Header */}
               <div className="p-4 sm:p-6 border-b border-gray-200/50">
                 <div className="flex items-center justify-between">

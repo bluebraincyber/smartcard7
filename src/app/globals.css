@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "../styles/design-tokens.css";
 
+/* Hide mobile UI when HUD is active */
+[data-hud="1"] .topbar-mobile-dup {
+  display: none !important;
+}
+
 /* Component base styles following novidades.md specifications */
 
 /* Button styles */

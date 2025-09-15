@@ -1,207 +1,221 @@
-Bora destravar isso, Carilo. Três vilões clássicos fazem item “sumir” no App Router: **cache**, **filtro de flags (isactive/isarchived)** e **preço/string**. Segue o playbook direto ao ponto com patches prontos.
+Carilo, aqui vai a **especificação fechada + instruções operacionais** para o dev implementar a **Etiqueta SmartCard** no **Topbar** — sem debate, pronto pra colar.
 
-# 1) Mate o cache do Server Component
+# 1) Objetivo do componente
 
-Garanta que a página pública **não** seja servida de cache. No `src/app/[slug]/page.tsx`:
+- **O que é:** uma etiqueta de marca **centralizada**, **colada no topo do contêiner que rola**, **sem arredondamento em cima** e **com arredondamento apenas nos cantos inferiores**.
+  sempre à vista, **ocupando pouco espaço**, com leitura clara em mobile e desktop.
 
-```tsx
-// src/app/[slug]/page.tsx
-import { unstable_noStore as noStore } from "next/cache";
+---
 
-export const revalidate = 0;
-export const dynamic = "force-dynamic";
+# 2) Anatomia (DOM & responsabilidades)
 
-export default async function Page({ params }: { params: { slug: string } }) {
-  noStore(); // sem cache
-  const store = await getStore(params.slug);
-  return <PublicStorePage store={store} />;
-}
 ```
-
-Se você chama `getStore` de outro arquivo, pode reforçar lá também (próximo passo).
-
-# 2) Garanta que o `getStore` não “cai” em cache e não filtra item novo por NULL
-
-Use `noStore()` e trate `NULL` nos filtros com `COALESCE`. Exemplo (ajuste ao seu driver/SQL):
-
-```ts
-// getStore.ts (ou onde estiver)
-// ...
-import { unstable_noStore as noStore } from "next/cache";
-
-export async function getStore(slug: string) {
-  noStore();
-
-  const { rows: [store] } = await db.query(
-    `SELECT id, name, slug FROM stores WHERE slug = $1 LIMIT 1`,
-    [slug]
-  );
-
-  const { rows: categories } = await db.query(
-    `SELECT id, name, position
-       FROM categories
-      WHERE store_id = $1
-      ORDER BY position ASC, name ASC`,
-    [store.id]
-  );
-
-  const enriched = [];
-  for (const c of categories) {
-    const { rows: items } = await db.query(
-      `SELECT id, name, description,
-              -- se price vier DECIMAL como string, tudo bem; o UI converte
-              price, 
-              COALESCE(isactive, TRUE)   AS isactive,
-              COALESCE(isarchived, FALSE) AS isarchived
-         FROM items
-        WHERE category_id = $1
-          AND COALESCE(isarchived, FALSE) = FALSE
-          AND COALESCE(isactive, TRUE) = TRUE
-        ORDER BY name ASC`,
-      [c.id]
-    );
-
-    enriched.push({ ...c, items });
-  }
-
-  return { ...store, categories: enriched };
-}
-```
-
-> Moral da história: se o INSERT estiver deixando `isactive`/`isarchived` como `NULL`, o `COALESCE` salva seu render.
-
-# 3) Após criar item, **revalide o caminho** (ou a tag)
-
-No `src/app/api/items/route.ts` (App Router), após o INSERT, chame `revalidatePath` do slug público; opcionalmente use tags.
-
-```ts
-// src/app/api/items/route.ts
-import { NextResponse } from "next/server";
-import { revalidatePath, revalidateTag } from "next/cache";
-
-export async function POST(req: Request) {
-  const body = await req.json();
-
-  const {
-    storeId, categoryId, name, description, price: rawPrice, slug,
-    isactive, isarchived,
-  } = body;
-
-  // preço robusto contra vírgula
-  const price = Number(String(rawPrice).replace(",", "."));
-
-  // defaults sólidos
-  const active   = isactive   === false ? false : true;
-  const archived = isarchived === true  ? true  : false;
-
-  const { rows: [item] } = await db.query(
-    `INSERT INTO items (store_id, category_id, name, description, price, isactive, isarchived)
-     VALUES ($1,$2,$3,$4,$5,$6,$7)
-     RETURNING *`,
-    [storeId, categoryId, name, description ?? "", price, active, archived]
-  );
-
-  // invalida página pública
-  if (slug) revalidatePath(`/${slug}`);
-  // se você usar fetch com tag: revalidateTag(`store:${storeId}`);
-
-  return NextResponse.json({ item }, { status: 201 });
-}
-```
-
-Se a criação é **Server Action** (não API), faça o `revalidatePath` ali mesmo, antes do `redirect`.
-
-# 4) Defaults no banco (para não depender do app)
-
-Se for **Postgres**, rode uma migration/SQL para normalizar legacy:
-
-```sql
-ALTER TABLE items ALTER COLUMN isactive   SET DEFAULT TRUE;
-ALTER TABLE items ALTER COLUMN isarchived SET DEFAULT FALSE;
-
-UPDATE items SET isactive   = TRUE  WHERE isactive   IS NULL;
-UPDATE items SET isarchived = FALSE WHERE isarchived IS NULL;
-```
-
-> Em **SQLite**, recrie a tabela com os defaults (limitação do ALTER), ou garanta os defaults via camadas de aplicação.
-
-# 5) Preço: string → número no UI (e form)
-
-Se `price` vier como string do driver, formate só na borda do UI:
-
-```tsx
-// onde renderiza:
-const p = Number(item.price); // seguro se vier "12.34"
-<span>{p.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</span>
-```
-
-No form (client), normalize antes do POST:
-
-```ts
-const payload = {
-  // ...
-  price: String(formData.get("price")).replace(",", "."),
-};
-```
-
-# 6) Left join sem transformar em inner join
-
-Se você monta categorias com um único SELECT agregado, lembre de filtrar no **JOIN**, não no `WHERE`, para manter categorias sem itens:
-
-```sql
-SELECT c.id, c.name,
-       COALESCE(
-         JSON_AGG(i.*) FILTER (WHERE i.id IS NOT NULL),
-         '[]'
-       ) AS items
-  FROM categories c
-  LEFT JOIN items i
-    ON i.category_id = c.id
-   AND COALESCE(i.isarchived, FALSE) = FALSE
-   AND COALESCE(i.isactive,   TRUE)  = TRUE
- WHERE c.store_id = $1
- GROUP BY c.id
- ORDER BY c.position, c.name;
-```
-
-# 7) UI não renderiza? Cheque shape e arrays vazias
-
-O `PublicStorePage` pode estar esperando `categories[].items` sempre como array. Garanta shape estável:
-
-```ts
-// no getStore, ao montar:
-enriched.push({ ...c, items: items ?? [] });
-```
-
-E no componente, proteja:
-
-```tsx
-{store.categories?.map(c => (
-  <Category key={c.id} {...c} items={c.items ?? []} />
-))}
-```
-
-# 8) Pós-criação no cliente
-
-Se, após criar, você navega para a página pública, dá um `router.refresh()` antes/ao redirecionar:
-
-```tsx
-import { useRouter } from "next/navigation";
-const router = useRouter();
-// depois do POST OK:
-router.refresh();
-router.push(`/${slug}`);
+TopbarHUD (cola no topo do contêiner que rola)
+└─ <div class="sticky-wrapper">  // controla sticky + z-index + safe-area
+   └─ <div class="topbar-shell"> // largura, blur, sombra no scroll
+      ├─ <button class="menu-btn md:hidden"> // ÚNICO botão para abrir/fechar sidebar (mobile)
+      ├─ <a class="etiqueta">SmartCard</a>   // A estrela do show (topo reto, base arredondada)
+      └─ <div class="right-slot md:flex">    // ações opcionais (desktop)
 ```
 
 ---
 
-**Checklist de validação agora:**
+# 3) Regras visuais da **Etiqueta**
 
-1. Crie um item com `price` contendo vírgula (ex.: `12,90`) e confirme renderização com moeda.
-2. Confirme que `revalidatePath("/[slug]")` disparou no terminal após o POST.
-3. Confira no log do servidor que o `getStore` roda a cada hit (sem cache).
-4. Verifique que o item novo aparece sem reiniciar o dev server.
+- **Topo:** reto (**sem** `rounded-t`).
+- **Base:** `rounded-b-xl` (12–16px).
+- **Fundo:** `bg-white` (modo dark: `dark:bg-neutral-900`).
+- **Sombra:** `shadow-md` constante (não depende do scroll).
+- **Texto:** `text-blue-600 font-semibold`, centralizado, `truncate`.
+- **Tamanhos:** `px-3 py-1` (mobile), `px-4 py-1.5` (≥ md).
+- **Largura:** `w-fit` e `mx-auto`.
 
-Se sumiu, é sintoma de cache; se não renderizou mas aparece no log SQL, é shape/filtro; se quebrou no JSON, pode ser tipo inválido (converta `price`).
+> É uma “aba” que nasce do topo: **forma retangular**, **colada no topo**, **só os cantos de baixo arredondados**.
 
-Quando tudo isso estiver em produção, você ganha **SLA de visibilidade** nível sênior: criou → aparece. Sem drama, sem F5 maroto. Quer escalar o stack pra `revalidateTag` com granularidade por loja/categoria na sequência? É só puxar que eu já te deixo com governance de cache fininha.
+---
+
+# 4) Comportamento do **Topbar**
+
+- **Sticky dentro do contêiner que rola** (não usar `position: fixed`).
+- **Z-index alto** para ficar acima do conteúdo.
+- **Safe area**: respeitar `env(safe-area-inset-top)` em iOS.
+- **Efeito de scroll:** a _shell_ do topbar ganha `shadow-sm` e comprime `padding` quando `scrollTop > 0` (a **Etiqueta não muda**).
+- **Mobile:** mostrar **apenas um** botão hambúrguer (o **de cima**, à esquerda).
+- **Desktop:** hambúrguer opcional; `right-slot` pode exibir ações.
+
+---
+
+# 5) Acessibilidade
+
+- **Botão hambúrguer:** `aria-label="Abrir menu"`, foco visível, acionável com Enter/Espaço.
+- **Região da barra:** `role="region" aria-label="Barra superior"`.
+- **Contraste AA** para texto azul sobre branco.
+- **`prefers-reduced-motion`**: transições discretas.
+
+---
+
+# 6) Implementação (código pronto)
+
+## `components/topbar.tsx`
+
+```tsx
+"use client";
+import { useEffect, useState } from "react";
+import clsx from "clsx";
+import { Menu } from "lucide-react";
+
+type Props = {
+  label: string; // Texto da etiqueta (nome da marca)
+  onMenuToggle?: () => void; // Callback do hambúrguer (mobile)
+  rightSlot?: React.ReactNode; // Ações opcionais (desktop)
+  className?: string;
+};
+
+export default function Topbar({
+  label,
+  onMenuToggle,
+  rightSlot,
+  className,
+}: Props) {
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const el = document.scrollingElement || document.documentElement;
+    const onScroll = () => setScrolled((el?.scrollTop || 0) > 0);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  return (
+    <div
+      className={clsx(
+        "sticky top-0 z-[2147483647] h-0 pointer-events-none",
+        className
+      )}
+      style={
+        { "--safe-top": "env(safe-area-inset-top, 0px)" } as React.CSSProperties
+      }
+    >
+      <div
+        className={clsx(
+          "pointer-events-auto relative mx-auto w-full max-w-screen-md",
+          "transition-all duration-200 ease-out",
+          // padding vertical da SHELL (não da etiqueta)
+          scrolled ? "py-1" : "py-2",
+          // efeito de elevação da shell no scroll
+          scrolled ? "shadow-sm" : "shadow-none",
+          // fundos
+          "bg-white/85 dark:bg-neutral-900/70",
+          "backdrop-blur supports-[backdrop-filter]:backdrop-blur",
+          // sem arredondar topo: borda apenas em baixo dá a leitura de bloco
+          "rounded-b-2xl rounded-t-none"
+        )}
+        role="region"
+        aria-label="Barra superior"
+      >
+        {/* Botão ÚNICO (mobile) — canto superior esquerdo */}
+        {onMenuToggle && (
+          <button
+            onClick={onMenuToggle}
+            aria-label="Abrir menu"
+            className={clsx(
+              "md:hidden absolute left-3 top-2",
+              "p-2 rounded-full bg-white dark:bg-neutral-800 shadow"
+            )}
+          >
+            <Menu className="h-5 w-5" />
+          </button>
+        )}
+
+        {/* ETIQUETA — topo reto, base arredondada */}
+        <div className="flex justify-center">
+          <a
+            className={clsx(
+              "select-none",
+              "bg-white dark:bg-neutral-900",
+              "shadow-md",
+              // tamanhos
+              "px-3 py-1 md:px-4 md:py-1.5",
+              // tipografia
+              "font-semibold text-blue-600 text-sm md:text-base",
+              // forma: apenas base arredondada
+              "rounded-b-xl rounded-t-none",
+              // largura ao conteúdo + centralização
+              "w-fit mx-auto",
+              // reserva área segura do iOS e respiro do topo
+              "mt-[calc(var(--safe-top)+4px)]"
+            )}
+          >
+            {label}
+          </a>
+        </div>
+
+        {/* Ações à direita (desktop) */}
+        {rightSlot && (
+          <div className="hidden md:flex items-center gap-2 absolute right-3 top-2">
+            {rightSlot}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+```
+
+## `components/TopbarHUD.tsx`
+
+```tsx
+"use client";
+import Topbar from "@/components/topbar";
+import { useSidebar } from "@/components/providers/sidebar-provider";
+
+export default function TopbarHUD({ label }: { label: string }) {
+  const { toggle } = useSidebar();
+  return <Topbar label={label} onMenuToggle={toggle} />;
+}
+```
+
+---
+
+# 7) Tailwind: classes-chave da **Etiqueta**
+
+```
+bg-white dark:bg-neutral-900
+shadow-md
+px-3 py-1 md:px-4 md:py-1.5
+font-semibold text-blue-600 text-sm md:text-base
+rounded-b-xl rounded-t-none
+w-fit mx-auto
+mt-[calc(var(--safe-top)+4px)]
+```
+
+---
+
+# 8) Regras de integração (evita dor de cabeça)
+
+- **Sticky no contêiner certo:** a wrapper sticky deve ser filha direta do **contêiner que tem `overflow: auto`**. Se o scroll é no `main`, colocar o TopbarHUD dentro do `main`.
+- **Somente um botão** para a sidebar (o **de cima**). Não duplique.
+- **Nada de `position: fixed`** na barra: quebra o fluxo e safe-areas.
+- **Dark mode:** preservar as classes `dark:*` já especificadas.
+- **Sem rounded no topo** em hipótese alguma: **garanta** `rounded-t-none`.
+
+---
+
+# 9) Testes de aceitação (checklist rápido)
+
+- **Formato correto:** topo reto, base arredondada; sombra perceptível.
+- **Posição:** centralizada, colada visualmente ao topo; respeita `safe-area`.
+- **Mobile:** botão hambúrguer **único** abre/fecha sidebar; foco acessível.
+- **Desktop:** etiqueta central, `right-slot` aparece quando usado.
+- **Scroll:** shell ganha `shadow-sm` e comprime padding; etiqueta **não** muda.
+- **Performance:** sem layout shift; scroll suave; sem listeners duplicados.
+
+---
+
+# 10) Entregável
+
+- Arquivos: `components/topbar.tsx` e `components/TopbarHUD.tsx` conforme acima.
+- **Sem ajustes adicionais** em páginas internas. Usar o HUD **apenas** nas páginas públicas do cartão.
+
+Quando for integrar com o design system, dá pra promover `label`, `sizes` e `tone` a tokens; mas o núcleo acima já entrega **pixel-perfect** igual ao print.

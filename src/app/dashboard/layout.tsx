@@ -6,7 +6,6 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileSidebar } from '@/components/layout/MobileSidebar'
 import { SidebarProvider } from '@/components/providers/sidebar-provider'
 import { usePathname } from 'next/navigation'
-import TopbarHUD from '@/components/topbar/TopbarHUD'
 
 export default function DashboardLayout({
   children,
@@ -51,8 +50,7 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen bg-gray-50">
-        <TopbarHUD />
+      <div className="min-h-screen bg-gray-50 relative">
         <Topbar />
         <div className="flex pt-2">
           <Sidebar />
