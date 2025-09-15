@@ -1,0 +1,22 @@
+{
+    "$schema": "https://json.schemastore.org/json",
+    "description": "Arquivos/pastas onde a IA pode atuar sem aprovação extra.",
+    "allow": [
+        "src/components/**",
+        "src/styles/**",
+        "src/lib/**",
+        "src/types/**",
+        "src/app/**/page.tsx",
+        "src/app/**/layout.tsx",
+        "src/app/**/loading.tsx",
+        "src/app/**/error.tsx",
+        "src/app/**/head.tsx",
+        "src/app/**/template.tsx",
+        "src/app/**/route.ts",
+        "src/app/**/route.tsx",
+        "public/**",
+        "README.md",
+        "docs/**",
+        ".trae/rules/contract.md"
+    ]
+}

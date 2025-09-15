@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  guard-deps:
+    name: Guardar deps/config
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Checar mudanças sensíveis
+        run: |
+          BASE="${{ github.base_ref }}"
+          CHANGED="$(git diff --name-only origin/${BASE}...HEAD || true)"
+          echo "Arquivos alterados:"
+          echo "${CHANGED}"
+          if echo "${CHANGED}" | grep -Eq '(^|/)(package.json|pnpm-lock.yaml)($)'; then
+            echo "Detectado diff em package.json/pnpm-lock.yaml."
+            echo "Verificando label de escape 'allow-deps'..."
+            PR_LABELS="${{ toJson(github.event.pull_request.labels.*.name) }}"
+            echo "Labels: ${PR_LABELS}"
+            if echo "${PR_LABELS}" | grep -qi 'allow-deps'; then
+              echo "Label allow-deps presente. Prosseguindo."
+            else
+              echo "❌ Falha: Este PR altera deps/config. Adicione a label 'allow-deps' e obtenha aprovação do CODEOWNER (@bluebraincyber)."
+              exit 1
+            fi
+          fi
+
+  validate:
+    name: Lint + Types + Build (Node 20.18.0)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'pnpm'
+      - run: corepack enable
+      - run: pnpm -v
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm validate

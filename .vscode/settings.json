@@ -1,0 +1,18 @@
+{
+  "editor.formatOnSave": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll": "explicit",
+    "source.organizeImports": "never"
+  },
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "files.eol": "\n",
+  "workbench.editor.enablePreview": false,
+  "workbench.editor.enablePreviewFromQuickOpen": false,
+  "workbench.editor.showTabs": true,
+  "workbench.startupEditor": "welcomePage",
+  "window.openFoldersInNewWindow": "on",
+  "browser.preview.port": 3000,
+  "browser.preview.openInNewWindow": true,
+  "browser.preview.trustedDomains": ["http://localhost:3000"],
+  "browser.preview.proxy": "http://localhost:3000"
+}

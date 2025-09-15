@@ -18,6 +18,9 @@ export { Divider } from './Divider';
 export type { DividerProps } from './Divider';
 
 export { Text } from './Text';
+
+export { Skeleton, SkeletonText } from './Skeleton';
+export type { SkeletonProps } from './Skeleton';
 export type { TextProps } from './Text';
 
 export { 

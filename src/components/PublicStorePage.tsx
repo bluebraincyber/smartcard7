@@ -130,7 +130,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
   }
 
   const getCartTotal = () => {
-    return cart.reduce((total, item) => total + (item.price * item.quantity), 0)
+    return cart.reduce((total, item) => total + ((item.price || 0) * item.quantity), 0)
   }
 
   const getCartItemCount = () => {
@@ -152,7 +152,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
       if (item.description) {
         message += `   _${item.description}_\n`
       }
-      const itemPrice = Number(item.price) || 0
+      const itemPrice = Number(item.price || 0)
       message += `   Qtd: ${item.quantity}x | Valor: R$ ${itemPrice.toFixed(2)}\n`
       message += `   Subtotal: R$ ${(itemPrice * item.quantity).toFixed(2)}\n\n`
     })
@@ -481,7 +481,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
 
       {/* Cart Modal */}
       {isCartOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end">
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-[60] flex items-end">
           <div className="bg-white w-full max-h-[80vh] rounded-t-lg overflow-hidden">
             <div className="p-4 border-b border-gray-200">
               <div className="flex items-center justify-between">

@@ -1,0 +1,43 @@
+{
+    "extends": [
+        "next/core-web-vitals"
+    ],
+    "rules": {
+        "import/no-unresolved": "error",
+        "import/no-duplicates": "error",
+        "import/order": [
+            "warn",
+            {
+                "newlines-between": "always",
+                "alphabetize": {
+                    "order": "asc"
+                }
+            }
+        ],
+        "no-restricted-imports": [
+            "error",
+            {
+                "patterns": [
+                    "../*",
+                    "./index"
+                ]
+            }
+        ]
+    },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx"
+                ]
+            },
+            "typescript": {
+                "alwaysTryTypes": true,
+                "project": "./tsconfig.json"
+            }
+        }
+    }
+}

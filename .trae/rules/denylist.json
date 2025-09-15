@@ -1,0 +1,20 @@
+{
+    "$schema": "https://json.schemastore.org/json",
+    "description": "Arquivos protegidos — IA não mexe.",
+    "deny": [
+        "package.json",
+        "pnpm-lock.yaml",
+        ".npmrc",
+        ".nvmrc",
+        "tsconfig.json",
+        "next.config.*",
+        ".eslintrc*",
+        "vitest.*",
+        "vercel.*",
+        "sql/**",
+        "scripts/**",
+        ".github/**",
+        ".vscode/**",
+        "db_schema.sql"
+    ]
+}

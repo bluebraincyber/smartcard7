@@ -1,0 +1,118 @@
+=== ESTRUTURA COMPLETA DO PROJETO SMARTCARD7 ===
+
+📁 DIRETÓRIOS PRINCIPAIS:
+
+├── .github/
+│   └── workflows/
+├── .trae/
+│   └── rules/
+├── .vscode/
+├── public/
+│   ├── images/
+│   └── uploads/
+│       ├── category/
+│       ├── item/
+│       ├── store/
+│       └── undefined/
+├── scripts/
+├── sql/
+├── src/
+│   ├── app/
+│   │   ├── [slug]/
+│   │   ├── api/
+│   │   │   ├── analytics/
+│   │   │   │   ├── summary/
+│   │   │   │   └── track/
+│   │   │   ├── auth/
+│   │   │   │   ├── [...nextauth]/
+│   │   │   │   ├── login/
+│   │   │   │   └── register/
+│   │   │   ├── categories/
+│   │   │   │   └── [id]/
+│   │   │   ├── health/
+│   │   │   │   └── db/
+│   │   │   ├── items/
+│   │   │   │   └── [id]/
+│   │   │   ├── slugs/
+│   │   │   │   └── check/
+│   │   │   ├── stores/
+│   │   │   │   ├── [id]/
+│   │   │   │   ├── check-slug/
+│   │   │   │   └── create-with-template/
+│   │   │   ├── templates/
+│   │   │   ├── test-duplicate/
+│   │   │   ├── upload/
+│   │   │   ├── uploads/
+│   │   │   │   └── [...path]/
+│   │   │   └── user/
+│   │   │       └── profile/
+│   │   ├── auth/
+│   │   │   ├── error/
+│   │   │   ├── login/
+│   │   │   └── register/
+│   │   ├── dashboard/
+│   │   │   ├── analytics/
+│   │   │   ├── login/
+│   │   │   ├── register/
+│   │   │   ├── settings/
+│   │   │   └── store/
+│   │   │       ├── [id]/
+│   │   │       │   ├── analytics/
+│   │   │       │   ├── categories/
+│   │   │       │   │   └── [categoryId]/
+│   │   │       │   │       └── items/
+│   │   │       │   ├── category/
+│   │   │       │   │   └── [categoryId]/
+│   │   │       │   │       └── item/
+│   │   │       │   │           └── new/
+│   │   │       │   ├── edit/
+│   │   │       │   └── onboarding/
+│   │   │       ├── new/
+│   │   │       └── page.tsx
+│   │   ├── product/
+│   │   │   └── [id]/
+│   │   └── restaurant/
+│   │       └── [id]/
+│   ├── components/
+│   │   ├── atoms/
+│   │   ├── molecules/
+│   │   ├── providers/
+│   │   └── ui/
+│   ├── lib/
+│   ├── styles/
+│   └── types/
+└── timelapse/
+
+📄 ARQUIVOS PRINCIPAIS:
+
+├── .env
+├── .env.local
+├── .eslintrc.json
+├── .gitattributes
+├── .gitignore
+├── .npmrc
+├── .nvmrc
+├── next.config.js
+├── package.json
+├── pnpm-lock.yaml
+├── tsconfig.json
+├── vitest.config.ts
+├── vitest.setup.ts
+├── README.md
+├── db_schema.sql
+└── [vários arquivos de documentação .md]
+
+🔧 TECNOLOGIAS IDENTIFICADAS:
+- Next.js (App Router)
+- TypeScript
+- Vitest (testes)
+- Prisma/SQL (banco)
+- Tailwind CSS
+- NextAuth.js
+- Vercel (deploy)
+
+📊 ESTATÍSTICAS:
+- 86 diretórios
+- 253 arquivos
+- Estrutura modular bem organizada
+- Padrão App Router do Next.js 13+

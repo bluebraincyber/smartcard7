@@ -1,0 +1,5 @@
+# Arquivos sensíveis: só passam com seu review
+/package.json      @bluebraincyber
+/pnpm-lock.yaml    @bluebraincyber
+/.npmrc            @bluebraincyber
+/.nvmrc            @bluebraincyber

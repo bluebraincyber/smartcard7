@@ -2,9 +2,7 @@ import { notFound } from 'next/navigation'
 import pool from '@/lib/db'
 import PublicStorePage from '@/components/PublicStorePage'
 import { Metadata } from 'next'
-import { unstable_noStore as noStore } from "next/cache";
 
-export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
@@ -16,194 +14,168 @@ interface PageProps {
 
 async function getStore(slug: string) {
   try {
-    noStore();
-
     console.log('🔍 Buscando loja com slug:', slug)
 
-    // Buscar loja - versão simplificada e robusta
+    // Testar conexão primeiro
+    const connectionTest = await pool.query('SELECT NOW()');
+    console.log('✅ Conexão com banco OK:', connectionTest.rows[0]);
+
+    // Debug: listar todas as lojas disponíveis
+    try {
+      const allStoresResult = await pool.query(
+        `SELECT slug, name, isactive FROM stores ORDER BY created_at DESC LIMIT 10`
+      );
+      console.log('🏪 Lojas disponíveis no banco:', allStoresResult.rows);
+    } catch (debugError) {
+      console.error('❌ Erro ao listar lojas:', debugError);
+    }
+
+    // Buscar loja específica
     const storeResult = await pool.query(
-      `SELECT id, name, slug, description, whatsapp, address, active, userid, created_at, updated_at,
-              coverimage, logo
+      `SELECT id, name, slug, description, whatsapp, address, isactive, created_at, updated_at
        FROM stores 
-       WHERE slug = $1 
+       WHERE slug = $1
        LIMIT 1`,
       [slug]
     );
 
-    console.log('📊 Resultado da busca de loja:', storeResult.rows.length, 'registros')
+    console.log('📊 Resultado da busca:', storeResult.rows.length, 'registros encontrados');
 
     if (storeResult.rows.length === 0) {
-      console.log('❌ Loja não encontrada para slug:', slug)
+      console.log('❌ Loja não encontrada para slug:', slug);
       return null;
     }
 
     const store = storeResult.rows[0];
-    console.log('✅ Loja encontrada:', store.name)
+    console.log('✅ Loja encontrada:', store.name, 'Ativa:', store.isactive);
 
-    // Verificar se a loja está ativa
-    if (!store.active) {
-      console.log('⚠️ Loja inativa:', store.name)
+    // Verificar se está ativa
+    if (!store.isactive) {
+      console.log('⚠️ Loja inativa:', store.name);
       return null;
     }
 
-    // Buscar categorias - versão simplificada
+    // Buscar categorias simples primeiro
     const categoriesResult = await pool.query(
       `SELECT id, name, storeid FROM categories WHERE storeid = $1 ORDER BY id ASC`,
       [store.id]
     );
 
-    console.log('📂 Categorias encontradas:', categoriesResult.rows.length)
+    console.log('📂 Categorias encontradas:', categoriesResult.rows.length);
 
-    const enrichedCategories = [];
+    // Para cada categoria, buscar items
+    const categories = [];
     for (const category of categoriesResult.rows) {
-      console.log('🔍 Buscando itens para categoria:', category.name)
-      
       try {
-        // Buscar itens com tratamento robusto de cada coluna
         const itemsResult = await pool.query(
-          `SELECT 
-            id, 
-            name, 
-            COALESCE(description, '') as description,
-            COALESCE(price_cents, 0) as price_cents,
-            COALESCE(image, '') as image,
-            COALESCE(isactive, true) as isactive,
-            COALESCE(isarchived, false) as isarchived
+          `SELECT id, name, description, price_cents, image, isactive, isarchived
            FROM items
-           WHERE categoryid = $1
+           WHERE categoryid = $1 AND isactive = true AND isarchived = false
            ORDER BY name ASC`,
           [category.id]
         );
 
-        console.log(`📦 Itens encontrados para ${category.name}:`, itemsResult.rows.length)
+        const items = itemsResult.rows.map(item => ({
+          id: String(item.id),
+          name: item.name,
+          description: item.description || null,
+          price: item.price_cents ? Number(item.price_cents) / 100 : 0,
+          categoryId: String(category.id),
+          imageUrl: item.image || null,
+          isactive: item.isactive,
+          isarchived: item.isarchived
+        }));
 
-        // Log detalhado dos itens para debug
-        if (itemsResult.rows.length > 0) {
-          console.log(`🔍 Primeiro item da categoria ${category.name}:`, JSON.stringify(itemsResult.rows[0], null, 2))
-        }
-
-        // Converter itens para formato esperado pelo frontend com tratamento robusto
-        const formattedItems = itemsResult.rows
-          .filter(item => {
-            const isArchived = item.isarchived === true
-            const isActive = item.isactive !== false
-            console.log(`📋 Item ${item.name}: archived=${isArchived}, active=${isActive}`)
-            return !isArchived && isActive
-          })
-          .map(item => {
-            const formattedItem = {
-              id: String(item.id),
-              name: String(item.name || ''),
-              description: item.description || null,
-              price: item.price_cents ? Number(item.price_cents) / 100 : 0,
-              categoryId: String(category.id),
-              imageUrl: item.image || null,
-              isactive: item.isactive !== false,
-              isarchived: item.isarchived === true
-            };
-            console.log(`✅ Item formatado:`, JSON.stringify(formattedItem, null, 2))
-            return formattedItem;
-          });
-
-        enrichedCategories.push({ 
-          ...category, 
-          items: formattedItems 
+        categories.push({
+          id: String(category.id),
+          name: category.name,
+          storeid: String(category.storeid),
+          items: items
         });
 
+        console.log(`📁 Categoria ${category.name}: ${items.length} itens`);
       } catch (itemError) {
-        console.error(`❌ Erro ao buscar itens para categoria ${category.name}:`, itemError)
-        // Continuar com categoria vazia em caso de erro
-        enrichedCategories.push({ 
-          ...category, 
-          items: [] 
+        console.error(`❌ Erro ao buscar itens da categoria ${category.name}:`, itemError);
+        categories.push({
+          id: String(category.id),
+          name: category.name,
+          storeid: String(category.storeid),
+          items: []
         });
       }
     }
 
-    const finalStore = { 
-      ...store,
-      isactive: store.active, // Mapear active para isactive para compatibilidade
-      coverImage: store.coverimage,
-      profileImage: store.logo,
-      primaryColor: '#EA1D2C', // Valor padrão
-      categories: enrichedCategories 
+    const finalStore = {
+      id: String(store.id),
+      name: store.name,
+      slug: store.slug,
+      description: store.description || null,
+      whatsapp: store.whatsapp || '',
+      address: store.address || null,
+      primaryColor: '#EA1D2C',
+      coverImage: null,
+      profileImage: null,
+      categories: categories
     };
 
-    console.log('🏪 Loja completa preparada:', finalStore.name, 'com', enrichedCategories.length, 'categorias')
-    console.log('📊 Resumo das categorias:', enrichedCategories.map(cat => ({ 
-      name: cat.name, 
-      itemCount: cat.items.length 
-    })))
-    
+    console.log('🏪 Loja final preparada:', finalStore.name, 'com', categories.length, 'categorias');
     return finalStore;
 
   } catch (error) {
-    console.error('❌ Erro ao buscar loja:', error)
-    console.error('❌ Stack trace:', error.stack)
+    console.error('❌ Erro geral ao buscar loja:', error);
+    console.error('❌ Stack:', error.stack);
     return null;
   }
 }
 
 export default async function StorePage({ params }: { params: { slug: string } }) {
   try {
-    noStore();
-    
-    console.log('🚀 Carregando página pública para slug:', params.slug)
+    console.log('🚀 Iniciando página pública para slug:', params.slug);
     
     const store = await getStore(params.slug);
 
     if (!store) {
-      console.log('🚫 Redirecionando para 404 - loja não encontrada')
-      notFound()
+      console.log('🚫 Loja não encontrada, redirecionando para 404');
+      notFound();
     }
 
-    console.log('🎉 Renderizando página pública para:', store.name)
-    console.log('🔍 Store data antes de passar para componente:', JSON.stringify({
-      name: store.name,
-      categoriesCount: store.categories.length,
-      totalItems: store.categories.reduce((sum, cat) => sum + cat.items.length, 0)
-    }, null, 2))
-    
-    return <PublicStorePage store={store} />
+    console.log('🎉 Renderizando página para:', store.name);
+    return <PublicStorePage store={store} />;
     
   } catch (error) {
-    console.error('❌ Erro crítico na página pública:', error)
-    console.error('❌ Stack trace:', error.stack)
-    notFound()
+    console.error('❌ Erro crítico na página:', error);
+    console.error('❌ Stack:', error.stack);
+    notFound();
   }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   try {
-    const store = await getStore(params.slug)
+    const store = await getStore(params.slug);
 
     if (!store) {
       return {
         title: 'Loja não encontrada - SmartCard',
         description: 'A loja que você está procurando não foi encontrada.'
-      }
+      };
     }
 
-    const itemCount = store.categories.reduce((total, category) => total + category.items.length, 0)
-    const description = store.description || 
-      `Conheça ${store.name} - ${itemCount} produtos disponíveis. Faça seu pedido pelo WhatsApp!`
-
     return {
-      title: `${store.name} - Cartão Digital SmartCard`,
-      description,
+      title: `${store.name} - SmartCard`,
+      description: store.description || `Conheça ${store.name} - Faça seu pedido pelo WhatsApp!`,
       openGraph: {
         title: `${store.name} - Cartão Digital`,
-        description,
+        description: store.description || `Conheça ${store.name}`,
         type: 'website',
         siteName: 'SmartCard',
         locale: 'pt_BR'
       }
-    }
+    };
   } catch (error) {
-    console.error('Erro ao gerar metadata:', error)
+    console.error('Erro ao gerar metadata:', error);
     return {
-      title: `${params.slug} - SmartCard`,
-      description: 'Cartão digital inteligente para seu negócio'
-    }
+      title: 'SmartCard',
+      description: 'Cartão digital inteligente'
+    };
   }
 }

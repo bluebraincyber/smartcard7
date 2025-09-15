@@ -162,7 +162,7 @@ export default function HomePage() {
               Como Funciona
             </h2>
             <p className="text-lg text-gray-500 mb-8">
-              Seu cartão digital no formato: <strong>smartcardweb.com.br/seu-negocio</strong>
+              Seu cartão digital personalizado com sua própria URL
             </p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">

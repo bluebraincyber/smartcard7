@@ -1,0 +1,37 @@
+name: AI Guard
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, unlabeled, reopened]
+
+jobs:
+  guard:
+    if: contains(github.event.pull_request.labels.*.name, 'ai-change')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+      - name: Instalar jq
+        run: sudo apt-get update && sudo apt-get install -y jq
+      - name: Validar allow/denylist
+        env:
+          GITHUB_BASE_REF: ${{ github.base_ref }}
+          CI: "true"
+        run: bash scripts/trae-guard.sh
+
+  validate:
+    name: Lint + Types + Build (Node 20.18.0)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.18.0'
+          cache: 'pnpm'
+      - run: corepack enable
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm validate

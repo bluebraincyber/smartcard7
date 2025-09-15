@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import pool from '@/lib/db';
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/authOptions'
 import type { Session } from 'next-auth'
 
@@ -40,9 +40,8 @@ export async function PATCH(
     }
 
     // Garante que a loja pertence ao usuário e pega estado atual
-    // CORRIGIDO: usar nome correto da coluna 'isactive'
     const storeRes = await pool.query(
-      'SELECT id, isactive FROM stores WHERE id = $1 AND userid = $2 LIMIT 1',
+      'SELECT id, active FROM stores WHERE id = $1 AND userid = $2 LIMIT 1',
       [storeid, userid]
     );
 
@@ -55,17 +54,17 @@ export async function PATCH(
       }, { status: 404 });
     }
 
-    const currentActive: boolean = storeRes.rows[0].isactive;
+    const currentActive: boolean = storeRes.rows[0].active;
     const nextActive = !currentActive;
 
     console.log('🔄 Toggle:', { currentActive, nextActive })
 
-    // Alterna o isactive - CORRIGIDO: usar nome correto da coluna
+    // Alterna o status da loja
     const updateRes = await pool.query(
       `UPDATE stores 
-       SET isactive = $1, updated_at = NOW() 
+       SET active = $1, updated_at = NOW() 
        WHERE id = $2 AND userid = $3 
-       RETURNING id, name, slug, description, isactive, userid, created_at, updated_at`,
+       RETURNING id, name, slug, description, active as "isActive", userid, created_at, updated_at`,
       [nextActive, storeid, userid]
     );
 
@@ -74,7 +73,7 @@ export async function PATCH(
     // Retornar formato compatível com frontend
     const updatedStore = {
       ...updateRes.rows[0],
-      isActive: updateRes.rows[0].isactive, // Manter isActive para compatibilidade
+      isActive: updateRes.rows[0].isActive,
       createdAt: updateRes.rows[0].created_at,
       updatedAt: updateRes.rows[0].updated_at
     };

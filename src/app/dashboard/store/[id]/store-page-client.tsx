@@ -112,7 +112,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         <div className="space-y-2">
           <div className="flex items-center space-x-2">
             <div className="flex items-center flex-1">
-              <span className="text-gray-500 text-sm mr-1">smartcardweb.com.br/</span>
+              <span className="text-gray-500 text-sm mr-1">/</span>
               <input
                 type="text"
                 value={editValues.slug}
@@ -182,7 +182,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         onClick={() => startInlineEdit('slug')}
       >
         <span className="flex-1 text-sm text-gray-600">
-          smartcardweb.com.br/<span className="font-medium text-gray-900">{store.slug}</span>
+          /<span className="font-medium text-gray-900">{store.slug}</span>
         </span>
         <Pencil className="h-3 w-3 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
       </div>
@@ -1003,7 +1003,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center justify-between">

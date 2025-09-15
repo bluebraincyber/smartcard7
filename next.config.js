@@ -1,6 +1,19 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Forçar a porta 3000
+  devIndicators: {
+    buildActivity: false,
+  },
+  // Configuração de porta
+  experimental: {
+    serverActions: {
+      allowedOrigins: ['localhost:3000'],
+    },
+  },
+  // Configuração do servidor
   env: {
+    PORT: '3000',
+    NEXTAUTH_URL: process.env.NEXTAUTH_URL || 'http://localhost:3000',
     DATABASE_URL: process.env.DATABASE_URL,
     DIRECT_URL: process.env.DIRECT_URL,
     POSTGRES_URL: process.env.POSTGRES_URL,

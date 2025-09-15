@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Store, Plus, Eye, BarChart3, Users } from 'lucide-react'
 import { Session } from 'next-auth'
+import PageViewsChart from '@/components/analytics/PageViewsChart'
 
 interface Store {
   id: string
@@ -34,11 +35,16 @@ export default function DashboardClient({ session }: DashboardClientProps) {
     totalClicks: 0,
     totalStores: 0
   })
+  const [pageViewsData, setPageViewsData] = useState<{
+    name: string;
+    views: number;
+  }[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     fetchStores()
     fetchAnalytics()
+    fetchPageViews()
   }, [])
 
   const fetchStores = async () => {
@@ -67,6 +73,18 @@ export default function DashboardClient({ session }: DashboardClientProps) {
       console.error('Erro ao buscar analytics:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchPageViews = async () => {
+    try {
+      const response = await fetch('/api/analytics/page-views')
+      if (response.ok) {
+        const data = await response.json()
+        setPageViewsData(data.pageViews)
+      }
+    } catch (error) {
+      console.error('Erro ao buscar visualizações de página:', error)
     }
   }
 
@@ -150,6 +168,11 @@ export default function DashboardClient({ session }: DashboardClientProps) {
         </div>
       </div>
 
+      {/* Page Views Chart */}
+      <div className="mb-6 sm:mb-8">
+        <PageViewsChart data={pageViewsData} />
+      </div>
+
       {/* Stores */}
       <div className="bg-white shadow rounded-lg">
         <div className="px-4 py-5 sm:p-6">
@@ -202,7 +225,7 @@ export default function DashboardClient({ session }: DashboardClientProps) {
                         {store.name}
                       </p>
                       <p className="text-xs sm:text-sm text-gray-500 truncate">
-                        smartcardweb.com.br/{store.slug}
+                        /{store.slug}
                       </p>
                       <p className="text-xs text-gray-400">
                         {store._count.categories} categorias

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import pool from '@/lib/db';
-import { getServerSession } from 'next-auth';
+import { getServerSession } from 'next-auth/next';
 import { authOptions } from '@/lib/authOptions';
 import type { Session } from 'next-auth';
 
@@ -13,12 +13,12 @@ export async function GET() {
   try {
     // Verificar autenticação
     const session = await getServerSession(authOptions) as Session | null;
-    
+
     // Se não estiver autenticado, retornar lista vazia
     if (!session?.user?.id) {
       return NextResponse.json({ stores: [] });
     }
-    
+
     const userid = Number(session.user.id);
     const { rows } = await pool.query(`
       SELECT 
@@ -26,7 +26,7 @@ export async function GET() {
         s.name,
         s.slug,
         s.description,
-        s.isactive as "isActive",
+        s.active as "isActive",
         s.userid,
         s.created_at as "createdAt",
         s.updated_at as "updatedAt",
@@ -39,7 +39,7 @@ export async function GET() {
       GROUP BY s.id, u.name
       ORDER BY s.created_at DESC
     `, [userid]);
-    
+
     // Transform the data to include _count object and ensure consistent naming
     const storesWithCount = rows.map(store => ({
       id: store.id,
@@ -56,7 +56,7 @@ export async function GET() {
         analytics: 0  // Adicionar analytics count se necessário
       }
     }));
-    
+
     return NextResponse.json({ stores: storesWithCount });
   } catch (error) {
     console.error('Get stores error:', error);
@@ -69,44 +69,44 @@ export async function POST(request: Request) {
   try {
     // Verificar autenticação
     const session = await getServerSession(authOptions) as Session | null;
-    
+
     if (!session?.user?.id) {
-      return NextResponse.json({ 
-        error: 'Unauthorized - Please login' 
+      return NextResponse.json({
+        error: 'Unauthorized - Please login'
       }, { status: 401 });
     }
-    
+
     const userid = Number(session.user.id);
     const { name, slug, description, whatsapp, address, primaryColor } = await request.json();
-    
+
     if (!name || !slug) {
-      return NextResponse.json({ 
-        error: 'Nome e slug são obrigatórios' 
+      return NextResponse.json({
+        error: 'Nome e slug são obrigatórios'
       }, { status: 400 });
     }
-    
+
     // Verificar se slug já existe
     const { rows: existing } = await pool.query(
       'SELECT id FROM stores WHERE slug = $1',
       [slug]
     );
-    
+
     if (existing.length > 0) {
-      return NextResponse.json({ 
-        error: 'Este identificador já está em uso' 
+      return NextResponse.json({
+        error: 'Este identificador já está em uso'
       }, { status: 400 });
     }
-    
+
     // Criar store
     const { rows } = await pool.query(
       'INSERT INTO stores (name, slug, description, userid, created_at, updated_at) VALUES ($1, $2, $3, $4, NOW(), NOW()) RETURNING *',
       [name, slug, description || '', userid]
     );
-    
-    return NextResponse.json({ 
-        success: true, 
-        store: rows[0] 
-      });
+
+    return NextResponse.json({
+      success: true,
+      store: rows[0]
+    });
   } catch (error) {
     console.error('Create store error:', error);
     return NextResponse.json({ error: 'INTERNAL_ERROR', detail: (error as Error)?.message }, { status: 500 });

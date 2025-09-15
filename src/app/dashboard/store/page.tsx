@@ -1,136 +1,214 @@
-'use client'
+'use client';
 
-import { useSession } from 'next-auth/react'
-import { useEffect, useState } from 'react'
-import Link from 'next/link'
-import { Store, Plus, Eye, BarChart3, Edit, Settings, ExternalLink, Power, PowerOff, Package } from 'lucide-react'
+import { useSession } from 'next-auth/react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+import { Loader2, Plus, Store } from 'lucide-react';
+import StoresToolbar from '@/components/store/StoresToolbar';
+import StoreCard from '@/components/store/StoreCard';
 
-interface Store {
-  id: string
-  name: string
-  slug: string
-  description?: string
-  isActive: boolean  // Mudando para isActive com A maiúsculo
-  createdAt: string
+type StoreStatus = 'active' | 'archived';
+
+export interface Store {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
+  isActive: boolean;
+  url: string;
+  status: 'active' | 'archived';
+  categories: number;
+  products: number;
+  views30d?: number;
+  updatedAt?: string;
   _count: {
-    categories: number
-    analytics: number
-  }
+    categories: number;
+    products: number;
+    analytics: number;
+  };
 }
 
 export default function MyStoresPage() {
-  const { data: session } = useSession()
-  const [stores, setStores] = useState<Store[]>([])
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState('')
+  const router = useRouter();
+  const { data: session } = useSession();
+  const [stores, setStores] = useState<Store[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | 'active' | 'archived'>('all');
+  const [sortBy, setSortBy] = useState<'recent' | 'az' | 'views'>('recent');
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    fetchStores()
-  }, [])
+    setIsClient(true);
+  }, []);
 
-  const fetchStores = async () => {
+  const fetchStores = useCallback(async () => {
     try {
-      const response = await fetch('/api/stores')
+      setLoading(true);
+      const response = await fetch('/api/stores');
       if (response.ok) {
-        const data = await response.json()
-        // Mapear para garantir que isactive vire isActive
+        const data = await response.json();
         const mappedStores = (data.stores || []).map((store: any) => ({
           ...store,
-          isActive: store.isActive || store.isactive // Suporta ambos os formatos
-        }))
-        setStores(mappedStores)
+          isActive: store.isActive ?? store.isactive ?? true,
+          status: (store.isActive ?? store.isactive ?? true) ? 'active' : 'archived',
+          url: `${window.location.protocol}//${window.location.hostname}${window.location.port ? `:${window.location.port}` : ''}/${store.slug}`,
+          categories: store._count?.categories || 0,
+          products: store._count?.products || 0,
+          _count: {
+            categories: store._count?.categories || 0,
+            products: store._count?.products || 0,
+            analytics: store._count?.analytics || 0,
+          },
+        }));
+        setStores(mappedStores);
       } else {
-        setError('Erro ao carregar lojas')
+        setError('Failed to fetch stores');
       }
     } catch (error) {
-      setError('Erro ao carregar lojas')
+      setError('Failed to fetch stores');
+      console.error('Error fetching stores:', error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  }, []);
 
-  const toggleStoreStatus = async (storeId: string, currentStatus: boolean) => {
+  useEffect(() => {
+    fetchStores();
+  }, [fetchStores]);
+
+  // Filter and sort stores
+  const filteredStores = useMemo(() => {
+    let filtered = stores;
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(store => 
+        store.name.toLowerCase().includes(query) ||
+        store.slug.toLowerCase().includes(query)
+      );
+    }
+
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(store => store.status === statusFilter);
+    }
+
+    // Apply sorting
+    filtered.sort((a, b) => {
+      switch (sortBy) {
+        case 'az':
+          return a.name.localeCompare(b.name);
+        case 'views':
+          return (b.views30d || 0) - (a.views30d || 0);
+        case 'recent':
+        default:
+          if (!a.updatedAt || !b.updatedAt) return 0;
+          return new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime();
+      }
+    });
+
+    // Group by status
+    const activeStores = filtered.filter(store => store.status === 'active');
+    const archivedStores = filtered.filter(store => store.status === 'archived');
+
+    return { activeStores, archivedStores };
+  }, [stores, searchQuery, statusFilter, sortBy]);
+
+  const handleToggleStatus = useCallback(async (storeId: string, status: 'active' | 'archived') => {
     try {
-      // Debug: log da requisição
-      console.log('Toggling store:', { storeId, currentStatus })
-      
-      // Não precisa enviar body, a API apenas alterna o estado
       const response = await fetch(`/api/stores/${storeId}/toggle`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        }
-      })
+      });
 
-      // Debug: log da resposta
-      console.log('Toggle response status:', response.status)
-      
-      if (response.ok) {
-        const updatedStore = await response.json()
-        console.log('Updated store:', updatedStore)
-        
-        // Atualizar o store no estado com a resposta da API
-        setStores(stores.map(store => 
-          store.id === storeId 
-            ? { ...store, isActive: updatedStore.isActive }
-            : store
-        ))
-      } else {
-        // Pegar detalhes do erro
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }))
-        console.error('Toggle error response:', {
-          status: response.status,
-          statusText: response.statusText,
-          error: errorData
-        })
-        
-        // Mostrar mensagem de erro mais específica
-        const errorMessage = errorData.error || `Erro ao alterar status da loja (${response.status})`
-        setError(errorMessage)
-        setTimeout(() => setError(''), 5000) // Limpar erro após 5 segundos
+      if (!response.ok) {
+        throw new Error('Falha ao atualizar o status da loja');
       }
-    } catch (error) {
-      console.error('Toggle catch error:', error)
-      setError('Erro de conexão ao alterar status da loja')
-      setTimeout(() => setError(''), 5000)
-    }
-  }
 
-  if (loading) {
+      const updatedStore = await response.json();
+
+      setStores((prevStores: Store[]) =>
+        prevStores.map(store =>
+          store.id === storeId 
+            ? { 
+                ...store, 
+                isActive: updatedStore.isActive,
+                status: updatedStore.isActive ? 'active' : 'archived',
+                updatedAt: updatedStore.updatedAt
+              } 
+            : store
+        )
+      );
+    } catch (err) {
+      setError('Falha ao atualizar o status da loja');
+      console.error('Erro ao atualizar status da loja:', err);
+    }
+  }, []);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+  };
+
+  const handleFilterStatus = (status: 'all' | 'active' | 'archived') => {
+    setStatusFilter(status);
+  };
+
+  const handleSort = (sort: 'recent' | 'az' | 'views') => {
+    setSortBy(sort);
+  };
+
+  const handleCreateStore = () => {
+    router.push('/dashboard/store/new');
+  };
+
+  const handleEditStore = (storeId: string) => {
+    router.push(`/dashboard/store/${storeId}/edit`);
+  };
+
+  const handleViewProducts = (storeId: string) => {
+    router.push(`/dashboard/store/${storeId}`);
+  };
+
+  const handleViewAnalytics = (storeId: string) => {
+    router.push(`/dashboard/analytics?storeId=${storeId}`);
+  };
+
+  if (!isClient) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="flex justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
       </div>
-    )
+    );
   }
 
   return (
-    <div className="max-w-7xl mx-auto py-4 sm:py-6 px-4 sm:px-6 lg:px-8">
-      <div className="mb-6 sm:mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Minhas Lojas</h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Gerencie todas as suas lojas digitais
-            </p>
-          </div>
-          <Link
-            href="/dashboard/store/new"
-            className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 w-full sm:w-auto"
-          >
-            <Plus className="mr-2 h-4 w-4" />
-            Nova Loja
-          </Link>
-        </div>
+    <div>
+      <div className="mb-4">
+        <h1 className="text-3xl font-bold text-gray-900">Minhas Lojas</h1>
       </div>
 
-      {error && (
+      <StoresToolbar
+        searchQuery={searchQuery}
+        onSearch={handleSearch}
+        statusFilter={statusFilter}
+        onFilterStatus={handleFilterStatus}
+        sortBy={sortBy}
+        onSort={handleSort}
+        onCreateStore={handleCreateStore}
+      />
+
+      {loading ? (
+        <div className="flex justify-center items-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-gray-500" />
+        </div>
+      ) : error ? (
         <div className="bg-red-50 border border-red-200 rounded-md p-4 mb-6">
           <div className="text-red-800 text-sm">{error}</div>
         </div>
-      )}
-
-      {stores.length === 0 ? (
+      ) : stores.length === 0 ? (
         <div className="text-center py-12">
           <Store className="mx-auto h-12 w-12 text-gray-400" />
           <h3 className="mt-2 text-sm font-medium text-gray-900">
@@ -150,107 +228,96 @@ export default function MyStoresPage() {
           </div>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {stores.map((store) => (
-            <div
-              key={store.id}
-              className="bg-white overflow-hidden shadow rounded-lg hover:shadow-md transition-shadow"
-            >
-              <div className="p-4 sm:p-6">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-start min-w-0 flex-1">
-                    <Store className="h-6 w-6 sm:h-8 sm:w-8 text-blue-600 mr-2 sm:mr-3 flex-shrink-0 mt-1" />
-                    <div className="min-w-0 flex-1">
-                      <h3 className="text-base sm:text-lg font-medium text-gray-900 truncate">
-                        {store.name}
-                      </h3>
-                      <p className="text-xs sm:text-sm text-gray-500 truncate">
-                        smartcardweb.com.br/{store.slug}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <button
-                      onClick={() => toggleStoreStatus(store.id, store.isActive)}
-                      className={`p-2 rounded-full transition-colors ${
-                        store.isActive
-                          ? 'text-green-600 hover:bg-green-50'
-                          : 'text-gray-400 hover:bg-gray-50'
-                      }`}
-                      title={store.isActive ? 'Desativar loja' : 'Ativar loja'}
-                    >
-                      {store.isActive ? (
-                        <Power className="h-5 w-5" />
-                      ) : (
-                        <PowerOff className="h-5 w-5" />
-                      )}
-                    </button>
-                  </div>
-                </div>
-
-                {store.description && (
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {store.description}
-                  </p>
-                )}
-
-                <div className="flex items-center justify-between text-sm text-gray-500 mb-4">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    store.isActive
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {store.isActive ? 'Ativa' : 'Inativa'}
-                  </span>
-                  <span>{store._count.categories} categorias</span>
-                </div>
-
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div className="flex flex-wrap gap-2">
-                    <Link
-                      href={`/dashboard/store/${store.id}`}
-                      className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                      <Eye className="mr-1 h-3 w-3" />
-                      Ver
-                    </Link>
-                    <Link
-                      href={`/dashboard/store/${store.id}/edit`}
-                      className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                      <Edit className="mr-1 h-3 w-3" />
-                      Editar
-                    </Link>
-                    <Link
-                      href={`/dashboard/store/${store.id}/categories`}
-                      className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                      <Package className="mr-1 h-3 w-3" />
-                      Gerenciar Produtos
-                    </Link>
-                    <Link
-                      href={`/dashboard/store/${store.id}/analytics`}
-                      className="inline-flex items-center px-2 py-1 sm:px-3 sm:py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50"
-                    >
-                      <BarChart3 className="mr-1 h-3 w-3" />
-                      Analytics
-                    </Link>
-                  </div>
-                  <a
-                    href={`/${store.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center px-3 py-1.5 text-xs font-medium rounded text-blue-600 hover:text-blue-500 w-full sm:w-auto"
-                  >
-                    <ExternalLink className="mr-1 h-3 w-3" />
-                    Abrir
-                  </a>
-                </div>
+        <div className="space-y-8 mt-6">
+          {/* Active Stores Section */}
+          {filteredStores.activeStores.length > 0 && (
+            <section>
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-medium text-gray-900">Lojas Ativas</h2>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                  {filteredStores.activeStores.length} loja{filteredStores.activeStores.length !== 1 ? 's' : ''}
+                </span>
               </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredStores.activeStores.map((store) => (
+                  <StoreCard
+                    key={store.id}
+                    store={{
+                      id: store.id,
+                      name: store.name,
+                      slug: store.slug,
+                      url: store.url,
+                      status: store.status,
+                      categories: store.categories,
+                      products: store.products,
+                      views30d: store.views30d,
+                      updatedAt: store.updatedAt
+                    }}
+                    onToggleStatus={handleToggleStatus}
+                    onEdit={handleEditStore}
+                    onProducts={handleViewProducts}
+                    onAnalytics={handleViewAnalytics}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* Archived Stores Section */}
+          {filteredStores.archivedStores.length > 0 && (
+            <section className="pt-6 border-t border-gray-200">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-medium text-gray-900">Lojas Arquivadas</h2>
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                  {filteredStores.archivedStores.length} loja{filteredStores.archivedStores.length !== 1 ? 's' : ''}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {filteredStores.archivedStores.map((store) => (
+                  <StoreCard
+                    key={store.id}
+                    store={{
+                      id: store.id,
+                      name: store.name,
+                      slug: store.slug,
+                      url: store.url,
+                      status: store.status,
+                      categories: store.categories,
+                      products: store.products,
+                      views30d: store.views30d,
+                      updatedAt: store.updatedAt
+                    }}
+                    onToggleStatus={handleToggleStatus}
+                    onEdit={handleEditStore}
+                    onProducts={handleViewProducts}
+                    onAnalytics={handleViewAnalytics}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
+
+          {/* No results message */}
+          {filteredStores.activeStores.length === 0 && filteredStores.archivedStores.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-gray-500 mb-4">
+                {searchQuery 
+                  ? `Nenhuma loja encontrada para "${searchQuery}"`
+                  : `Nenhuma loja ${statusFilter === 'active' ? 'ativa' : 'arquivada'} encontrada`
+                }
+              </p>
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                >
+                  Limpar busca
+                </button>
+              )}
             </div>
-          ))}
+          )}
         </div>
       )}
     </div>
-  )
+  );
 }

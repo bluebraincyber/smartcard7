@@ -172,8 +172,7 @@ export default function ProductPage() {
         title={mockProduct.name}
         showBack
         showFavorite
-        isFavorite={isFavorite}
-        onFavoriteClick={() => setIsFavorite(!isFavorite)}
+        onFavorite={() => setIsFavorite(!isFavorite)}
         className="sticky top-0 z-50"
       />
 
@@ -183,8 +182,6 @@ export default function ProductPage() {
           <ImageThumb
             src={mockProduct.images[currentImageIndex]}
             alt={mockProduct.name}
-            size="xl"
-            variant="square"
             className="w-full h-full object-cover"
           />
         </div>
@@ -208,10 +205,10 @@ export default function ProductPage() {
         {/* Badges */}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           {mockProduct.badge && (
-            <Badge variant="primary" size="sm">{mockProduct.badge}</Badge>
+            <Badge variant="solid" size="sm">{mockProduct.badge}</Badge>
           )}
           {mockProduct.discount && (
-            <Badge variant="destructive" size="sm">-{mockProduct.discount}%</Badge>
+            <Badge variant="error" size="sm">-{mockProduct.discount}%</Badge>
           )}
         </div>
       </div>
@@ -254,7 +251,7 @@ export default function ProductPage() {
                   {customization.name}
                 </Text>
                 {customization.required && (
-                  <Chip size="sm" variant="destructive">Obrigatório</Chip>
+                  <Chip size="sm" variant="selected">Obrigatório</Chip>
                 )}
               </div>
               
@@ -365,7 +362,7 @@ export default function ProductPage() {
                 <Text size="sm" color="muted" className="mb-2">Alérgenos</Text>
                 <div className="flex flex-wrap gap-1">
                   {mockProduct.allergens.map((allergen) => (
-                    <Chip key={allergen} size="sm" variant="secondary">
+                    <Chip key={allergen} size="sm" variant="default">
                       {allergen}
                     </Chip>
                   ))}

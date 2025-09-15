@@ -4,6 +4,7 @@ declare module 'next-auth' {
       id: string
       name: string
       email: string
+      storeId: string
     }
   }
 
@@ -11,6 +12,7 @@ declare module 'next-auth' {
     id: string
     name: string
     email: string
+    storeId: string
   }
 }
 
