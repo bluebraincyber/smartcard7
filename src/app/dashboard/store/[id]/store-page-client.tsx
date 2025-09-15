@@ -214,56 +214,53 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
     return (
       <div
         onClick={() => setCreateModal({ isOpen: true, categoryId, categoryName })}
-        className="group cursor-pointer transition-all duration-300 bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl hover:shadow-gray-100 hover:-translate-y-1 hover:border-blue-300"
+        className="group cursor-pointer transition-all duration-200 bg-white rounded-2xl border-2 border-dashed border-gray-300 hover:border-blue-500 overflow-hidden shadow-lg shadow-gray-200/50 hover:shadow-xl hover:shadow-gray-300/60 hover:-translate-y-0.5"
       >
         {/* HEADER DE MÍDIA — mesma estrutura do AdminProductCard */}
         <div className="relative w-full bg-gray-50 rounded-t-2xl overflow-hidden">
-          <div className="relative w-full aspect-square sm:aspect-[4/3] bg-gradient-to-br from-gray-50 to-gray-100 flex flex-col items-center justify-center">
+          <div className="relative w-full aspect-square bg-gray-50 flex flex-col items-center justify-center group-hover:bg-blue-50 transition-colors duration-200">
             {/* Círculo com ícone Plus */}
-            <div className="w-16 h-16 rounded-full border-2 border-dashed border-gray-300 group-hover:border-blue-500 group-hover:bg-blue-50 flex items-center justify-center transition-all duration-300 group-hover:scale-110 mb-3">
-              <Plus className="h-8 w-8 text-gray-400 group-hover:text-blue-500 transition-colors duration-300" />
+            <div className="w-12 h-12 rounded-full border-2 border-dashed border-gray-300 group-hover:border-blue-500 group-hover:bg-blue-50 flex items-center justify-center transition-all duration-200 group-hover:scale-105 mb-2">
+              <Plus className="h-6 w-6 text-gray-400 group-hover:text-blue-500 transition-colors duration-200" />
             </div>
             
             {/* Botão Adicionar abaixo do ícone */}
-            <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-gray-100 group-hover:bg-blue-100 text-gray-600 group-hover:text-blue-600 text-sm font-medium transition-all duration-300">
+            <div className="inline-flex items-center px-2.5 py-1 rounded-full bg-gray-100 group-hover:bg-blue-100 text-gray-600 group-hover:text-blue-600 text-xs font-medium transition-all duration-200">
               Adicionar
             </div>
-            
-            {/* Overlay sutil */}
-            <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-all duration-300"></div>
           </div>
         </div>
 
         {/* Conteúdo do card — mesma estrutura do AdminProductCard */}
-        <div className="p-4">
+        <div className="p-3">
           {/* Nome e descrição */}
-          <div className="mb-3">
-            <h3 className="font-semibold text-gray-700 group-hover:text-blue-600 text-lg leading-tight mb-1 transition-colors duration-300">
-              Novo Item
+          <div className="mb-2">
+            <h3 className="font-semibold text-gray-700 group-hover:text-blue-600 text-base leading-tight mb-1 transition-colors duration-200">
+              Novo Produto
             </h3>
-            <p className="text-gray-500 group-hover:text-blue-500 text-sm leading-relaxed transition-colors duration-300">
+            <p className="text-gray-500 group-hover:text-blue-500 text-xs line-clamp-1 leading-relaxed transition-colors duration-200">
               Clique para adicionar produto
             </p>
           </div>
 
           {/* Espaço para preço (vazio mas mantém layout) */}
-          <div className="mb-4">
-            <div className="h-8 flex items-center">
-              <span className="text-sm text-gray-400 group-hover:text-blue-400 transition-colors duration-300 italic">
+          <div className="mb-3">
+            <div className="h-6 flex items-center">
+              <span className="text-xs text-gray-400 group-hover:text-blue-400 transition-colors duration-200 italic">
                 Configure nome e preço
               </span>
             </div>
           </div>
 
           {/* Status badge centralizado */}
-          <div className="flex items-center justify-center mb-4">
-            <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700 group-hover:bg-blue-100 transition-colors duration-300">
-              Novo Produto
+          <div className="flex items-center justify-center mb-3">
+            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700 group-hover:bg-blue-100 transition-colors duration-200">
+              Novo Item
             </span>
           </div>
 
           {/* Espaço vazio para manter alinhamento com outros cards */}
-          <div className="h-9"></div>
+          <div className="h-8"></div>
         </div>
       </div>
     )
@@ -1022,15 +1019,18 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
+        <div className="mb-12">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
               <Link
                 href="/dashboard/products"
-                className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
+                className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-gray-200"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Voltar para Seleção de Lojas
@@ -1040,7 +1040,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
               <Link
                 href={`/${store.slug}`}
                 target="_blank"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-xl shadow-sm text-sm font-medium text-gray-700 bg-white/90 hover:bg-white hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 backdrop-blur-sm"
               >
                 <Eye className="mr-2 h-4 w-4" />
                 Visualizar Loja
@@ -1050,18 +1050,24 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
           </div>
         </div>
 
-        {/* Store Header */}
-        <div className="mb-6">
-          <div className="text-center sm:text-left">
-            <h1 className="text-2xl font-bold text-gray-900">{store.name}</h1>
-            <p className="mt-1 text-sm text-gray-600">
-              Gerencie as categorias e produtos desta loja
-            </p>
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <div className="relative mb-8">
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg mb-6">
+              <div className="w-10 h-10 rounded-full" style={{ backgroundColor: store.primaryColor }}></div>
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 opacity-20 rounded-full blur-xl scale-150"></div>
           </div>
+          <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
+            {store.name}
+          </h1>
+          <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            Gerencie categorias, produtos e configurações desta loja
+          </p>
         </div>
 
         {/* Store Images Preview */}
-        <div className="bg-white shadow rounded-lg mb-6">
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 mb-12">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div>
@@ -1231,7 +1237,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
           )}
         </div>
         {/* Store Info - Com Inline Editing */}
-        <div className="bg-white shadow rounded-lg mb-8">
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 mb-12">
           <div className="px-6 py-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
               <div className="flex-1 pr-4">
@@ -1305,7 +1311,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         </div>
 
         {/* Categories Section Header */}
-        <div className="bg-white shadow rounded-lg mb-6">
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 mb-12">
           <div className="px-6 py-4">
             <div className="flex items-center justify-between">
               <div>
@@ -1316,7 +1322,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
               </div>
               <Link
                 href={`/dashboard/store/${store.id}/categories`}
-                className="inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                className="inline-flex items-center px-6 py-3 border border-transparent rounded-xl shadow-sm text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Categoria
@@ -1328,7 +1334,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         {/* Categories and Items */}
         <div className="space-y-8">
           {store.categories.length === 0 ? (
-            <div className="bg-white shadow rounded-lg">
+            <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200">
               <div className="px-6 py-12 text-center">
                 <div className="text-gray-400 mb-4">
                   <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -1341,7 +1347,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                 </p>
                 <Link
                   href={`/dashboard/store/${store.id}/categories`}
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                  className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Criar Primeira Categoria
@@ -1350,7 +1356,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
             </div>
           ) : (
             store.categories.map((category) => (
-            <div key={category.id} className="bg-white shadow rounded-lg">
+            <div key={category.id} className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 mb-8">
               <div className="px-6 py-4 border-b border-gray-200">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
@@ -1433,13 +1439,13 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
               <div className="px-6 py-6">
                 {category.items?.length === 0 ? (
                   <div className="py-12">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                       {/* Card "Novo Item" como único item quando categoria vazia */}
                       <AddItemCard categoryId={category.id} categoryName={category.name} />
                     </div>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                     {category.items.map((item) => (
                       <AdminProductCard
                         key={item.id}
@@ -1469,14 +1475,14 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         </div>
 
         {/* Delete Store Section */}
-        <div className="mt-12 bg-red-50 border border-red-200 rounded-lg p-6">
+        <div className="mt-12 bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-red-200 p-8">
           <h3 className="text-lg font-medium text-red-900 mb-4">Zona de Perigo</h3>
           <p className="text-sm text-red-700 mb-4">
             Deletar esta loja removerá permanentemente todos os dados, incluindo categorias e itens. Esta ação não pode ser desfeita.
           </p>
           <button
             onClick={() => setShowDeleteModal(true)}
-            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+            className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl text-white bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-all duration-200"
           >
             <Trash2 className="mr-2 h-4 w-4" />
             Deletar Loja
@@ -1486,8 +1492,8 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
 
       {/* Delete Store Modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onClick={() => setShowDeleteModal(false)}>
-          <div className="relative top-20 mx-auto p-5 border w-96 shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50" onClick={() => setShowDeleteModal(false)}>
+          <div className="relative top-20 mx-auto p-8 border w-96 shadow-xl rounded-3xl bg-white/95 backdrop-blur-sm border border-gray-200" onClick={e => e.stopPropagation()}>
             <div className="mt-3">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Deletar Loja</h3>
               <p className="text-sm text-gray-600 mb-4">
@@ -1506,14 +1512,14 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                     setShowDeleteModal(false)
                     setDeleteConfirmText('')
                   }}
-                  className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                  className="px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={deleteStore}
                   disabled={deleteConfirmText !== store.name || isDeleting}
-                  className="px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-red-600 to-red-700 border border-transparent rounded-xl hover:from-red-700 hover:to-red-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
                 >
                   {isDeleting ? 'Deletando...' : 'Deletar Loja'}
                 </button>
@@ -1585,8 +1591,8 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
 
       {/* Modal de Upload de Imagens */}
       {imageModal.isOpen && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50" onClick={closeImageModal}>
-          <div className="relative top-20 mx-auto p-6 border w-full max-w-md shadow-lg rounded-md bg-white" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm overflow-y-auto h-full w-full z-50" onClick={closeImageModal}>
+          <div className="relative top-20 mx-auto p-8 border w-full max-w-md shadow-xl rounded-3xl bg-white/95 backdrop-blur-sm border border-gray-200" onClick={e => e.stopPropagation()}>
             <div className="mb-4">
               <h3 className="text-lg font-medium text-gray-900 mb-2">
                 {imageModal.type === 'cover' ? 'Imagem de Capa' : 'Logo/Perfil'}
@@ -1612,7 +1618,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
             <div className="flex justify-end space-x-3">
               <button
                 onClick={closeImageModal}
-                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                className="px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-xl hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-all duration-200"
               >
                 Cancelar
               </button>

@@ -8,6 +8,8 @@ interface ImageThumbProps {
   alt: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   variant?: 'rounded' | 'circle' | 'square';
+  rounded?: 'none' | 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  fluid?: boolean;
   className?: string;
   priority?: boolean;
 }
@@ -16,7 +18,9 @@ export function ImageThumb({
   src, 
   alt, 
   size = 'md', 
-  variant = 'rounded', 
+  variant = 'rounded',
+  rounded,
+  fluid = false,
   className = '',
   priority = false 
 }: ImageThumbProps) {
@@ -35,13 +39,32 @@ export function ImageThumb({
     square: 'rounded-none'
   };
 
+  const roundedClasses = {
+    none: 'rounded-none',
+    sm: 'rounded-sm',
+    md: 'rounded-md',
+    lg: 'rounded-lg',
+    xl: 'rounded-xl',
+    full: 'rounded-full'
+  };
+
   const handleError = () => {
     setHasError(true);
   };
 
+  // Se fluid é true, usa w-full h-full, senão usa os tamanhos fixos
+  const containerClasses = fluid 
+    ? 'w-full h-full'
+    : sizeClasses[size];
+
+  // Determina as classes de border-radius
+  const borderClasses = rounded 
+    ? roundedClasses[rounded]
+    : variantClasses[variant];
+
   if (!src || hasError) {
     return (
-      <div className={`${sizeClasses[size]} ${variantClasses[variant]} bg-gray-100 flex items-center justify-center ${className}`}>
+      <div className={`${containerClasses} ${borderClasses} bg-gray-100 flex items-center justify-center ${className}`}>
         <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
@@ -50,7 +73,7 @@ export function ImageThumb({
   }
 
   return (
-    <div className={`${sizeClasses[size]} ${variantClasses[variant]} overflow-hidden relative ${className}`}>
+    <div className={`${containerClasses} ${borderClasses} overflow-hidden relative ${className}`}>
       <Image
         src={src}
         alt={alt}

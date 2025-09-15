@@ -32,7 +32,7 @@ async function getStore(slug: string) {
 
     // Buscar loja específica
     const storeResult = await pool.query(
-      `SELECT id, name, slug, description, whatsapp, address, isactive, created_at, updated_at
+      `SELECT id, name, slug, description, whatsapp, address, logo, coverimage, isactive, created_at, updated_at
        FROM stores 
        WHERE slug = $1
        LIMIT 1`,
@@ -113,10 +113,17 @@ async function getStore(slug: string) {
       whatsapp: store.whatsapp || '',
       address: store.address || null,
       primaryColor: '#EA1D2C',
-      coverImage: null,
-      profileImage: null,
+      coverImage: store.coverimage || null,
+      profileImage: store.logo || null,
       categories: categories
     };
+
+    console.log('🖼️ Imagens da loja:', { 
+      coverImage: store.coverimage, 
+      profileImage: store.logo,
+      finalCoverImage: finalStore.coverImage,
+      finalProfileImage: finalStore.profileImage
+    });
 
     console.log('🏪 Loja final preparada:', finalStore.name, 'com', categories.length, 'categorias');
     return finalStore;

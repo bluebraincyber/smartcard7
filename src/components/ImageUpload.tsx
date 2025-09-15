@@ -196,38 +196,38 @@ export default function ImageUpload({
               src={currentImage || '/images/placeholder.png'}
               alt="Current product image"
               fill={true}
-              className="object-cover rounded-md"
+              className="object-cover"
               priority={true}
             />
-          </div>
-          
-          {/* Overlay com botões - só mostra em telas maiores para variantes pequenas */}
-          <div className={`absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 space-x-1 ${
-            variant === 'compact' || variant === 'small' ? 'hidden sm:flex' : 'flex'
-          }`}>
-            <button
-              onClick={handleClick}
-              className={`bg-white text-gray-700 px-2 py-1 rounded text-xs font-medium hover:bg-gray-50 flex items-center ${
-                variant === 'compact' ? 'px-1 py-0.5' : 'px-2 py-1'
-              }`}
-              disabled={uploading}
-              type="button"
-            >
-              <Upload className={`${variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
-              {variant === 'compact' ? '↻' : 'Trocar'}
-            </button>
-            {onRemove && (
-              <button
-                onClick={handleRemove}
-                className={`bg-red-600 text-white px-2 py-1 rounded text-xs font-medium hover:bg-red-700 flex items-center ${
-                  variant === 'compact' ? 'px-1 py-0.5' : 'px-2 py-1'
-                }`}
-                type="button"
-              >
-                <X className={`${variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
-                {variant === 'compact' ? '×' : 'Remover'}
-              </button>
-            )}
+            
+            {/* Overlay com botões - dentro do container da imagem */}
+            <div className={`absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
+              variant === 'compact' || variant === 'small' ? 'hidden sm:flex' : 'flex'
+            }`}>
+              <div className="flex space-x-2">
+                <button
+                  onClick={handleClick}
+                  className={`bg-white text-gray-700 rounded text-xs font-medium hover:bg-gray-50 flex items-center shadow-sm ${
+                    variant === 'compact' ? 'px-2 py-1' : 'px-3 py-1.5'
+                  }`}
+                  disabled={uploading}
+                  type="button"
+                >
+                  <Upload className={`${variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
+                  Trocar
+                </button>
+                <button
+                  onClick={handleRemove}
+                  className={`bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700 flex items-center shadow-sm ${
+                    variant === 'compact' ? 'px-2 py-1' : 'px-3 py-1.5'
+                  }`}
+                  type="button"
+                >
+                  <X className={`${variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
+                  Remover
+                </button>
+              </div>
+            </div>
           </div>
           
           {/* Indicador mobile para variantes pequenas */}

@@ -62,7 +62,7 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
       <div
         ref={ref}
         className={cn(
-          'group relative bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-gray-100 hover:-translate-y-1',
+          'group relative bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all duration-200 shadow-lg shadow-gray-200/50 hover:shadow-xl hover:shadow-gray-300/60 hover:-translate-y-0.5',
           !isActive && 'opacity-60',
           className
         )}
@@ -70,7 +70,7 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
       >
         {/* HEADER DE MÍDIA — imagem GRANDE */}
         <div className="relative w-full bg-gray-50 rounded-t-2xl overflow-hidden">
-          <div className="relative w-full aspect-square sm:aspect-[4/3]">
+          <div className="relative w-full aspect-square">
             <ImageThumb
               src={image ?? ''}
               alt={name}
@@ -81,17 +81,19 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
 
             {/* Switch no canto superior esquerdo */}
             <div className="absolute top-3 left-3 z-10">
-              <Switch
-                checked={isActive}
-                onCheckedChange={handleSwitchChange}
-                size="md"
-              />
+              <div className="[&>button]:outline [&>button]:outline-2 [&>button]:outline-gray-200 [&>button]:drop-shadow-md">
+                <Switch
+                  checked={isActive}
+                  onCheckedChange={handleSwitchChange}
+                  size="md"
+                />
+              </div>
             </div>
 
             {/* Overlay de produto Indisponível */}
             {isPaused && (
               <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                <div className="bg-white/90 backdrop-blur-sm rounded-full p-2">
+                <div className="bg-white/95 rounded-xl p-2 shadow-sm">
                   <PauseIcon size="lg" className="text-yellow-600" />
                 </div>
               </div>
@@ -100,27 +102,27 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
         </div>
 
         {/* Conteúdo do card */}
-        <div className="p-4">
+        <div className="p-3">
           {/* Nome e descrição */}
-          <div className="mb-3">
-            <h3 className="font-semibold text-gray-900 text-lg leading-tight mb-1 line-clamp-1">
+          <div className="mb-2">
+            <h3 className="font-semibold text-gray-900 text-base leading-tight mb-1 line-clamp-1">
               {name}
             </h3>
             {description && (
-              <p className="text-gray-500 text-sm line-clamp-2 leading-relaxed">
+              <p className="text-gray-500 text-xs line-clamp-1 leading-relaxed">
                 {description}
               </p>
             )}
           </div>
 
           {/* Preço */}
-          <div className="mb-4">
+          <div className="mb-3">
             <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-bold text-green-600">
+              <span className="text-lg font-bold text-green-600">
                 {formatPrice(price)}
               </span>
               {originalPrice && originalPrice > price && (
-                <span className="text-sm text-gray-400 line-through">
+                <span className="text-xs text-gray-400 line-through">
                   {formatPrice(originalPrice)}
                 </span>
               )}
@@ -128,13 +130,13 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
           </div>
 
           {/* Status badges */}
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-1.5 mb-3">
             <span
               className={cn(
-                'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium',
+                'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
                 isActive
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-gray-100 text-gray-800'
+                  ? 'bg-green-100 text-green-700'
+                  : 'bg-gray-100 text-gray-500'
               )}
             >
               {isActive ? 'Ativo' : 'Inativo'}
@@ -142,10 +144,10 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
             
             <span
               className={cn(
-                'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium',
+                'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
                 isPaused
-                  ? 'bg-yellow-100 text-yellow-800'
-                  : 'bg-blue-100 text-blue-800'
+                  ? 'bg-yellow-100 text-yellow-700'
+                  : 'bg-blue-100 text-blue-700'
               )}
             >
               {isPaused ? 'Indisponível' : 'Disponível'}
@@ -158,7 +160,7 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => onEdit(id)}
-                className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-colors"
                 title="Editar produto"
               >
                 <EditIcon size="sm" />
@@ -167,7 +169,7 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
               <button
                 onClick={handlePauseToggle}
                 className={cn(
-                  'inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors',
+                  'inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors',
                   isPaused
                     ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200'
                     : 'bg-gray-100 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600'
@@ -182,7 +184,7 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
             <div className="relative">
               <button
                 onClick={() => setIsActionsOpen(!isActionsOpen)}
-                className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
                 title="Mais ações"
               >
                 <MoreIcon size="sm" />

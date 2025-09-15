@@ -242,142 +242,174 @@ export default function ItemsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col items-center justify-center h-64">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600"></div>
+              <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-blue-600 opacity-20 animate-pulse"></div>
+            </div>
+            <span className="mt-4 text-gray-700 font-medium">Carregando produtos...</span>
+          </div>
+        </div>
       </div>
     )
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <Link
-          href={`/dashboard/store/${params.id}/categories`}
-          className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700"
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Voltar às Categorias
-        </Link>
-        <h1 className="mt-2 text-2xl font-bold text-gray-900">
-          {category?.name} - {store?.name}
-        </h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Gerencie os itens desta categoria
-        </p>
-      </div>
-
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-4 py-5 sm:p-6">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-medium text-gray-900">Itens da Categoria</h2>
-            <button
-              onClick={() => setShowNewForm(true)}
-              className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700"
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Background Pattern */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-12">
+          <div className="flex items-center space-x-4 mb-6">
+            <Link
+              href={`/dashboard/store/${params.id}/categories`}
+              className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-gray-200"
             >
-              <Plus className="mr-2 h-4 w-4" />
-              Novo Item
-            </button>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Voltar às Categorias
+            </Link>
           </div>
-
-          {showNewForm && (
-            <div className="mb-6 p-4 border border-gray-200 rounded-lg bg-gray-50">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">
-                {editingItem ? 'Editar Item' : 'Novo Item'}
-              </h3>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Nome *</label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="Nome do item"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Descrição</label>
-                  <textarea
-                    rows={3}
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="Descrição do item"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Preço</label>
-                  <div className="mt-1 relative rounded-md shadow-sm">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <span className="text-gray-500 sm:text-sm">R$</span>
-                    </div>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.price}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
-                      className="pl-12 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                      placeholder="0,00"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">URL da Imagem</label>
-                  <input
-                    type="url"
-                    value={formData.image}
-                    onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                    className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
-                    placeholder="https://exemplo.com/imagem.jpg"
-                  />
-                </div>
-
-                <div className="flex justify-end space-x-3">
-                  <button
-                    type="button"
-                    onClick={resetForm}
-                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md hover:bg-gray-400"
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={creating || !formData.name.trim()}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
-                  >
-                    {creating ? 'Salvando...' : (editingItem ? 'Atualizar' : 'Criar')}
-                  </button>
-                </div>
-              </form>
-            </div>
-          )}
-
-          {items.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="text-gray-400 mb-4">
-                <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
+          
+          {/* Hero Section */}
+          <div className="text-center">
+            <div className="relative mb-8">
+              <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-green-500 to-green-600 shadow-lg mb-6">
+                <Plus className="h-10 w-10 text-white" />
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhum item criado</h3>
-              <p className="text-gray-500 mb-4">
-                Adicione itens a esta categoria
-              </p>
+              <div className="absolute inset-0 bg-gradient-to-r from-green-400 to-green-600 opacity-20 rounded-full blur-xl scale-150"></div>
+            </div>
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
+              {category?.name} - {store?.name}
+            </h1>
+            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+              Gerencie os produtos desta categoria
+            </p>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200">
+          <div className="px-8 py-6 border-b border-gray-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-xl font-semibold text-gray-900">Produtos da Categoria</h2>
+                <p className="mt-1 text-sm text-gray-600">Adicione e gerencie os produtos desta categoria</p>
+              </div>
               <button
                 onClick={() => setShowNewForm(true)}
-                className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700"
+                className="inline-flex items-center px-6 py-3 border border-transparent text-sm font-medium rounded-xl shadow-sm text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-200"
               >
                 <Plus className="mr-2 h-4 w-4" />
-                Criar Primeiro Item
+                Novo Produto
               </button>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          </div>
+          
+          <div className="p-8">
+
+            {showNewForm && (
+              <div className="mb-8 p-6 border-2 border-dashed border-green-200 rounded-2xl bg-green-50/50 backdrop-blur-sm">
+                <h3 className="text-lg font-semibold text-gray-900 mb-6">
+                  {editingItem ? 'Editar Produto' : 'Novo Produto'}
+                </h3>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Nome do Produto *</label>
+                      <input
+                        type="text"
+                        required
+                        value={formData.name}
+                        onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                        className="w-full border-gray-300 rounded-xl shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                        placeholder="Ex: Corte Masculino, Barba Completa..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">Preço</label>
+                      <div className="relative rounded-xl shadow-sm">
+                        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                          <span className="text-gray-500 sm:text-sm font-medium">R$</span>
+                        </div>
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          value={formData.price}
+                          onChange={(e) => setFormData(prev => ({ ...prev, price: e.target.value }))}
+                          className="pl-12 w-full border-gray-300 rounded-xl shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                          placeholder="25,00"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Descrição</label>
+                    <textarea
+                      rows={3}
+                      value={formData.description}
+                      onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                      className="w-full border-gray-300 rounded-xl shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                      placeholder="Descreva o produto ou serviço..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">URL da Imagem</label>
+                    <input
+                      type="url"
+                      value={formData.image}
+                      onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
+                      className="w-full border-gray-300 rounded-xl shadow-sm focus:ring-green-500 focus:border-green-500 sm:text-sm transition-all duration-200"
+                      placeholder="https://exemplo.com/imagem.jpg"
+                    />
+                  </div>
+
+                  <div className="flex justify-end space-x-4 pt-4">
+                    <button
+                      type="button"
+                      onClick={resetForm}
+                      className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all duration-200"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={creating || !formData.name.trim()}
+                      className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl hover:from-green-700 hover:to-green-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                    >
+                      {creating ? 'Salvando...' : (editingItem ? 'Atualizar Produto' : 'Criar Produto')}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {items.length === 0 ? (
+              <div className="text-center py-16">
+                <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-green-100 mb-6">
+                  <Plus className="h-8 w-8 text-green-600" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-3">Nenhum produto criado</h3>
+                <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
+                  Adicione produtos a esta categoria para começar a vender
+                </p>
+                <button
+                  onClick={() => setShowNewForm(true)}
+                  className="inline-flex items-center px-8 py-4 border border-transparent shadow-sm text-lg font-medium rounded-2xl text-white bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 transition-all duration-200"
+                >
+                  <Plus className="mr-3 h-6 w-6" />
+                  Criar Primeiro Produto
+                </button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {items.map((item) => (
                 <AdminProductCard
                   key={item.id}
@@ -395,8 +427,9 @@ export default function ItemsPage() {
                   onDelete={handleDelete}
                 />
               ))}
-            </div>
-          )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>

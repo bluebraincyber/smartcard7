@@ -83,6 +83,10 @@ export default function ProductCreateModal({
     setFormData(prev => ({ ...prev, image: imageUrl }))
   }
 
+  const handleImageRemove = () => {
+    setFormData(prev => ({ ...prev, image: '' }))
+  }
+
   const handleToggleChange = (field: 'isactive' | 'isavailable') => {
     setFormData(prev => ({
       ...prev,
@@ -180,6 +184,7 @@ export default function ProductCreateModal({
                         <div className="w-full max-w-sm">
                           <ImageUpload
                             onUpload={handleImageUpload}
+                            onRemove={handleImageRemove}
                             currentImage={formData.image}
                             type="item"
                             storeid={storeId}
@@ -274,11 +279,11 @@ export default function ProductCreateModal({
                   </div>
                   
                   {/* Footer com botões */}
-                  <div className="px-6 py-4 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+                  <div className="px-8 py-6 bg-gradient-to-r from-gray-50 to-gray-100 border-t border-gray-200/50 flex justify-end space-x-4">
                     <button
                       type="button"
                       onClick={onClose}
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      className="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200 shadow-sm"
                       disabled={isLoading}
                     >
                       Cancelar
@@ -286,9 +291,9 @@ export default function ProductCreateModal({
                     <button
                       type="submit"
                       disabled={isLoading}
-                      className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-green-600 to-green-700 border border-transparent rounded-xl hover:from-green-700 hover:to-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
                     >
-                      {isLoading ? 'Criando...' : 'Criar Item'}
+                      {isLoading ? 'Criando...' : 'Criar Produto'}
                     </button>
                   </div>
                 </form>
