@@ -18,8 +18,8 @@ async function getHealthStatus() {
 export default async function HealthPage() {
   const health = await getHealthStatus();
   const isHealthy = health.status === 'ok';
-  const timestamp = new Date(health.timestamp).toLocaleString();
-  const uptime = new Date(health.uptimeSec * 1000).toISOString().substr(11, 8);
+  const timestamp = health.timestamp ? new Date(health.timestamp).toLocaleString() : 'N/A';
+  const uptime = health.uptimeSec ? new Date((health.uptimeSec || 0) * 1000).toISOString().substr(11, 8) : 'N/A';
 
   const getStatusIcon = (status: string) => {
     switch (status) {

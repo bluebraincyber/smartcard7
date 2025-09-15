@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { LedgerEntry } from '@/types/finance';
 
 // In-memory storage for development (replace with database in production)
-let entries: LedgerEntry[] = [];
+export let entries: LedgerEntry[] = [];
 
 // Helper to parse query parameters
 function parseQueryParams(url: string) {

@@ -5,6 +5,7 @@ import { authOptions } from '@/lib/authOptions'
 import type { Session } from 'next-auth'
 
 export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'; // Disable static generation
 
 export async function GET(request: NextRequest) {
   try {

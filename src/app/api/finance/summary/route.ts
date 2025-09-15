@@ -4,6 +4,8 @@ import type { NextRequest } from 'next/server';
 // Import the in-memory storage from entries route
 import { entries } from '../entries/route';
 
+export const dynamic = 'force-dynamic'; // Disable static generation
+
 export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
