@@ -12,33 +12,29 @@ export function Topbar() {
   if (pathname.startsWith('/auth')) return null;
 
   return (
-    <header className="sticky top-0 z-30 flex justify-center">
-      <div className="bg-white shadow-md rounded-b-lg py-4 px-8 w-auto inline-block">
-        <div className="flex items-center justify-between">
-          {/* Left: Mobile menu button only */}
-          <div className="flex items-center">
-            <button
-              type="button"
-              onClick={toggle}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-md text-gray-500 hover:bg-gray-100 md:hidden"
-              aria-label="Abrir menu"
-            >
-              <Menu className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Center: Brand */}
-          <div className="absolute left-1/2 -translate-x-1/2">
+    <header className="sticky top-0 z-30">
+      {/* Floating hamburger menu */}
+      <button
+        type="button"
+        onClick={toggle}
+        className="fixed top-4 left-4 z-40 inline-flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md text-gray-500 hover:bg-gray-100 md:hidden"
+        aria-label="Abrir menu"
+      >
+        <Menu className="h-5 w-5" />
+      </button>
+      
+      {/* Centered SmartCard */}
+      <div className="flex justify-center w-full">
+        <div className="bg-white shadow-md rounded-b-lg py-2 px-3 w-auto min-w-[120px] text-center">
+          <div className="flex items-center justify-center w-full">
+            {/* Center: Brand */}
             <a 
-              href="#" 
-              className="text-blue-600 font-semibold hover:underline"
+              href="/dashboard" 
+              className="text-blue-600 text-sm font-semibold hover:underline whitespace-nowrap mx-auto"
             >
               SmartCard
             </a>
           </div>
-
-          {/* Right side empty for alignment */}
-          <div className="w-9"></div>
         </div>
       </div>
     </header>

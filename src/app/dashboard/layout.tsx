@@ -6,6 +6,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileSidebar } from '@/components/layout/MobileSidebar'
 import { SidebarProvider } from '@/components/providers/sidebar-provider'
 import { usePathname } from 'next/navigation'
+import TopbarHUD from '@/components/topbar/TopbarHUD'
 
 export default function DashboardLayout({
   children,
@@ -51,13 +52,17 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <div className="min-h-screen bg-gray-50">
+        <TopbarHUD />
         <Topbar />
-        <Sidebar />
-        <MobileSidebar />
-        
-        {/* Main content */}
-        <div className="md:pl-16 pt-14">
-          <main className="max-w-[1200px] mx-auto px-4 py-6 md:px-6">
+        <div className="flex pt-2">
+          <Sidebar />
+          <MobileSidebar />
+          
+          {/* Main content */}
+          <main 
+            className="flex-1 max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8"
+            data-scroll-root
+          >
             {children}
           </main>
         </div>

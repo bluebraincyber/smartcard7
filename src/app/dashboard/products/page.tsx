@@ -15,6 +15,7 @@ interface Store {
   products: number
   views30d?: number
   updatedAt?: string
+  // Add any other missing properties that might be used in the StoreCard component
 }
 
 interface ErrorState {
@@ -375,7 +376,7 @@ function QuickActionCard({
   color 
 }: {
   href: string
-  icon: any
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   title: string
   description: string
   color: 'green' | 'purple' | 'blue'

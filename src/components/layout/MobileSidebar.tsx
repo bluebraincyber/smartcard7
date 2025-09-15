@@ -29,15 +29,15 @@ export function MobileSidebar() {
 
   return (
     <>
-      {/* Backdrop */}
+      {/* Backdrop with higher z-index */}
       <div 
-        className="fixed inset-0 z-40 bg-black/50 transition-opacity md:hidden"
+        className="fixed inset-0 z-[60] bg-black/50 transition-opacity md:hidden"
         onClick={close}
       />
       
-      {/* Sidebar */}
+      {/* Sidebar with transform for smooth slide-in */}
       <div 
-        className="fixed left-0 top-0 z-50 flex h-screen w-64 flex-col bg-white shadow-xl transition-transform duration-300 ease-in-out md:hidden"
+        className="fixed left-0 top-0 z-[70] flex h-screen w-64 flex-col bg-white shadow-xl transition-transform duration-300 ease-in-out transform md:hidden"
         role="dialog"
         aria-modal="true"
       >

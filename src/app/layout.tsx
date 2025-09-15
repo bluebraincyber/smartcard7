@@ -8,6 +8,11 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata = {
   title: 'SmartCard - Cartão Digital Inteligente',
   description: 'Cartão digital interativo e universal para pequenos e médios negócios',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    viewportFit: 'cover',
+  },
 };
 
 export default function RootLayout({
