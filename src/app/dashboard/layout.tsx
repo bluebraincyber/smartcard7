@@ -38,8 +38,8 @@ function NavItem({
     <Link
       href={href}
       className={`group flex items-center px-2 py-2.5 text-sm font-medium rounded-md transition-colors ${active
-          ? 'bg-blue-50 text-blue-600'
-          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+        ? 'bg-blue-50 text-blue-600'
+        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
         }`}
       title={collapsed ? label : undefined}
     >
@@ -68,8 +68,8 @@ function MobileNavItem({
     <Link
       href={href}
       className={`flex items-center px-3 py-3 text-base font-medium rounded-md ${active
-          ? 'bg-blue-50 text-blue-600'
-          : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+        ? 'bg-blue-50 text-blue-600'
+        : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
         }`}
     >
       <Icon
