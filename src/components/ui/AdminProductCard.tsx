@@ -62,26 +62,27 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
       <div
         ref={ref}
         className={cn(
-          'group relative bg-white rounded-2xl border border-gray-200 overflow-hidden transition-all duration-200 shadow-lg shadow-gray-200/50 hover:shadow-xl hover:shadow-gray-300/60 hover:-translate-y-0.5',
+          'group relative bg-card rounded-2xl border border-border overflow-hidden transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5',
+          'hover:shadow-foreground/5 dark:hover:shadow-foreground/10',
           !isActive && 'opacity-60',
           className
         )}
         {...props}
       >
         {/* HEADER DE MÍDIA — imagem GRANDE */}
-        <div className="relative w-full bg-gray-50 rounded-t-2xl overflow-hidden">
+        <div className="relative w-full bg-muted/30 rounded-t-2xl overflow-hidden">
           <div className="relative w-full aspect-square">
             <ImageThumb
               src={image ?? ''}
               alt={name}
               rounded="none"
               fluid
-              className="bg-gray-100"
+              className="bg-muted"
             />
 
             {/* Switch no canto superior esquerdo */}
             <div className="absolute top-3 left-3 z-10">
-              <div className="[&>button]:outline [&>button]:outline-2 [&>button]:outline-gray-200 [&>button]:drop-shadow-md">
+              <div className="[&>button]:outline [&>button]:outline-2 [&>button]:outline-muted-foreground/20 [&>button]:drop-shadow-md">
                 <Switch
                   checked={isActive}
                   onCheckedChange={handleSwitchChange}
@@ -92,9 +93,9 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
 
             {/* Overlay de produto Indisponível */}
             {isPaused && (
-              <div className="absolute inset-0 bg-black/20 flex items-center justify-center">
-                <div className="bg-white/95 rounded-xl p-2 shadow-sm">
-                  <PauseIcon size="lg" className="text-yellow-600" />
+              <div className="absolute inset-0 bg-foreground/10 dark:bg-foreground/20 flex items-center justify-center">
+                <div className="bg-card/95 rounded-xl p-2 shadow-sm">
+                  <PauseIcon size="lg" className="text-yellow-600 dark:text-yellow-500" />
                 </div>
               </div>
             )}
@@ -219,7 +220,7 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
                         onDelete(id);
                         setIsActionsOpen(false);
                       }}
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-brand-blue hover:bg-brand-blue/10"
                     >
                       <TrashIcon size="sm" />
                       Excluir

@@ -103,7 +103,7 @@ const MetricCard = ({
           change > 0 
             ? 'bg-green-50 text-green-700' 
             : change < 0 
-            ? 'bg-red-50 text-red-700' 
+            ? 'bg-brand-blue/10 text-brand-blue' 
             : 'bg-gray-50 text-gray-700'
         }`}>
           {change > 0 ? (

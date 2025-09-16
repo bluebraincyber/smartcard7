@@ -34,7 +34,7 @@ export default function SecuritySettingsCard() {
   }, [strength, next]);
 
   const strengthColor = useMemo(() => {
-    const colors = ["bg-red-500", "bg-orange-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"];
+    const colors = ["bg-brand-blue", "bg-orange-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"];
     return colors[strength];
   }, [strength]);
 
@@ -177,7 +177,7 @@ export default function SecuritySettingsCard() {
         <div className="flex items-center justify-between">
           <div>
             {message && (
-              <div className={`text-sm ${state === "error" ? "text-red-600" : "text-green-600"}`}>
+              <div className={`text-sm ${state === "error" ? "text-brand-blue" : "text-green-600"}`}>
                 {message}
               </div>
             )}

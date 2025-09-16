@@ -26,8 +26,8 @@ const Chip = React.forwardRef<HTMLSpanElement, ChipProps>(
     
     const variants = {
       default: 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-      selected: 'bg-red-100 text-red-700 border border-red-200',
-      filter: 'bg-white border border-gray-300 text-gray-700 hover:border-red-300'
+      selected: 'bg-brand-blue/10 text-brand-blue border border-brand-blue/20',
+      filter: 'bg-white border border-gray-300 text-gray-700 hover:border-brand-blue/50'
     };
     
     const sizes = {

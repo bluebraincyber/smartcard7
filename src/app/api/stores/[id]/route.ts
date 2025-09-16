@@ -60,7 +60,7 @@ export async function GET(
       address: store.address || '',
       businessType: store.business_type || 'general',
       requiresAddress: store.requires_address || false,
-      primaryColor: store.primary_color || '#EA1D2C',
+      primaryColor: store.primary_color || '#2563eb',
       categories: categoriesResult.rows.map(category => ({
         ...category,
         items: itemsResult.rows

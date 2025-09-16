@@ -101,7 +101,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
         suppressHydrationWarning
       >
         <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-blue mx-auto mb-4"></div>
           <p className="text-gray-600 dark:text-gray-400">Carregando tema...</p>
         </div>
       </div>

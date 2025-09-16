@@ -10,11 +10,12 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata = {
   title: 'SmartCard - Cartão Digital Inteligente',
   description: 'Cartão digital interativo e universal para pequenos e médios negócios',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    viewportFit: 'cover',
-  },
+};
+
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover',
 };
 
 export default function RootLayout({
@@ -63,7 +64,7 @@ export default function RootLayout({
         </Script>
         
         {/* Meta tags para PWA */}
-        <meta name="theme-color" content="#EA1D2C" />
+        <meta name="theme-color" content="#2563eb" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>

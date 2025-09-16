@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/providers/sidebar-provider";
 import { Home, Store, Boxes, Banknote, BarChart3, Settings, X, LogOut } from "lucide-react";
 import Link from "next/link";
@@ -37,15 +38,15 @@ export function MobileSidebar() {
       
       {/* Sidebar with transform for smooth slide-in */}
       <div 
-        className="fixed left-0 top-0 z-[70] flex h-screen w-64 flex-col bg-white shadow-xl transition-transform duration-300 ease-in-out transform md:hidden"
+        className="fixed left-0 top-0 z-[70] flex h-screen w-64 flex-col bg-background shadow-xl transition-transform duration-300 ease-in-out transform md:hidden border-r border-border"
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex h-14 items-center justify-between px-4">
-          <span className="text-lg font-semibold text-gray-900">Menu</span>
+        <div className="flex h-14 items-center justify-between border-b border-border px-4">
+          <span className="text-lg font-semibold text-foreground">Menu</span>
           <button 
             onClick={close}
-            className="rounded-md p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-900"
+            className="rounded-md p-1 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             aria-label="Fechar menu"
           >
             <X className="h-6 w-6" />
@@ -61,17 +62,19 @@ export function MobileSidebar() {
                 <Link
                   key={href}
                   href={href}
-                  className={`group flex items-center gap-3 rounded-md px-3 py-2.5 text-base font-medium ${
+                  className={cn(
+                    "group flex items-center gap-3 rounded-lg px-3 py-2.5 text-base font-medium transition-colors",
                     isActive
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-                  }`}
+                      ? "bg-primary/10 text-primary border border-primary/20"
+                      : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                  )}
                   onClick={close}
                 >
                   <Icon 
-                    className={`h-5 w-5 flex-shrink-0 ${
-                      isActive ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500'
-                    }`} 
+                    className={cn(
+                      "h-5 w-5 flex-shrink-0",
+                      isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                    )} 
                   />
                   {label}
                 </Link>
@@ -81,18 +84,18 @@ export function MobileSidebar() {
         </nav>
 
         {/* User profile at the bottom */}
-        <div className="border-t border-gray-200 p-4">
+        <div className="border-t border-border p-4 mt-auto">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 flex-shrink-0 rounded-full bg-indigo-100 flex items-center justify-center">
-              <span className="text-sm font-medium text-indigo-600">US</span>
+            <div className="h-10 w-10 flex-shrink-0 rounded-full bg-primary/20 flex items-center justify-center">
+              <span className="text-sm font-medium text-primary">US</span>
             </div>
-            <div className="min-w-0">
-              <p className="truncate text-sm font-medium text-gray-900">Usuário</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-foreground">Usuário</p>
               <button
                 onClick={handleSignOut}
-                className="flex w-full items-center space-x-2 px-2 py-2 text-sm font-medium text-red-600 hover:bg-red-50 rounded-md"
+                className="mt-1 flex w-full items-center text-sm font-medium text-primary hover:bg-primary/10 rounded-md px-2 py-1.5 transition-colors"
               >
-                <LogOut className="mr-1 h-3.5 w-3.5" />
+                <LogOut className="mr-2 h-4 w-4" />
                 Sair
               </button>
             </div>

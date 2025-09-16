@@ -18,7 +18,7 @@ const Badge = React.forwardRef<HTMLSpanElement, BadgeProps>(
       outline: 'badge-outline', 
       success: 'badge-success',
       warning: 'bg-yellow-500 text-white',
-      error: 'bg-red-500 text-white'
+      error: 'bg-brand-blue text-white'
     };
     
     const sizes = {

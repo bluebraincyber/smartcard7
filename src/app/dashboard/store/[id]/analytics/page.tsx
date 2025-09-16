@@ -265,7 +265,7 @@ export default function StoreAnalyticsPage() {
               )}
               {analytics.summary.totalViews === 0 && (
                 <div className="flex items-start">
-                  <div className="w-2 h-2 bg-red-500 rounded-full mt-2 mr-3"></div>
+                  <div className="w-2 h-2 bg-brand-blue rounded-full mt-2 mr-3"></div>
                   <p className="text-sm text-gray-600">
                     Nenhuma visita registrada. Compartilhe o link da sua loja para começar a receber visitantes.
                   </p>

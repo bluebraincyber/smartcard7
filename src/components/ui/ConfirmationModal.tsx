@@ -33,26 +33,26 @@ export default function ConfirmationModal({
   const getIconColor = () => {
     switch (type) {
       case 'danger':
-        return 'text-red-600'
+        return 'text-brand-blue'
       case 'warning':
         return 'text-yellow-600'
       case 'info':
         return 'text-blue-600'
       default:
-        return 'text-red-600'
+        return 'text-brand-blue'
     }
   }
 
   const getButtonColor = () => {
     switch (type) {
       case 'danger':
-        return 'bg-red-600 hover:bg-red-500 focus:ring-red-500'
+        return 'bg-brand-blue hover:bg-brand-blue/90 focus:ring-brand-blue/50'
       case 'warning':
         return 'bg-yellow-600 hover:bg-yellow-500 focus:ring-yellow-500'
       case 'info':
         return 'bg-blue-600 hover:bg-blue-500 focus:ring-blue-500'
       default:
-        return 'bg-red-600 hover:bg-red-500 focus:ring-red-500'
+        return 'bg-brand-blue hover:bg-brand-blue/90 focus:ring-brand-blue/50'
     }
   }
 
@@ -84,7 +84,7 @@ export default function ConfirmationModal({
             >
               <Dialog.Panel className="w-full max-w-sm sm:max-w-md transform overflow-hidden rounded-2xl bg-white p-4 sm:p-6 text-left align-middle shadow-xl transition-all">
                 <div className="flex flex-col sm:flex-row sm:items-center">
-                  <div className={`mx-auto flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 mb-3 sm:mb-0`}>
+                  <div className={`mx-auto flex h-10 w-10 sm:h-12 sm:w-12 flex-shrink-0 items-center justify-center rounded-full bg-brand-blue/10 sm:mx-0 mb-3 sm:mb-0`}>
                     <ExclamationTriangleIcon className={`h-5 w-5 sm:h-6 sm:w-6 ${getIconColor()}`} aria-hidden="true" />
                   </div>
                   <div className="sm:ml-4 text-center sm:text-left">

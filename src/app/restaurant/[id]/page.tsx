@@ -72,7 +72,7 @@ const mockCoupon = {
   description: 'Em pedidos acima de R$ 30',
   code: 'SAVE20',
   validUntil: '2024-12-31',
-  backgroundColor: 'bg-gradient-to-r from-red-500 to-red-600'
+  backgroundColor: 'bg-gradient-to-r from-brand-blue to-brand-blue/90'
 };
 
 

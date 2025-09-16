@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import "../styles/design-tokens.css";
+@import "../styles/responsive.css";
 
 /* ===== SMARTCARD7 - GLOBALS CSS LIMPO ===== */
 
@@ -23,7 +24,7 @@
 
 /* === BUTTONS === */
 .btn-primary {
-  background: var(--brand-red);
+  background: var(--brand-blue);
   color: var(--text-inverse);
   border-radius: var(--radius-md);
   height: var(--height-button-lg);
@@ -41,7 +42,7 @@
 }
 
 .btn-primary:hover {
-  background: var(--brand-red-hover);
+  background: var(--brand-blue-hover);
   transform: translateY(-1px);
 }
 
@@ -115,14 +116,14 @@
 }
 
 .badge-solid {
-  background: var(--brand-red);
+  background: var(--brand-blue);
   color: var(--text-inverse);
 }
 
 .badge-outline {
   background: transparent;
-  color: var(--brand-red);
-  border: 1px solid var(--brand-red);
+  color: var(--brand-blue);
+  border: 1px solid var(--brand-blue);
 }
 
 .badge-success {
@@ -142,8 +143,8 @@
 
 /* === TABS === */
 .tab-active {
-  color: var(--brand-red);
-  border-bottom: 2px solid var(--brand-red);
+  color: var(--brand-blue);
+  border-bottom: 2px solid var(--brand-blue);
   border-radius: var(--space-2) var(--space-2) 0 0;
   font-weight: var(--font-semibold);
   background: var(--bg-soft);
@@ -208,7 +209,7 @@
 .input:focus {
   outline: none;
   border-color: var(--border-focus);
-  box-shadow: 0 0 0 3px rgba(234, 29, 44, 0.1);
+  box-shadow: 0 0 0 3px rgba(48, 114, 249, 0.1);
 }
 
 .input:disabled {
@@ -261,7 +262,7 @@
 
 /* === SELECTIONS === */
 ::selection {
-  background: var(--brand-red);
+  background: var(--brand-blue);
   color: var(--text-inverse);
 }
 
@@ -281,7 +282,7 @@
   height: 20px;
   margin: -10px 0 0 -10px;
   border: 2px solid var(--border);
-  border-top: 2px solid var(--brand-red);
+  border-top: 2px solid var(--brand-blue);
   border-radius: 50%;
   animation: loading-spin 1s linear infinite;
 }

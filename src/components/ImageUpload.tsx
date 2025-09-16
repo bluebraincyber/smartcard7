@@ -218,7 +218,7 @@ export default function ImageUpload({
                 </button>
                 <button
                   onClick={handleRemove}
-                  className={`bg-red-600 text-white rounded text-xs font-medium hover:bg-red-700 flex items-center shadow-sm ${
+                  className={`bg-brand-blue text-white rounded text-xs font-medium hover:bg-brand-blue/90 flex items-center shadow-sm ${
                     variant === 'compact' ? 'px-2 py-1' : 'px-3 py-1.5'
                   }`}
                   type="button"

@@ -146,7 +146,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
               >
                 <HeartIcon className={cn(
                   'h-4 w-4',
-                  isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'
+                  isFavorite ? 'fill-brand-blue text-brand-blue' : 'text-gray-400'
                 )} />
               </Button>
             </div>
@@ -163,7 +163,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
           'group overflow-hidden',
           sizes[size].card,
           !inStock && 'opacity-60',
-          variant === 'featured' && 'ring-2 ring-red-100',
+          variant === 'featured' && 'ring-2 ring-brand-blue/20',
           className
         )}
         onClick={onClick}
@@ -203,7 +203,7 @@ const ProductCard = React.forwardRef<HTMLDivElement, ProductCardProps>(
           >
             <HeartIcon className={cn(
               'h-4 w-4',
-              isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-600'
+              isFavorite ? 'fill-brand-blue text-brand-blue' : 'text-gray-600'
             )} />
           </Button>
           

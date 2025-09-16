@@ -3,6 +3,7 @@
 This guide provides comprehensive documentation for working with the SmartCard7 theme system, including how to use theme variables, implement new components, and maintain consistency across the application.
 
 ## Table of Contents
+
 - [Theme Architecture](#theme-architecture)
 - [Using Theme Variables](#using-theme-variables)
 - [Creating Theme-Aware Components](#creating-theme-aware-components)
@@ -21,6 +22,7 @@ The SmartCard7 theme system is built on top of CSS custom properties (variables)
 - **Smooth transitions** between themes
 
 Key files:
+
 - `src/contexts/theme-context.tsx` - Theme provider and hooks
 - `src/styles/design-tokens.css` - Theme variables and styles
 - `tailwind.config.js` - Tailwind CSS theme configuration
@@ -60,11 +62,11 @@ For Tailwind classes, use the theme-aware variants:
 | `--card-foreground` | `#111827` | `#f8fafc` | Text on cards |
 | `--muted` | `#f1f5f9` | `#334155` | Muted backgrounds |
 | `--muted-foreground` | `#64748b` | `#94a3b8` | Muted text |
-| `--primary` | `#e11d48` | `#f43f5e` | Primary brand color |
+| `--primary` | `#e11d48` | `#3072F9` | Primary brand color |
 | `--primary-foreground` | `#f8fafc` | `#0f172a` | Text on primary |
 | `--border` | `#e2e8f0` | `#334155` | Border color |
 | `--input` | `#e2e8f0` | `#334155` | Input borders |
-| `--ring` | `#e11d48` | `#f43f5e` | Focus ring color |
+| `--ring` | `#e11d48` | `#3072F9` | Focus ring color |
 
 ## Creating Theme-Aware Components
 
@@ -193,15 +195,18 @@ export default function RootLayout({
 ## Troubleshooting
 
 ### Theme not applying
+
 - Ensure the `ThemeProvider` wraps your application
 - Check for CSS specificity issues
 - Verify no hardcoded colors are overriding theme variables
 
 ### Flash of unstyled content (FOUC)
+
 - The theme script in `layout.tsx` should prevent this
 - Ensure the script runs before the page renders
 
 ### Inconsistent theming
+
 - Verify all components use theme variables
 - Check for missing or incorrect theme class names
 - Ensure proper nesting of theme providers
@@ -222,12 +227,14 @@ export default function RootLayout({
 ## Browser Support
 
 The theme system works in all modern browsers. For older browsers:
+
 - Add appropriate fallbacks
 - Consider using a CSS preprocessor for better compatibility
 
 ## Contributing
 
 When making changes to the theme system:
+
 1. Update this documentation
 2. Add tests if possible
 3. Test in both themes

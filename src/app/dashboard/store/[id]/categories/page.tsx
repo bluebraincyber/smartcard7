@@ -326,7 +326,7 @@ export default function CategoriesPage() {
 
                         <button
                           onClick={() => deleteCategory(category.id)}
-                          className="p-2 text-red-500 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-200"
+                          className="p-2 text-brand-blue hover:bg-brand-blue/10 hover:text-brand-blue/90 rounded-xl transition-all duration-200"
                           title="Excluir categoria"
                         >
                           <Trash2 className="h-4 w-4" />

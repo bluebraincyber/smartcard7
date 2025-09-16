@@ -50,7 +50,7 @@ export default function LedgerTable({
                   <td className="align-top">{e.category ?? "–"}</td>
                   <td className="align-top">{e.method ?? "–"}</td>
                   <td className="align-top text-right text-green-700">{e.type === "IN" ? fmtBRL(e.amount) : ""}</td>
-                  <td className="align-top text-right text-red-700">{e.type === "OUT" ? fmtBRL(e.amount) : ""}</td>
+                  <td className="align-top text-right text-brand-blue">{e.type === "OUT" ? fmtBRL(e.amount) : ""}</td>
                   <td className="align-top text-right">
                     <button className="icon-btn" title="Editar" onClick={() => onEdit(e)}>
                       ✏️

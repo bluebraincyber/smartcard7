@@ -45,7 +45,7 @@ export function KpiCard({
         className={cn(
           'inline-flex items-center text-sm font-medium',
           isPositive ? 'text-green-600' : '',
-          isNegative ? 'text-red-600' : '',
+          isNegative ? 'text-brand-blue' : '',
           !isPositive && !isNegative ? 'text-gray-500' : ''
         )}
       >

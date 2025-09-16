@@ -19,6 +19,9 @@ module.exports = {
     
     extend: {
       colors: {
+        brand: {
+          blue: "#3072F9",
+        },
         // === CORE THEME COLORS ===
         background: 'var(--background)',
         foreground: 'var(--foreground)',
@@ -59,8 +62,6 @@ module.exports = {
         ring: 'var(--ring)',
         
         // === BRAND COLORS ===
-        'brand-red': 'var(--brand-red)',
-        'brand-red-hover': 'var(--brand-red-hover)',
         'accent-purple': 'var(--accent-purple)',
         'accent-purple-hover': 'var(--accent-purple-hover)',
         success: 'var(--success)',

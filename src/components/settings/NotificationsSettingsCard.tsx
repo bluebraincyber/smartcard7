@@ -223,7 +223,7 @@ export default function NotificationsSettingsCard() {
       <div className="flex items-center justify-between">
         <div>
           {message && (
-            <div className={`text-sm ${state === "error" ? "text-red-600" : "text-green-600"}`}>
+            <div className={`text-sm ${state === "error" ? "text-brand-blue" : "text-green-600"}`}>
               {message}
             </div>
           )}

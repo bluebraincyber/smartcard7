@@ -135,7 +135,7 @@ export default function StoreCard({ store, onToggleStatus, onEdit, onProducts, o
           onClick={toggle} 
           className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors ${
             store.status === "active"
-              ? "text-red-600 bg-red-50 border-red-200 hover:bg-red-100"
+              ? "text-brand-blue bg-brand-blue/10 border-brand-blue/20 hover:bg-brand-blue/20"
               : "text-green-600 bg-green-50 border-green-200 hover:bg-green-100"
           }`}
           title={store.status === "active" ? "Arquivar loja" : "Ativar loja"}

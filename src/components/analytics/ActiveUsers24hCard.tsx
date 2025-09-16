@@ -81,7 +81,7 @@ export function ActiveUsers24hCard() {
                       Média: {data.baseline} usuários
                     </p>
                     {data.isAnomaly && (
-                      <p className="text-sm text-red-500 mt-1">
+                      <p className="text-sm text-brand-blue mt-1">
                         Anomalia detectada
                       </p>
                     )}

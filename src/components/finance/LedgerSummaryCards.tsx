@@ -24,7 +24,7 @@ export default function LedgerSummaryCards({ loading, data }: { loading: boolean
                 (c.key === "inflow"
                   ? "text-green-700"
                   : c.key === "outflow"
-                  ? "text-red-700"
+                  ? "text-brand-blue"
                   : "")
               }
             >

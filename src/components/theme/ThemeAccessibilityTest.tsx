@@ -75,7 +75,7 @@ export function ThemeAccessibilityTest() {
           return (
             <div 
               key={index}
-              className={`p-4 rounded-md ${check.bgColor} border ${passes ? 'border-green-500' : 'border-red-500'}`}
+              className={`p-4 rounded-md ${check.bgColor} border ${passes ? 'border-green-500' : 'border-brand-blue'}`}
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -89,7 +89,7 @@ export function ThemeAccessibilityTest() {
                 {passes ? (
                   <CheckCircle className="h-5 w-5 text-green-500" />
                 ) : (
-                  <XCircle className="h-5 w-5 text-red-500" />
+                  <XCircle className="h-5 w-5 text-brand-blue" />
                 )}
               </div>
             </div>

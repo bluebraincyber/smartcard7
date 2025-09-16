@@ -241,7 +241,7 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
                   cy={innerHeight - (data[data.length - 1].y / maxValue) * innerHeight + PADDING - 0.5} // Adjust to visually align with the line
                   r="4"
                   fill="currentColor"
-                  className="text-red-500"
+                  className="text-brand-blue"
                 />
               </>
             )}
@@ -253,7 +253,7 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
       <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-blue-100">
         <div className="text-xs text-gray-600">Atual</div>
         <div className="text-lg font-bold text-blue-600">{latestValue.toLocaleString('pt-BR')}</div>
-        <div className={`text-xs flex items-center ${percentageChange >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+        <div className={`text-xs flex items-center ${percentageChange >= 0 ? 'text-green-600' : 'text-brand-blue'}`}>
           <TrendingUpIcon className="h-3 w-3 mr-1" />
           {percentageChange.toFixed(1)}%
         </div>

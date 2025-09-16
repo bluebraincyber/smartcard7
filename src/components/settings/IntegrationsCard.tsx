@@ -195,8 +195,8 @@ export default function IntegrationsCard() {
                     
                     {error && (
                       <div className="flex items-center mt-2">
-                        <AlertTriangle className="h-3 w-3 text-red-500 mr-1" />
-                        <p className="text-xs text-red-500">
+                        <AlertTriangle className="h-3 w-3 text-brand-blue mr-1" />
+                        <p className="text-xs text-brand-blue">
                           {error}
                         </p>
                       </div>
@@ -209,7 +209,7 @@ export default function IntegrationsCard() {
                     <button
                       onClick={() => disconnect(config.id as IntegrationProvider)}
                       disabled={isLoading}
-                      className="inline-flex items-center px-4 py-2 border border-red-300 text-sm font-medium rounded-md shadow-sm text-red-600 bg-white hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                      className="inline-flex items-center px-4 py-2 border border-brand-blue/30 text-sm font-medium rounded-md shadow-sm text-brand-blue bg-white hover:bg-brand-blue/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-50"
                     >
                       {isLoading ? (
                         <>

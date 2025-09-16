@@ -190,7 +190,7 @@ export function PagesRankingTable() {
                         page.change > 0 
                           ? 'bg-green-100 text-green-800' 
                           : page.change < 0 
-                            ? 'bg-red-100 text-red-800' 
+                            ? 'bg-brand-blue/10 text-brand-blue' 
                             : 'bg-gray-100 text-gray-800'
                       }`}
                     >

@@ -297,7 +297,7 @@ export default function NewStorePage() {
                         slugCheckResult.available ? (
                           <Check className="h-4 w-4 text-green-500" />
                         ) : (
-                          <X className="h-4 w-4 text-red-500" />
+                          <X className="h-4 w-4 text-brand-blue" />
                         )
                       )}
                     </div>
@@ -306,10 +306,10 @@ export default function NewStorePage() {
                     <div className={`mt-2 p-2 rounded-md ${
                       slugCheckResult.available 
                         ? 'bg-green-50 border border-green-200 dark:bg-green-950/20 dark:border-green-800/30' 
-                        : 'bg-red-50 border border-red-200 dark:bg-red-950/20 dark:border-red-800/30'
+                        : 'bg-brand-blue/10 border border-brand-blue/20 dark:bg-brand-blue/10 dark:border-brand-blue/30'
                     }`}>
                       <p className={`text-sm font-medium ${
-                        slugCheckResult.available ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'
+                        slugCheckResult.available ? 'text-green-700 dark:text-green-400' : 'text-brand-blue dark:text-brand-blue/90'
                       }`}>
                         {slugCheckResult.message}
                       </p>
@@ -411,18 +411,18 @@ export default function NewStorePage() {
                 </div>
 
                 {error && (
-                  <div className="rounded-md bg-red-50 border border-red-200 dark:bg-red-950/20 dark:border-red-800/30 p-4">
+                  <div className="rounded-md bg-brand-blue/10 border border-brand-blue/20 dark:bg-brand-blue/10 dark:border-brand-blue/30 p-4">
                     <div className="flex">
                       <div className="flex-shrink-0">
-                        <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                        <svg className="h-5 w-5 text-brand-blue" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                         </svg>
                       </div>
                       <div className="ml-3">
-                        <h3 className="text-sm font-medium text-red-700 dark:text-red-400">
+                        <h3 className="text-sm font-medium text-brand-blue dark:text-brand-blue/90">
                           Erro ao criar loja
                         </h3>
-                        <div className="mt-2 text-sm text-red-700 dark:text-red-400">
+                        <div className="mt-2 text-sm text-brand-blue dark:text-brand-blue/90">
                           <p>{error}</p>
                         </div>
                       </div>

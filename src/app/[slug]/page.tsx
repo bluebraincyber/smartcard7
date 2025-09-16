@@ -112,7 +112,7 @@ async function getStore(slug: string) {
       description: store.description || null,
       whatsapp: store.whatsapp || '',
       address: store.address || null,
-      primaryColor: '#EA1D2C',
+      primaryColor: store.primary_color || '#2563eb',
       coverImage: store.coverimage || null,
       profileImage: store.logo || null,
       categories: categories
@@ -130,7 +130,9 @@ async function getStore(slug: string) {
 
   } catch (error) {
     console.error('❌ Erro geral ao buscar loja:', error);
-    console.error('❌ Stack:', error.stack);
+    if (error instanceof Error) {
+      console.error('❌ Stack:', error.stack);
+    }
     return null;
   }
 }
@@ -151,7 +153,9 @@ export default async function StorePage({ params }: { params: { slug: string } }
     
   } catch (error) {
     console.error('❌ Erro crítico na página:', error);
-    console.error('❌ Stack:', error.stack);
+    if (error instanceof Error) {
+      console.error('❌ Stack:', error.stack);
+    }
     notFound();
   }
 }
@@ -180,6 +184,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   } catch (error) {
     console.error('Erro ao gerar metadata:', error);
+    if (error instanceof Error) {
+      console.error('Detalhes do erro:', error.message);
+    }
     return {
       title: 'SmartCard',
       description: 'Cartão digital inteligente'

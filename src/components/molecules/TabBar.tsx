@@ -52,7 +52,7 @@ const TabBar = React.forwardRef<HTMLDivElement, TabBarProps>(
         return cn(
           baseClasses,
           isactive ? 'tab-active' : 'tab-inactive',
-          'border-b-2 hover:text-red-600'
+          'border-b-2 hover:text-brand-blue'
         );
       }
 
@@ -61,7 +61,7 @@ const TabBar = React.forwardRef<HTMLDivElement, TabBarProps>(
           baseClasses,
           'rounded-full',
           isactive 
-            ? 'bg-red-100 text-red-700 border border-red-200' 
+            ? 'bg-brand-blue/10 text-brand-blue border border-brand-blue/20' 
             : 'text-gray-600 hover:bg-gray-100'
         );
       }
@@ -70,7 +70,7 @@ const TabBar = React.forwardRef<HTMLDivElement, TabBarProps>(
       return cn(
         baseClasses,
         isactive 
-          ? 'text-red-600 bg-red-50' 
+          ? 'text-brand-blue bg-brand-blue/10' 
           : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
       );
     };
@@ -131,7 +131,7 @@ const TabBar = React.forwardRef<HTMLDivElement, TabBarProps>(
                 <span className={cn(
                   'text-xs px-1 sm:px-1.5 py-0.5 rounded-full min-w-[1rem] text-center',
                   tab.id === activeTab 
-                    ? 'bg-red-200 text-red-800' 
+                    ? 'bg-brand-blue/20 text-brand-blue' 
                     : 'bg-gray-200 text-gray-600'
                 )}>
                   {tab.count}

@@ -117,7 +117,7 @@ const AppBar = React.forwardRef<HTMLDivElement, AppBarProps>(
                 placeholder={searchPlaceholder}
                 className={cn(
                   'w-full h-8 sm:h-10 pl-8 sm:pl-10 pr-3 sm:pr-4 bg-gray-100 border border-gray-200 rounded-lg',
-                  'text-xs sm:text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent',
+                  'text-xs sm:text-sm placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-brand-blue focus:border-transparent',
                   'transition-all duration-200'
                 )}
               />
