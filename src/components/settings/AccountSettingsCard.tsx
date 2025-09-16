@@ -53,13 +53,13 @@ export default function AccountSettingsCard() {
     <div className="space-y-6">
       <div className="grid gap-6 sm:grid-cols-2">
         <div>
-          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
             Nome completo
           </label>
           <input
             id="name"
             type="text"
-            className="block w-full px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+            className="block w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary focus:outline-none"
             placeholder="Seu nome completo"
             value={name}
             onChange={(e) => setName(e.target.value)}
@@ -67,13 +67,13 @@ export default function AccountSettingsCard() {
         </div>
 
         <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
             E-mail
           </label>
           <input
             id="email"
             type="email"
-            className="block w-full px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+            className="block w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary focus:outline-none"
             placeholder="seu@email.com"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -82,13 +82,13 @@ export default function AccountSettingsCard() {
       </div>
 
       <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+        <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
           Telefone (opcional)
         </label>
         <input
           id="phone"
           type="tel"
-          className="block w-full px-3 py-2 text-sm rounded-md border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+          className="block w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary focus:outline-none"
           placeholder="(11) 99999-9999"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
@@ -98,7 +98,7 @@ export default function AccountSettingsCard() {
       <div className="flex items-center justify-between">
         <div>
           {message && (
-            <div className={`text-sm ${state === "error" ? "text-brand-blue" : "text-green-600"}`}>
+            <div className={`text-sm ${state === "error" ? "text-destructive" : "text-success"}`}>
               {message}
             </div>
           )}
@@ -106,7 +106,7 @@ export default function AccountSettingsCard() {
         <button
           onClick={onSave}
           disabled={state === "saving"}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
         >
           {state === "saving" ? "Salvando..." : "Salvar alterações"}
         </button>

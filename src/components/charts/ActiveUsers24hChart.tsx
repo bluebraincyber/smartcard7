@@ -84,12 +84,12 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
   const percentageChange = previousValue > 0 ? ((latestValue - previousValue) / previousValue) * 100 : 0;
 
   return (
-    <div className="h-64 p-4 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg border border-blue-100 relative">
+    <div className="h-64 p-4 bg-gradient-to-br from-primary/5 to-accent/5 rounded-lg border border-border relative">
       <div className="flex items-center justify-between mb-4 relative z-10">
-        <h3 className="text-sm font-medium text-gray-700">Usuários Ativos (24h)</h3>
-        <div className="flex items-center space-x-2 bg-white/80 px-2 py-1 rounded-full shadow-sm">
-          <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
-          <span className="text-xs text-gray-700">Tempo real</span>
+        <h3 className="text-sm font-medium text-foreground">Usuários Ativos (24h)</h3>
+        <div className="flex items-center space-x-2 bg-card/80 px-2 py-1 rounded-full shadow-sm border border-border">
+          <div className="w-2 h-2 bg-primary rounded-full animate-pulse"></div>
+          <span className="text-xs text-foreground">Tempo real</span>
         </div>
       </div>
 
@@ -105,8 +105,8 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
           >
             <defs>
               <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.2" />
-                <stop offset="100%" stopColor="#3B82F6" stopOpacity="0" />
+                <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity="0.2" />
+                <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity="0" />
               </linearGradient>
             </defs>
 
@@ -118,7 +118,7 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
               y2={innerHeight + PADDING}
               stroke="currentColor"
               strokeDasharray="2 2"
-              className="text-gray-200"
+              className="text-border"
             />
 
             {/* Linha do eixo X */}
@@ -129,7 +129,7 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
               y2={innerHeight + PADDING}
               stroke="currentColor"
               strokeDasharray="2 2"
-              className="text-gray-200"
+              className="text-border"
             />
 
             {/* Labels do eixo X */}
@@ -146,7 +146,7 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
                   textAnchor="middle"
                   fontSize="10"
                   fill="currentColor"
-                  className="text-gray-400"
+                  className="text-muted-foreground"
                 >
                   {format(point.x, 'HH:mm')}
                 </text>
@@ -168,7 +168,7 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
                   width={100}
                   height={24}
                   rx="4"
-                  fill="#1E293B"
+                  fill="hsl(var(--popover))"
                   className="shadow-lg"
                 />
                 <text
@@ -176,7 +176,7 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
                   y={PADDING + 8}
                   textAnchor="middle"
                   fontSize="12"
-                  fill="white"
+                  fill="hsl(var(--popover-foreground))"
                   className="font-medium"
                 >
                   {data[chartHoverIndex].y.toLocaleString()} usuários
@@ -197,7 +197,7 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className="text-blue-500 drop-shadow-sm"
+              className="text-primary drop-shadow-sm"
             />
             
             {/* Invisible hit area for tooltip */}
@@ -228,7 +228,7 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
                   cy={y - 0.5} // Ajuste para alinhar visualmente com a linha
                   r="3"
                   fill="currentColor"
-                  className="text-blue-500 animate-pulse"
+                  className="text-primary animate-pulse"
                 />
               );
             })}
@@ -241,7 +241,7 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
                   cy={innerHeight - (data[data.length - 1].y / maxValue) * innerHeight + PADDING - 0.5} // Adjust to visually align with the line
                   r="4"
                   fill="currentColor"
-                  className="text-brand-blue"
+                  className="text-primary"
                 />
               </>
             )}
@@ -250,10 +250,10 @@ export function ActiveUsers24hChart({ data, height = 200, maWindow }: ActiveUser
       </div>
 
       {/* Indicadores de valor */}
-      <div className="absolute top-2 right-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-blue-100">
-        <div className="text-xs text-gray-600">Atual</div>
-        <div className="text-lg font-bold text-blue-600">{latestValue.toLocaleString('pt-BR')}</div>
-        <div className={`text-xs flex items-center ${percentageChange >= 0 ? 'text-green-600' : 'text-brand-blue'}`}>
+      <div className="absolute top-2 right-2 bg-card/80 backdrop-blur-sm rounded-lg px-3 py-2 border border-border">
+        <div className="text-xs text-muted-foreground">Atual</div>
+        <div className="text-lg font-bold text-primary">{latestValue.toLocaleString('pt-BR')}</div>
+        <div className={`text-xs flex items-center ${percentageChange >= 0 ? 'text-success' : 'text-destructive'}`}>
           <TrendingUpIcon className="h-3 w-3 mr-1" />
           {percentageChange.toFixed(1)}%
         </div>

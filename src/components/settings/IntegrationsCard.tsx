@@ -136,11 +136,11 @@ export default function IntegrationsCard() {
       {/* Header with Documentation Link */}
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Conecte seus canais para automação e métricas unificadas
           </p>
         </div>
-        <button className="inline-flex items-center px-3 py-2 text-sm font-medium text-blue-600 bg-white border border-blue-300 rounded-md hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+        <button className="inline-flex items-center px-3 py-2 text-sm font-medium text-primary bg-card border border-primary/20 rounded-md hover:bg-primary/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary">
           <ExternalLink className="h-4 w-4 mr-2" />
           Documentação
         </button>
@@ -155,48 +155,48 @@ export default function IntegrationsCard() {
           const error = integration?.error;
           
           return (
-            <div key={config.id} className="bg-white border border-gray-200 rounded-lg p-6 hover:shadow-sm transition-shadow">
+            <div key={config.id} className="bg-card border border-border rounded-lg p-6 hover:shadow-sm transition-shadow">
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className={`p-3 rounded-lg ${
-                    config.color === 'green' ? 'bg-green-100' :
-                    config.color === 'pink' ? 'bg-pink-100' :
-                    'bg-purple-100'
+                    config.color === 'green' ? 'bg-secondary/20' :
+                    config.color === 'pink' ? 'bg-accent/20' :
+                    'bg-primary/20'
                   }`}>
                     <config.icon className={`h-6 w-6 ${
-                      config.color === 'green' ? 'text-green-600' :
-                      config.color === 'pink' ? 'text-pink-600' :
-                      'text-purple-600'
+                      config.color === 'green' ? 'text-secondary' :
+                      config.color === 'pink' ? 'text-accent' :
+                      'text-primary'
                     }`} />
                   </div>
                   
                   <div className="flex-1">
                     <div className="flex items-center space-x-3">
-                      <h3 className="text-base font-medium text-gray-900">
+                      <h3 className="text-base font-medium text-foreground">
                         {config.title}
                       </h3>
                       {isConnected && (
-                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                        <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-success/10 text-success">
                           <Check className="h-3 w-3 mr-1" />
                           {config.connectedLabel}
                         </span>
                       )}
                     </div>
                     
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-muted-foreground mt-1">
                       {config.description}
                     </p>
                     
                     {isConnected && integration.lastSynced && (
-                      <p className="text-xs text-gray-400 mt-2">
+                      <p className="text-xs text-muted-foreground/70 mt-2">
                         Última sincronização: {new Date(integration.lastSynced).toLocaleString('pt-BR')}
                       </p>
                     )}
                     
                     {error && (
                       <div className="flex items-center mt-2">
-                        <AlertTriangle className="h-3 w-3 text-brand-blue mr-1" />
-                        <p className="text-xs text-brand-blue">
+                        <AlertTriangle className="h-3 w-3 text-destructive mr-1" />
+                        <p className="text-xs text-destructive">
                           {error}
                         </p>
                       </div>
@@ -209,7 +209,7 @@ export default function IntegrationsCard() {
                     <button
                       onClick={() => disconnect(config.id as IntegrationProvider)}
                       disabled={isLoading}
-                      className="inline-flex items-center px-4 py-2 border border-brand-blue/30 text-sm font-medium rounded-md shadow-sm text-brand-blue bg-white hover:bg-brand-blue/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-blue disabled:opacity-50"
+                      className="inline-flex items-center px-4 py-2 border border-destructive/30 text-sm font-medium rounded-md shadow-sm text-destructive bg-card hover:bg-destructive/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-destructive disabled:opacity-50"
                     >
                       {isLoading ? (
                         <>
@@ -224,7 +224,7 @@ export default function IntegrationsCard() {
                     <button
                       onClick={() => connect(config.id as IntegrationProvider)}
                       disabled={isLoading}
-                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+                      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
                     >
                       {isLoading ? (
                         <>
@@ -247,8 +247,8 @@ export default function IntegrationsCard() {
       </div>
 
       {/* Help Text */}
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <p className="text-sm text-blue-800">
+      <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+        <p className="text-sm text-primary">
           💡 <strong>Dica:</strong> As integrações permitem sincronizar dados automaticamente e oferecer uma experiência mais fluida aos seus clientes.
         </p>
       </div>

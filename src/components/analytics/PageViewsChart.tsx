@@ -40,11 +40,11 @@ export default function PageViewsChart({ data }: PageViewsChartProps) {
       <Card className="col-span-1 lg:col-span-2">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
-            <Eye className="h-5 w-5 text-purple-500" />
+            <Eye className="h-5 w-5 text-accent" />
             Visualizações por Página
           </CardTitle>
         </CardHeader>
-        <CardContent className="flex h-[200px] items-center justify-center text-sm text-gray-500">
+        <CardContent className="flex h-[200px] items-center justify-center text-sm text-muted-foreground">
           Carregando dados ou dados indisponíveis...
         </CardContent>
       </Card>
@@ -61,7 +61,7 @@ export default function PageViewsChart({ data }: PageViewsChartProps) {
     <Card className="col-span-1 lg:col-span-2">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Eye className="h-5 w-5 text-purple-500" />
+          <Eye className="h-5 w-5 text-accent" />
           Visualizações por Página
         </CardTitle>
       </CardHeader>
@@ -74,7 +74,7 @@ export default function PageViewsChart({ data }: PageViewsChartProps) {
               y1={PADDING}
               x2={width - SIDE_PADDING}
               y2={PADDING}
-              stroke="#e0e0e0"
+              stroke="hsl(var(--border))"
               strokeWidth="1"
             />
             {/* Eixo Y (linha horizontal inferior) */}
@@ -83,7 +83,7 @@ export default function PageViewsChart({ data }: PageViewsChartProps) {
               y1={height - PADDING}
               x2={width - SIDE_PADDING}
               y2={height - PADDING}
-              stroke="#e0e0e0"
+              stroke="hsl(var(--border))"
               strokeWidth="1"
             />
 
@@ -100,7 +100,7 @@ export default function PageViewsChart({ data }: PageViewsChartProps) {
                     y={y}
                     width={barWidth * 0.8} // Largura da barra
                     height={barHeight}
-                    fill="#a78bfa" // Cor roxa
+                    fill="hsl(var(--accent))" // Cor accent
                     rx="4" // Borda arredondada
                     ry="4" // Borda arredondada
                   />
@@ -110,7 +110,7 @@ export default function PageViewsChart({ data }: PageViewsChartProps) {
                     y={height - PADDING + 15} // Abaixo do eixo X
                     textAnchor="middle"
                     fontSize="12"
-                    fill="#6b7280"
+                    fill="hsl(var(--muted-foreground))"
                   >
                     {d.name}
                   </text>
@@ -120,7 +120,7 @@ export default function PageViewsChart({ data }: PageViewsChartProps) {
                     y={y - 5} // Acima da barra
                     textAnchor="middle"
                     fontSize="12"
-                    fill="#6b7280"
+                    fill="hsl(var(--muted-foreground))"
                   >
                     {d.views}
                   </text>

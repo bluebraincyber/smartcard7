@@ -38,10 +38,10 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         disabled={disabled}
         onClick={() => !disabled && onCheckedChange(!checked)}
         className={cn(
-          'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white disabled:cursor-not-allowed disabled:opacity-50',
+          'peer inline-flex shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50',
           checked
-            ? 'bg-green-600 hover:bg-green-700'
-            : 'bg-gray-200 hover:bg-gray-300',
+            ? 'bg-primary hover:bg-primary/90'
+            : 'bg-border hover:bg-muted',
           sizes[size].switch,
           className
         )}
@@ -50,7 +50,8 @@ const Switch = React.forwardRef<HTMLButtonElement, SwitchProps>(
         <span
           data-state={checked ? 'checked' : 'unchecked'}
           className={cn(
-            'pointer-events-none block rounded-full bg-white shadow-lg ring-0 transition-transform',
+            'pointer-events-none block rounded-full shadow-lg ring-0 transition-transform',
+            checked ? 'bg-primary-foreground' : 'bg-background',
             sizes[size].thumb
           )}
         />

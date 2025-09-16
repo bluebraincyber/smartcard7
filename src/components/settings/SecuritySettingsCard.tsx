@@ -34,7 +34,7 @@ export default function SecuritySettingsCard() {
   }, [strength, next]);
 
   const strengthColor = useMemo(() => {
-    const colors = ["bg-brand-blue", "bg-orange-500", "bg-yellow-500", "bg-blue-500", "bg-green-500"];
+    const colors = ["bg-destructive", "bg-warning", "bg-warning", "bg-secondary", "bg-success"];
     return colors[strength];
   }, [strength]);
 
@@ -85,14 +85,14 @@ export default function SecuritySettingsCard() {
       {/* Password Change Section */}
       <div className="space-y-6">
         <div>
-          <label htmlFor="current-password" className="block text-sm font-medium text-gray-700 mb-2">
+          <label htmlFor="current-password" className="block text-sm font-medium text-foreground mb-2">
             Senha atual
           </label>
           <div className="relative">
             <input
               id="current-password"
               type={showCurrent ? "text" : "password"}
-              className="block w-full px-3 py-2 pr-10 text-sm rounded-md border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+              className="block w-full px-3 py-2 pr-10 text-sm rounded-md border border-border bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary focus:outline-none"
               placeholder="Digite sua senha atual"
               value={current}
               onChange={(e) => setCurrent(e.target.value)}
@@ -100,7 +100,7 @@ export default function SecuritySettingsCard() {
             <button
               type="button"
               onClick={() => setShowCurrent(!showCurrent)}
-              className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+              className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
               aria-label={showCurrent ? "Ocultar senha" : "Mostrar senha"}
             >
               {showCurrent ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -110,14 +110,14 @@ export default function SecuritySettingsCard() {
 
         <div className="grid gap-6 sm:grid-cols-2">
           <div>
-            <label htmlFor="new-password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="new-password" className="block text-sm font-medium text-foreground mb-2">
               Nova senha
             </label>
             <div className="relative">
               <input
                 id="new-password"
                 type={showNew ? "text" : "password"}
-                className="block w-full px-3 py-2 pr-10 text-sm rounded-md border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+                className="block w-full px-3 py-2 pr-10 text-sm rounded-md border border-border bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary focus:outline-none"
                 placeholder="Nova senha"
                 value={next}
                 onChange={(e) => setNext(e.target.value)}
@@ -125,7 +125,7 @@ export default function SecuritySettingsCard() {
               <button
                 type="button"
                 onClick={() => setShowNew(!showNew)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
                 aria-label={showNew ? "Ocultar senha" : "Mostrar senha"}
               >
                 {showNew ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -133,16 +133,16 @@ export default function SecuritySettingsCard() {
             </div>
             {next && (
               <div className="mt-3">
-                <div className="flex justify-between text-xs text-gray-500 mb-1">
+                <div className="flex justify-between text-xs text-muted-foreground mb-1">
                   <span>Força da senha: {strengthText}</span>
                 </div>
-                <div className="h-1 w-full bg-gray-200 rounded-full overflow-hidden">
+                <div className="h-1 w-full bg-border rounded-full overflow-hidden">
                   <div 
                     className={`h-full ${strengthColor} transition-all duration-300`} 
                     style={{ width: `${(strength + 1) * 20}%` }}
                   />
                 </div>
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-muted-foreground">
                   Use 8 ou mais caracteres com uma combinação de letras, números e símbolos
                 </p>
               </div>
@@ -150,14 +150,14 @@ export default function SecuritySettingsCard() {
           </div>
 
           <div>
-            <label htmlFor="confirm-password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-foreground mb-2">
               Confirmar nova senha
             </label>
             <div className="relative">
               <input
                 id="confirm-password"
                 type={showConfirm ? "text" : "password"}
-                className="block w-full px-3 py-2 pr-10 text-sm rounded-md border border-gray-300 bg-white text-gray-900 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
+                className="block w-full px-3 py-2 pr-10 text-sm rounded-md border border-border bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary focus:outline-none"
                 placeholder="Confirme a nova senha"
                 value={confirm}
                 onChange={(e) => setConfirm(e.target.value)}
@@ -165,7 +165,7 @@ export default function SecuritySettingsCard() {
               <button
                 type="button"
                 onClick={() => setShowConfirm(!showConfirm)}
-                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600"
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-muted-foreground hover:text-foreground"
                 aria-label={showConfirm ? "Ocultar senha" : "Mostrar senha"}
               >
                 {showConfirm ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -176,32 +176,32 @@ export default function SecuritySettingsCard() {
 
         <div className="flex items-center justify-between">
           <div>
-            {message && (
-              <div className={`text-sm ${state === "error" ? "text-brand-blue" : "text-green-600"}`}>
-                {message}
-              </div>
-            )}
+          {message && (
+          <div className={`text-sm ${state === "error" ? "text-destructive" : "text-success"}`}>
+          {message}
+          </div>
+          )}
           </div>
           <button
-            onClick={onChangePassword}
-            disabled={!isFormValid || state === "saving"}
-            className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md shadow-sm text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          onClick={onChangePassword}
+          disabled={!isFormValid || state === "saving"}
+          className="inline-flex items-center px-4 py-2 border border-border text-sm font-medium rounded-md shadow-sm text-foreground bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
           >
-            {state === "saving" ? "Atualizando..." : "Alterar senha"}
+          {state === "saving" ? "Atualizando..." : "Alterar senha"}
           </button>
         </div>
       </div>
 
       {/* Divider */}
-      <div className="border-t border-gray-200"></div>
+      <div className="border-t border-border"></div>
 
       {/* Two-Factor Authentication */}
       <div className="flex items-center justify-between py-4">
         <div>
-          <p className="text-sm font-medium text-gray-900">
+          <p className="text-sm font-medium text-foreground">
             Autenticação de dois fatores
           </p>
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-muted-foreground">
             Adicione uma camada extra de segurança à sua conta
           </p>
         </div>

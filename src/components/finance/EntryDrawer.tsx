@@ -81,24 +81,24 @@ export default function EntryDrawer({
       {/* Drawer */}
       <aside
         className={
-          "absolute right-0 top-0 h-full w-full max-w-md transform bg-white p-6 shadow-xl transition-transform " +
+          "absolute right-0 top-0 h-full w-full max-w-md transform bg-background p-6 shadow-xl transition-transform border-l border-border " +
           (open ? "translate-x-0" : "translate-x-full")
         }
         role="dialog"
         aria-modal="true"
         aria-label="Lançamento"
       >
-        <h3 className="text-lg font-semibold">{initial ? "Editar Lançamento" : "Novo Lançamento"}</h3>
+        <h3 className="text-lg font-semibold text-foreground">{initial ? "Editar Lançamento" : "Novo Lançamento"}</h3>
 
         {/* Tipo */}
-        <div className="mt-4 inline-flex rounded-xl border border-gray-200 p-1" role="tablist">
+        <div className="mt-4 inline-flex rounded-xl border border-border p-1 bg-muted/30" role="tablist">
           {(["IN", "OUT"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setForm((f) => ({ ...f, type: t }))}
               className={
-                "h-9 rounded-lg px-3 text-sm " +
-                (form.type === t ? "bg-indigo-600 text-white" : "text-zinc-700 hover:bg-zinc-100")
+                "h-9 rounded-lg px-3 text-sm transition-colors " +
+                (form.type === t ? "bg-primary text-primary-foreground shadow-sm" : "text-muted-foreground hover:bg-muted")
               }
               role="tab"
               aria-selected={form.type === t}
@@ -110,9 +110,9 @@ export default function EntryDrawer({
 
         <form className="mt-4 space-y-4" onSubmit={submit}>
           <label className="block text-sm">
-            <span className="text-zinc-600">Título</span>
+            <span className="text-muted-foreground">Título</span>
             <input
-              className="mt-1 h-10 w-full rounded-xl border border-gray-200 px-3 text-sm focus:border-indigo-600"
+              className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
               value={form.title}
               onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
               placeholder="Ex.: Venda via Pix"
@@ -120,9 +120,9 @@ export default function EntryDrawer({
           </label>
 
           <label className="block text-sm">
-            <span className="text-zinc-600">Valor</span>
+            <span className="text-muted-foreground">Valor</span>
             <input
-              className="mt-1 h-10 w-full rounded-xl border border-gray-200 px-3 text-sm focus:border-indigo-600"
+              className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
               value={form.amountText}
               onChange={(e) => setForm((f) => ({ ...f, amountText: e.target.value }))}
               placeholder="0,00"
@@ -132,19 +132,19 @@ export default function EntryDrawer({
 
           <div className="grid grid-cols-2 gap-3">
             <label className="block text-sm">
-              <span className="text-zinc-600">Data</span>
+              <span className="text-muted-foreground">Data</span>
               <input
                 type="date"
-                className="mt-1 h-10 w-full rounded-xl border border-gray-200 px-3 text-sm focus:border-indigo-600"
+                className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
                 value={form.date}
                 onChange={(e) => setForm((f) => ({ ...f, date: e.target.value }))}
               />
             </label>
 
             <label className="block text-sm">
-              <span className="text-zinc-600">Categoria</span>
+              <span className="text-muted-foreground">Categoria</span>
               <input
-                className="mt-1 h-10 w-full rounded-xl border border-gray-200 px-3 text-sm focus:border-indigo-600"
+                className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
                 value={form.category}
                 onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
                 placeholder="Vendas, Taxas, Fornecedor…"
@@ -153,9 +153,9 @@ export default function EntryDrawer({
           </div>
 
           <label className="block text-sm">
-            <span className="text-zinc-600">Forma</span>
+            <span className="text-muted-foreground">Forma</span>
             <select
-              className="mt-1 h-10 w-full rounded-xl border border-gray-200 px-3 text-sm focus:border-indigo-600"
+              className="mt-1 h-10 w-full rounded-xl border border-border bg-background px-3 text-sm text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
               value={form.method}
               onChange={(e) => setForm((f) => ({ ...f, method: e.target.value as any }))}
             >
@@ -169,9 +169,9 @@ export default function EntryDrawer({
           </label>
 
           <label className="block text-sm">
-            <span className="text-zinc-600">Observações</span>
+            <span className="text-muted-foreground">Observações</span>
             <textarea
-              className="mt-1 w-full rounded-xl border border-gray-200 p-3 text-sm focus:border-indigo-600"
+              className="mt-1 w-full rounded-xl border border-border bg-background p-3 text-sm text-foreground placeholder-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
               rows={3}
               value={form.note}
               onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))}
@@ -180,10 +180,10 @@ export default function EntryDrawer({
           </label>
 
           <div className="mt-4 flex items-center justify-end gap-2">
-            <button type="button" onClick={onClose} className="h-10 rounded-xl border border-gray-200 px-3 text-sm">
+            <button type="button" onClick={onClose} className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground hover:bg-muted transition-colors">
               Cancelar
             </button>
-            <button type="submit" className="h-10 rounded-xl bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-700">
+            <button type="submit" className="h-10 rounded-xl bg-primary px-4 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors">
               Salvar
             </button>
           </div>

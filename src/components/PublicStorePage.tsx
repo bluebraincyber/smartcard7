@@ -1,12 +1,12 @@
 'use client'
 
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
-import { MapPin, Phone, MessageCircle, ShoppingCart, Plus, Minus, Menu, Home, User, Settings } from 'lucide-react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { ImageThumb } from './ui/ImageThumb'
-import Topbar from './topbar'
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { MapPin, Phone, MessageCircle, ShoppingCart, Plus, Minus } from 'lucide-react'
 
+/**
+ * Interfaces de dados para a loja, categorias e itens.
+ * Elas garantem que a estrutura dos dados seja previsível e consistente em toda a aplicação.
+ */
 interface Store {
   id: string
   name: string
@@ -46,22 +46,50 @@ interface PublicStorePageProps {
   store: Store
 }
 
-// Utilidades
+/**
+ * Funções utilitárias para formatação e manipulação de dados, mantendo o código
+ * principal mais limpo e focado na lógica do componente.
+ */
 const formatBRL = (value: number) =>
   new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
 
 const normalizeWhats = (raw: string) => {
   const digits = (raw || '').replace(/\D/g, '')
-  // Garante DDI 55 apenas uma vez
+  // Garante que o DDI 55 esteja presente apenas uma vez.
   return digits.startsWith('55') ? digits : `55${digits}`
 }
 
 const isAvailable = (item: Item) => item.isarchived !== true && item.isactive !== false
 
+/**
+ * Componente principal para a loja virtual pública.
+ * Ele gerencia o estado da loja, o carrinho de compras e a interação do utilizador.
+ */
 export default function PublicStorePage({ store }: PublicStorePageProps) {
-  // 1) Validação de dados na entrada
+  // 1) Inicialização dos estados (sempre na parte superior do componente)
+  const [cart, setCart] = useState<CartItem[]>(() => {
+    if (typeof window !== 'undefined' && store?.id) {
+      const savedCart = localStorage.getItem(`cart_${store.id}`)
+      console.log('Carregando carrinho do localStorage:', savedCart)
+      return savedCart ? JSON.parse(savedCart) : []
+    }
+    return []
+  })
+  
+  const [isCartOpen, setIsCartOpen] = useState(false)
+  const safeCategories = Array.isArray(store?.categories) ? store.categories : []
+  
+  // 2) Efeitos colaterais
+  useEffect(() => {
+    if (typeof window !== 'undefined' && cart.length > 0 && store?.id) {
+      console.log('Salvando carrinho no localStorage:', cart)
+      localStorage.setItem(`cart_${store.id}`, JSON.stringify(cart))
+    }
+  }, [cart, store?.id])
+  
+  // 3) Validação de dados de entrada (após os Hooks)
   if (!store || !store.id || !store.name) {
-    console.error('❌ Dados de store inválidos:', store)
+    console.error('❌ Invalid store data:', store)
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
@@ -71,23 +99,9 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
       </div>
     )
   }
-
-  // 2) Normalizações seguras
-  const safeCategories = Array.isArray(store.categories) ? store.categories : []
-  const [cart, setCart] = useState<CartItem[]>([])
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isCartOpen, setIsCartOpen] = useState(false)
-
-  // Log útil p/ QA (não polui produção)
-  if (process.env.NODE_ENV !== 'production') {
-    // eslint-disable-next-line no-console
-    console.log('🏪 Store carregada', {
-      name: store.name,
-      categories: safeCategories.map(c => ({ name: c.name, items: c.items?.length ?? 0 })),
-    })
-  }
-
-  // 3) Analytics (evita duplicar em StrictMode dev)
+  
+  // 4) Análise de dados (evita duplicação no StrictMode de desenvolvimento).
+  // A ref é usada para garantir que o efeito seja executado apenas uma vez.
   const trackedRef = useRef(false)
   useEffect(() => {
     if (trackedRef.current) return
@@ -112,17 +126,28 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
     trackVisit()
   }, [store.id, store.slug])
 
-  // 4) Carrinho
+  // 4) Gestão do carrinho de compras usando React hooks.
   const addToCart = useCallback((item: Item) => {
+    console.log('Tentando adicionar ao carrinho:', item)
     setCart(prev => {
       const idx = prev.findIndex(ci => ci.id === item.id)
+      let newCart;
+      
       if (idx >= 0) {
-        const next = [...prev]
-        next[idx] = { ...next[idx], quantity: next[idx].quantity + 1 }
-        return next
+        newCart = [...prev]
+        newCart[idx] = { ...newCart[idx], quantity: newCart[idx].quantity + 1 }
+      } else {
+        newCart = [...prev, { ...item, quantity: 1 }]
       }
-      return [...prev, { ...item, quantity: 1 }]
+      
+      console.log('Item adicionado ao carrinho:', item.name)
+      console.log('Novo estado do carrinho:', newCart)
+      
+      return newCart
     })
+    
+    // Abre o carrinho automaticamente
+    setIsCartOpen(true)
   }, [])
 
   const removeFromCart = useCallback((itemId: string) => {
@@ -141,17 +166,19 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
     })
   }, [])
 
+  // Memoriza o valor total do carrinho para evitar recálculos desnecessários.
   const cartTotal = useMemo(
     () => cart.reduce((t, i) => t + ((i.price || 0) * i.quantity), 0),
     [cart]
   )
 
+  // Memoriza a contagem total de itens no carrinho.
   const cartCount = useMemo(
     () => cart.reduce((t, i) => t + i.quantity, 0),
     [cart]
   )
 
-  // 5) WhatsApp helpers
+  // 5) Funções auxiliares do WhatsApp para enviar pedidos e consultas.
   const generateWhatsAppMessage = () => {
     if (cart.length === 0) return ''
 
@@ -209,92 +236,27 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
     window.open(url, '_blank')
   }
 
-  // 6) Render
+  // 6) A estrutura de renderização do componente.
   return (
-    <div className="min-h-screen bg-background">
-      {/* ETIQUETA SMARTCARD - colada no topo */}
-      <div className="w-full flex justify-center sticky top-0 z-50">
-        <div className="bg-card shadow-lg px-6 py-3 rounded-b-2xl font-bold text-primary">
-          SmartCard
-        </div>
-      </div>
-
-      {/* Botão hambúrguer (mobile) */}
-      <button
-        onClick={() => setIsMenuOpen(v => !v)}
-        className="md:hidden fixed top-3 left-4 z-40 p-2 bg-card rounded-full shadow-md"
-      >
-        <Menu className="h-5 w-5" />
-      </button>
-
-      {/* Botão carrinho (desktop) */}
-      <button
-        onClick={() => setIsCartOpen(true)}
-        className={`hidden md:block fixed top-3 right-4 z-40 relative p-2 sm:p-2.5 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl ${
-        cart.length > 0 
-        ? 'bg-gradient-to-r from-success to-success/90 text-white hover:from-success/90 hover:to-success/80' 
-        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-        }`}
-        aria-label="Abrir carrinho"
-      >
-        <ShoppingCart className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-        {cart.length > 0 && (
-          <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-destructive text-white text-xs rounded-full h-5 w-5 sm:h-6 sm:w-6 flex items-center justify-center text-[10px] sm:text-xs font-bold shadow-md">
-            {cartCount}
-          </span>
-        )}
-      </button>
-
-      {/* Dropdown Menu */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-[2147483646] bg-black/20 backdrop-blur-sm" onClick={() => setIsMenuOpen(false)}>
-          <div className="absolute top-16 left-0 right-0 bg-card/95 backdrop-blur-md border border-border shadow-xl mx-4 rounded-2xl" onClick={(e) => e.stopPropagation()}>
-            <div className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 gap-2">
-                <Link href="/" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-muted group-hover:bg-primary/10 transition-colors duration-200">
-                    <Home className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-primary transition-colors duration-200" />
-                  </div>
-                  <span className="text-foreground text-sm sm:text-base font-medium">Página Inicial</span>
-                </Link>
-                <Link href="/auth/register" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-muted group-hover:bg-secondary/10 transition-colors duration-200">
-                    <User className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-secondary transition-colors duration-200" />
-                  </div>
-                  <span className="text-foreground text-sm sm:text-base font-medium">Criar Minha Loja</span>
-                </Link>
-                <Link href="/dashboard" className="flex items-center space-x-3 sm:space-x-4 p-3 sm:p-4 rounded-xl hover:bg-muted transition-all duration-200 group" onClick={() => setIsMenuOpen(false)}>
-                  <div className="p-2 rounded-lg bg-muted group-hover:bg-accent/10 transition-colors duration-200">
-                    <Settings className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground group-hover:text-accent transition-colors duration-200" />
-                  </div>
-                  <span className="text-foreground text-sm sm:text-base font-medium">Painel Administrativo</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Store Hero Section */}
+    <div className="min-h-screen bg-background font-[Inter]">
+      
+      {/* Secção Hero da Loja, com tratamento para imagens e fallback. */}
       <div className="relative">
-        {/* Cover Image */}
+        {/* Imagem de Capa */}
         {store.coverImage ? (
           <div className="h-32 sm:h-48 md:h-64 bg-gray-200 overflow-hidden relative">
-            <Image
+            <img
               src={store.coverImage.startsWith('/') ? `/api${store.coverImage}` : store.coverImage}
               alt={`Capa da ${store.name}`}
-              fill
-              className="object-cover"
-              priority
-              sizes="100vw"
+              className="object-cover w-full h-full"
               onError={(e) => {
                 console.error('Erro ao carregar imagem de capa:', store.coverImage)
-                // Remove a imagem em caso de erro
                 e.currentTarget.style.display = 'none'
-                e.currentTarget.parentElement?.classList.add('bg-gradient-to-r', 'from-blue-500', 'to-purple-600')
+                const fallback = e.currentTarget.nextElementSibling as HTMLElement
+                if (fallback) fallback.classList.add('opacity-100')
               }}
             />
-            {/* Fallback content (hidden by default, shown on error) */}
+            {/* Conteúdo de fallback (oculto por padrão, mostrado em caso de erro) */}
             <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center opacity-0 transition-opacity duration-300">
               <div className="text-center text-white px-4">
                 <div className="bg-white/20 p-2 sm:p-4 rounded-full mb-2 sm:mb-4 inline-block">
@@ -319,32 +281,31 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
           </div>
         )}
 
-        {/* Store Info Card */}
+        {/* Cartão de Informações da Loja */}
         <div className="max-w-4xl mx-auto px-3 sm:px-4">
           <div className="bg-card/95 backdrop-blur-sm -mt-8 sm:-mt-12 relative z-10 rounded-2xl shadow-2xl border border-border">
             <div className="p-5 sm:p-8">
               <div className="flex items-start space-x-4 sm:space-x-6">
-                {/* Profile Image */}
+                {/* Imagem de Perfil */}
                 <div className="flex-shrink-0">
                   {store.profileImage ? (
-                    <Image
+                    <img
                       src={store.profileImage.startsWith('/') ? `/api${store.profileImage}` : store.profileImage}
                       alt={`Logo da ${store.name}`}
                       width={80}
                       height={80}
                       className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-4 border-white shadow-lg"
-                      priority
                       onError={(e) => {
                         console.error('Erro ao carregar imagem de perfil:', store.profileImage)
-                        // Esconde a imagem e mostra o fallback
+                        // Oculta a imagem e mostra o fallback.
                         e.currentTarget.style.display = 'none'
                         const fallback = e.currentTarget.nextElementSibling as HTMLElement
                         if (fallback) fallback.style.display = 'flex'
                       }}
                     />
                   ) : null}
-                  {/* Fallback sempre presente */}
-                    <div 
+                  {/* Fallback está sempre presente */}
+                    <div
                       className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-muted to-muted/80 rounded-2xl flex items-center justify-center border-4 border-background shadow-lg"
                       style={{ display: store.profileImage ? 'none' : 'flex' }}
                     >
@@ -354,14 +315,14 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                   </div>
                 </div>
 
-                {/* Store Details */}
+                {/* Detalhes da Loja */}
                 <div className="flex-1 min-w-0">
                   <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">{store.name}</h1>
                   {store.description && (
                     <p className="text-muted-foreground text-sm sm:text-base mb-4 leading-relaxed">{store.description}</p>
                   )}
 
-                  {/* Store Info */}
+                  {/* Informações de contato e endereço */}
                   <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm text-muted-foreground">
                     {store.address && (
                       <div className="flex items-center">
@@ -385,7 +346,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
         </div>
       </div>
 
-      {/* Categories and Items */}
+      {/* Categorias e Itens da loja */}
       <div className="max-w-4xl mx-auto px-3 sm:px-4 py-4 sm:py-6">
         {safeCategories.length === 0 ? (
           <div className="text-center py-12">
@@ -405,222 +366,261 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
             </button>
           </div>
         ) : (
-          <div className="space-y-8">
-            {safeCategories.map(category => {
-              const safeItems = Array.isArray(category.items) ? category.items : []
-              const available = safeItems.filter(isAvailable)
+          <>
+            <div className="space-y-8">
+              {safeCategories.map(category => {
+                const safeItems = Array.isArray(category.items) ? category.items : []
+                const available = safeItems.filter(isAvailable)
 
-              return (
-                <div key={category.id} className="mb-8">
-                  <h2 className="text-2xl font-bold mb-4 text-foreground">{category.name}</h2>
-                  {available.length === 0 ? (
-                    <p className="text-muted-foreground text-center py-8">Nenhum item disponível nesta categoria</p>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                      {available.map(item => (
-                        <div
-                          key={item.id}
-                          className="bg-card/90 backdrop-blur-sm rounded-2xl shadow-lg border border-border p-4 sm:p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
-                        >
-                          <div className="flex items-start space-x-4">
-                            {/* Product Image */}
-                            <div className="flex-shrink-0">
-                              <ImageThumb
-                                src={item.imageUrl || ''}
-                                alt={item.name}
-                                size="lg"
-                                variant="rounded"
-                                className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl shadow-sm group-hover:shadow-md transition-shadow duration-300"
-                                priority={false}
-                              />
-                            </div>
-
-                            {/* Product Info */}
-                            <div className="flex-1 min-w-0">
-                              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
-                                <h3 className="font-semibold text-foreground text-base sm:text-lg mb-1 sm:mb-0 leading-tight">{item.name}</h3>
-                                <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-success to-success/80 bg-clip-text text-transparent sm:ml-3">
-                                  {formatBRL(Number(item.price) || 0)}
-                                </span>
+                return (
+                  <div key={category.id} className="mb-8">
+                    <h2 className="text-2xl font-bold mb-4 text-foreground">{category.name}</h2>
+                    {available.length === 0 ? (
+                      <p className="text-muted-foreground text-center py-8">Nenhum item disponível nesta categoria</p>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                        {available.map(item => (
+                          <div
+                            key={item.id}
+                            className="bg-card/90 backdrop-blur-sm rounded-2xl shadow-lg border border-border p-4 sm:p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                          >
+                            <div className="flex items-start space-x-4">
+                              {/* Imagem do Produto com fallback */}
+                              <div className="flex-shrink-0">
+                                {item.imageUrl ? (
+                                  <img
+                                    src={item.imageUrl}
+                                    alt={item.name}
+                                    className="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover shadow-sm group-hover:shadow-md transition-shadow duration-300"
+                                    onError={(e) => {
+                                      e.currentTarget.style.display = 'none';
+                                      const fallback = e.currentTarget.nextElementSibling as HTMLElement;
+                                      if (fallback) fallback.style.display = 'flex';
+                                    }}
+                                  />
+                                ) : null}
+                                <div
+                                  className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-muted to-muted/80 rounded-xl flex items-center justify-center border border-border"
+                                  style={{ display: item.imageUrl ? 'none' : 'flex' }}
+                                >
+                                  <svg className="h-10 w-10 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h8v2H6V8zm0 4h12v2H6v-2z"/>
+                                  </svg>
+                                </div>
                               </div>
 
-                              {item.description && (
-                                <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 leading-relaxed line-clamp-2">{item.description}</p>
-                              )}
+                              {/* Informações e controlo do item */}
+                              <div className="flex-1 min-w-0">
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
+                                  <h3 className="font-semibold text-foreground text-base sm:text-lg mb-1 sm:mb-0 leading-tight">{item.name}</h3>
+                                  <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-success to-success/80 bg-clip-text text-transparent sm:ml-3">
+                                    {formatBRL(Number(item.price) || 0)}
+                                  </span>
+                                </div>
 
-                              {/* Add to Cart Controls */}
-                              <div className="flex items-center justify-end">
-                                {cart.find(ci => ci.id === item.id) ? (
-                                  <div className="flex items-center space-x-3">
-                                    <button
-                                      onClick={() => removeFromCart(item.id)}
-                                      className="bg-destructive/10 text-destructive p-2 sm:p-2.5 rounded-xl hover:bg-destructive/20 transition-all duration-200 shadow-sm hover:shadow-md"
-                                    >
-                                      <Minus className="h-4 w-4" aria-hidden="true" />
-                                    </button>
-                                    <span className="font-bold text-lg sm:text-xl min-w-[2rem] text-center text-foreground">
-                                      {cart.find(ci => ci.id === item.id)?.quantity || 0}
-                                    </span>
+                                {item.description && (
+                                  <p className="text-xs sm:text-sm text-muted-foreground mb-3 sm:mb-4 leading-relaxed line-clamp-2">{item.description}</p>
+                                )}
+
+                                {/* Controlos para adicionar ao carrinho */}
+                                <div className="flex items-center justify-end">
+                                  {cart.find(ci => ci.id === item.id) ? (
+                                    <div className="flex items-center space-x-3">
+                                      <button
+                                        onClick={() => removeFromCart(item.id)}
+                                        className="bg-destructive/10 text-destructive p-2 sm:p-2.5 rounded-xl hover:bg-destructive/20 transition-all duration-200 shadow-sm hover:shadow-md"
+                                      >
+                                        <Minus className="h-4 w-4" aria-hidden="true" />
+                                      </button>
+                                      <span className="font-bold text-lg sm:text-xl min-w-[2rem] text-center text-foreground">
+                                        {cart.find(ci => ci.id === item.id)?.quantity || 0}
+                                      </span>
+                                      <button
+                                        onClick={() => addToCart(item)}
+                                        className="bg-success/10 text-success p-2 sm:p-2.5 rounded-xl hover:bg-success/20 transition-all duration-200 shadow-sm hover:shadow-md"
+                                      >
+                                        <Plus className="h-4 w-4" aria-hidden="true" />
+                                      </button>
+                                    </div>
+                                  ) : (
                                     <button
                                       onClick={() => addToCart(item)}
-                                      className="bg-success/10 text-success p-2 sm:p-2.5 rounded-xl hover:bg-success/20 transition-all duration-200 shadow-sm hover:shadow-md"
+                                      className="bg-gradient-to-r from-success to-success/90 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:from-success/90 hover:to-success/80 transition-all duration-200 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl"
                                     >
-                                      <Plus className="h-4 w-4" aria-hidden="true" />
+                                      Adicionar
                                     </button>
-                                  </div>
-                                ) : (
-                                  <button
-                                    onClick={() => addToCart(item)}
-                                    className="bg-gradient-to-r from-success to-success/90 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:from-success/90 hover:to-success/80 transition-all duration-200 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl"
-                                  >
-                                    Adicionar
-                                  </button>
-                                )}
+                                  )}
+                                </div>
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+            </div>
+
+            {/* Rodapé com total e botão para finalizar no WhatsApp */}
+            {cart.length > 0 && (
+              <div className="p-6 border-t border-border bg-muted/30 mt-8 rounded-2xl">
+                <div className="flex items-center justify-between mb-6">
+                  <span className="text-lg font-bold text-foreground">Total:</span>
+                  <span className="text-2xl font-bold bg-gradient-to-r from-success to-success/80 bg-clip-text text-transparent">
+                    {formatBRL(cartTotal)}
+                  </span>
                 </div>
-              )
-            })}
-          </div>
+
+                <button
+                  onClick={sendWhatsAppOrder}
+                  className="w-full bg-gradient-to-r from-success to-success/90 text-white py-4 rounded-xl hover:from-success/90 hover:to-success/80 transition-all duration-200 font-bold flex items-center justify-center shadow-lg hover:shadow-xl"
+                >
+                  <MessageCircle className="h-5 w-5 mr-3" aria-hidden="true" />
+                  Finalizar no WhatsApp
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
 
-      {/* Floating Cart Modal */}
+      {/* Botão FAB (Floating Action Button) do Carrinho */}
+      <div className="fixed top-6 right-6 z-30">
+        <button
+          onClick={() => {
+            console.log('Abrindo carrinho...', cart);
+            setIsCartOpen(true);
+          }}
+          className="p-4 rounded-full bg-primary text-primary-foreground shadow-2xl hover:scale-110 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center relative"
+          aria-label="Abrir carrinho"
+          style={{ backgroundColor: store.primaryColor }}
+        >
+          <ShoppingCart className="h-6 w-6" />
+          {cart.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-destructive text-white text-xs font-bold rounded-full h-5 w-5 flex items-center justify-center">
+              {cartCount}
+            </span>
+          )}
+        </button>
+      </div>
+      <style jsx global>{`
+        :root {
+          --primary: ${store.primaryColor};
+        }
+      `}</style>
+
+      {/* Modal do Carrinho */}
       {isCartOpen && (
-        <div className="fixed inset-0 z-[60]" role="dialog" aria-modal="true">
-          {/* Backdrop */}
-          <div 
-            className="absolute inset-0 bg-black/20 backdrop-blur-sm" 
-            onClick={() => setIsCartOpen(false)}
-          />
-          
-          {/* Floating Card - Centered */}
-          <div className="relative z-10 flex items-center justify-center min-h-full p-4 sm:p-6">
-            <div className="bg-card/95 backdrop-blur-md rounded-2xl shadow-2xl border border-border w-full max-w-md max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-300">
-              {/* Header */}
-              <div className="p-4 sm:p-6 border-b border-border">
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            {/* Overlay */}
+            <div 
+              className="fixed inset-0 bg-black/50 transition-opacity" 
+              onClick={() => setIsCartOpen(false)}
+            ></div>
+
+            {/* Conteúdo do Modal */}
+            <div className="inline-block align-bottom bg-card rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-h-[80vh] flex flex-col">
+              <div className="px-6 pt-6 pb-4 border-b border-border">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-gradient-to-r from-success/20 to-success/30 rounded-lg">
-                      <ShoppingCart className="h-5 w-5 text-success" aria-hidden="true" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-bold text-foreground">Seu Carrinho</h3>
-                      {cart.length > 0 && (
-                        <p className="text-sm text-muted-foreground">{cartCount} {cartCount === 1 ? 'item' : 'itens'}</p>
-                      )}
-                    </div>
-                  </div>
-                  <button 
-                    onClick={() => setIsCartOpen(false)} 
-                    className="text-muted-foreground hover:text-foreground p-2 hover:bg-muted rounded-lg transition-all duration-200" 
-                    aria-label="Fechar carrinho"
+                  <h3 className="text-lg font-bold text-foreground">Seu Carrinho</h3>
+                  <button
+                    onClick={() => setIsCartOpen(false)}
+                    className="text-muted-foreground hover:text-foreground focus:outline-none"
                   >
-                    <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <span className="sr-only">Fechar</span>
+                    <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
               </div>
-
-              {/* Cart Content */}
-              {cart.length === 0 ? (
-                <div className="p-6 sm:p-8 text-center">
-                  <div className="text-muted-foreground mb-4">
-                    <ShoppingCart className="h-12 w-12 mx-auto" strokeWidth={1} />
+              
+              <div className="flex-1 overflow-y-auto p-6">
+                {cart.length === 0 ? (
+                  <div className="text-center py-12">
+                    <ShoppingCart className="mx-auto h-12 w-12 text-muted-foreground" />
+                    <h3 className="mt-2 text-sm font-medium text-foreground">Carrinho vazio</h3>
+                    <p className="mt-1 text-sm text-muted-foreground">Adicione itens ao carrinho para continuar.</p>
                   </div>
-                  <h4 className="text-lg font-medium text-foreground mb-2">Carrinho vazio</h4>
-                  <p className="text-muted-foreground mb-6">Adicione alguns produtos para começar seu pedido</p>
-                  <button 
-                    onClick={() => setIsCartOpen(false)}
-                    className="bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-3 rounded-xl hover:from-primary/90 hover:to-primary/70 transition-all duration-200 font-semibold"
+                ) : (
+                  <div className="space-y-6">
+                    {cart.map((item) => (
+                      <div key={item.id} className="flex items-center space-x-4">
+                        <div className="flex-shrink-0">
+                          {item.imageUrl ? (
+                            <img
+                              src={item.imageUrl}
+                              alt={item.name}
+                              className="w-16 h-16 rounded-lg object-cover"
+                            />
+                          ) : (
+                            <div className="w-16 h-16 rounded-lg bg-muted flex items-center justify-center">
+                              <svg className="h-8 w-8 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h8v2H6V8zm0 4h12v2H6v-2z" />
+                              </svg>
+                            </div>
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm font-medium text-foreground truncate">{item.name}</h4>
+                          <p className="text-sm text-muted-foreground">{formatBRL(item.price || 0)}</p>
+                        </div>
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={() => removeFromCart(item.id)}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <Minus className="h-4 w-4" />
+                          </button>
+                          <span className="w-6 text-center text-sm font-medium">{item.quantity}</span>
+                          <button
+                            onClick={() => addToCart(item)}
+                            className="text-muted-foreground hover:text-foreground"
+                          >
+                            <Plus className="h-4 w-4" />
+                          </button>
+                        </div>
+                        <div className="ml-4">
+                          <p className="text-sm font-medium">{formatBRL((item.price || 0) * item.quantity)}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+              
+              {cart.length > 0 && (
+                <div className="border-t border-border p-6">
+                  <div className="flex justify-between text-base font-medium text-foreground mb-6">
+                    <p>Total</p>
+                    <p>{formatBRL(cartTotal)}</p>
+                  </div>
+                  <button
+                    onClick={sendWhatsAppOrder}
+                    className="w-full bg-gradient-to-r from-success to-success/90 text-white py-3 px-4 rounded-xl hover:from-success/90 hover:to-success/80 transition-all duration-200 font-medium flex items-center justify-center"
                   >
-                    Continuar Comprando
+                    <MessageCircle className="h-5 w-5 mr-2" />
+                    Finalizar Pedido
                   </button>
                 </div>
-              ) : (
-                <>
-                  {/* Items List */}
-                  <div className="p-4 sm:p-6 max-h-64 sm:max-h-80 overflow-y-auto">
-                    <div className="space-y-4">
-                      {cart.map(item => (
-                        <div key={item.id} className="bg-muted/80 rounded-xl p-4 hover:bg-muted transition-colors duration-200">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1 min-w-0">
-                              <h4 className="font-semibold text-foreground mb-1 truncate">{item.name}</h4>
-                              <p className="text-sm text-muted-foreground">{formatBRL(Number(item.price) || 0)} cada</p>
-                            </div>
-                            <div className="ml-4 text-right">
-                              <p className="font-bold text-success mb-2">
-                                {formatBRL((Number(item.price) || 0) * item.quantity)}
-                              </p>
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center justify-between mt-3">
-                            <div className="flex items-center space-x-3">
-                              <button 
-                                onClick={() => removeFromCart(item.id)} 
-                                className="bg-destructive/10 text-destructive p-2 rounded-lg hover:bg-destructive/20 transition-colors duration-200" 
-                                aria-label="Diminuir quantidade"
-                              >
-                                <Minus className="h-4 w-4" aria-hidden="true" />
-                              </button>
-                              <span className="font-bold text-foreground min-w-[2rem] text-center">{item.quantity}</span>
-                              <button 
-                                onClick={() => addToCart(item)} 
-                                className="bg-success/10 text-success p-2 rounded-lg hover:bg-success/20 transition-colors duration-200" 
-                                aria-label="Aumentar quantidade"
-                              >
-                                <Plus className="h-4 w-4" aria-hidden="true" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Footer */}
-                  <div className="p-4 sm:p-6 border-t border-border bg-muted/50">
-                    <div className="flex items-center justify-between mb-6">
-                      <span className="text-lg font-bold text-foreground">Total:</span>
-                      <span className="text-2xl font-bold bg-gradient-to-r from-success to-success/80 bg-clip-text text-transparent">
-                        {formatBRL(cartTotal)}
-                      </span>
-                    </div>
-
-                    <button 
-                      onClick={sendWhatsAppOrder} 
-                      className="w-full bg-gradient-to-r from-success to-success/90 text-white py-4 rounded-xl hover:from-success/90 hover:to-success/80 transition-all duration-200 font-bold flex items-center justify-center shadow-lg hover:shadow-xl"
-                    >
-                      <MessageCircle className="h-5 w-5 mr-3" aria-hidden="true" />
-                      Finalizar no WhatsApp
-                    </button>
-                  </div>
-                </>
               )}
             </div>
           </div>
         </div>
       )}
 
-
-
-      {/* WhatsApp FAB */}
+      {/* Botão FAB (Floating Action Button) do WhatsApp */}
       <button
         onClick={() => sendWhatsAppInquiry('general')}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-success to-success/90 text-white p-4 rounded-2xl shadow-2xl hover:from-success/90 hover:to-success/80 transition-all duration-300 z-40 hover:scale-110 hover:-translate-y-1"
+        className="fixed bottom-6 right-6 bg-gradient-to-r from-success to-success/90 text-white p-4 rounded-2xl shadow-2xl hover:from-success/90 hover:to-success/80 transition-all duration-300 z-30 hover:scale-110 hover:-translate-y-1"
         aria-label="Abrir conversa no WhatsApp"
       >
         <MessageCircle className="h-6 w-6" aria-hidden="true" />
       </button>
 
+      {/* Rodapé da página */}
       <footer className="bg-card border-t border-border mt-8 sm:mt-12">
         <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
           <div className="text-center">
@@ -634,9 +634,9 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
             </div>
             <p className="text-muted-foreground text-xs sm:text-sm mb-3 sm:mb-4">Cartão digital inteligente para pequenos e médios negócios</p>
             <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-6 text-xs sm:text-sm text-muted-foreground">
-              <Link href="/" className="hover:text-foreground transition-colors">Página Inicial</Link>
-              <Link href="/auth/register" className="hover:text-foreground transition-colors">Criar Minha Loja</Link>
-              <Link href="/dashboard" className="hover:text-foreground transition-colors">Painel Administrativo</Link>
+              <a href="/" className="hover:text-foreground transition-colors">Página Inicial</a>
+              <a href="/auth/register" className="hover:text-foreground transition-colors">Criar Minha Loja</a>
+              <a href="/dashboard" className="hover:text-foreground transition-colors">Painel Administrativo</a>
             </div>
             <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-border">
               <p className="text-muted-foreground text-xs">© 2025 SmartCard. Todos os direitos reservados.</p>

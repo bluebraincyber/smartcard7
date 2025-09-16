@@ -52,21 +52,21 @@ export default function LedgerFiltersBar({
         <div className="flex items-center gap-2">
           <button
             onClick={onExport}
-            className="h-10 rounded-xl border border-gray-200 px-3 text-sm hover:bg-zinc-50"
+            className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground hover:bg-muted transition-colors"
             aria-label="Exportar CSV"
           >
             Exportar
           </button>
           <button
             onClick={onNewExpense}
-            className="h-10 rounded-xl border border-gray-200 px-3 text-sm hover:bg-zinc-50"
+            className="h-10 rounded-xl border border-border bg-background px-3 text-sm text-foreground hover:bg-muted transition-colors"
             aria-label="Nova despesa"
           >
             + Despesa
           </button>
           <button
             onClick={onNewIncome}
-            className="h-10 rounded-xl bg-indigo-600 px-3 text-sm font-medium text-white hover:bg-indigo-700"
+            className="h-10 rounded-xl bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90 transition-colors"
             aria-label="Nova receita"
           >
             + Receita

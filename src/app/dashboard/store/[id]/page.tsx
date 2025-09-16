@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import pool from '@/lib/db'
-import { getServerSession } from 'next-auth'
+import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/authOptions'
 import StorePageClient from './store-page-client'
 
@@ -13,6 +13,9 @@ interface Store {
   address?: string
   primaryColor: string
   isactive: boolean
+  image?: string
+  coverImage?: string
+  profileImage?: string
   categories: Category[]
 }
 
@@ -37,7 +40,7 @@ interface Item {
 
 export default async function StorePage({ params }: { params: { id: string } }) {
   // 1. Obter a sessão do usuário NO SERVIDOR
-  const session = await getServerSession(authOptions)
+  const session = await getServerSession(authOptions) as { user?: { id: string } } | null
   if (!session?.user?.id) {
     notFound()
   }
@@ -95,6 +98,9 @@ export default async function StorePage({ params }: { params: { id: string } }) 
       address: storeData.address,
       primaryColor: storeData.primaryColor || storeData.primary_color || '#EA1D2C',
       isactive: storeData.isactive,
+      image: storeData.logo,
+      coverImage: storeData.coverimage,
+      profileImage: storeData.logo,
       categories: categories
     }
 

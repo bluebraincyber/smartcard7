@@ -17,21 +17,21 @@ export default function LedgerTable({
   const hasData = rows.length > 0;
 
   return (
-    <div className="rounded-2xl border border-gray-200 p-5 shadow-sm">
+    <div className="rounded-2xl border border-border p-5 shadow-sm bg-card">
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-base font-semibold">Lançamentos</h2>
+        <h2 className="text-base font-semibold text-foreground">Lançamentos</h2>
       </div>
 
       {loading ? (
-        <div className="h-40 animate-pulse rounded-xl bg-zinc-100" />
+        <div className="h-40 animate-pulse rounded-xl bg-muted" />
       ) : !hasData ? (
-        <div className="rounded-xl border border-dashed p-10 text-center text-sm text-zinc-600">
+        <div className="rounded-xl border border-dashed border-border p-10 text-center text-sm text-muted-foreground bg-muted/30">
           Sem lançamentos no período. Adicione uma receita ou despesa.
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="min-w-full text-sm">
-            <thead className="text-left text-zinc-500">
+            <thead className="text-left text-muted-foreground">
               <tr>
                 <th className="py-2">Data</th>
                 <th>Título</th>
@@ -44,13 +44,13 @@ export default function LedgerTable({
             </thead>
             <tbody>
               {rows.map((e) => (
-                <tr key={e.id} className="border-t">
-                  <td className="py-2 align-top">{fmtDate(e.date)}</td>
-                  <td className="align-top">{e.title}</td>
-                  <td className="align-top">{e.category ?? "–"}</td>
-                  <td className="align-top">{e.method ?? "–"}</td>
-                  <td className="align-top text-right text-green-700">{e.type === "IN" ? fmtBRL(e.amount) : ""}</td>
-                  <td className="align-top text-right text-brand-blue">{e.type === "OUT" ? fmtBRL(e.amount) : ""}</td>
+                <tr key={e.id} className="border-t border-border">
+                  <td className="py-2 align-top text-foreground">{fmtDate(e.date)}</td>
+                  <td className="align-top text-foreground">{e.title}</td>
+                  <td className="align-top text-foreground">{e.category ?? "–"}</td>
+                  <td className="align-top text-foreground">{e.method ?? "–"}</td>
+                  <td className="align-top text-right text-success">{e.type === "IN" ? fmtBRL(e.amount) : ""}</td>
+                  <td className="align-top text-right text-destructive">{e.type === "OUT" ? fmtBRL(e.amount) : ""}</td>
                   <td className="align-top text-right">
                     <button className="icon-btn" title="Editar" onClick={() => onEdit(e)}>
                       ✏️
@@ -67,8 +67,8 @@ export default function LedgerTable({
       )}
 
       <style jsx>{`
-        .icon-btn { display:inline-flex;align-items:center;justify-content:center; width:32px;height:32px; border:1px solid #e5e7eb; border-radius:10px; margin-left:6px; background:#fff; }
-        .icon-btn:hover { border-color:#c7cdd4; }
+        .icon-btn { display:inline-flex;align-items:center;justify-content:center; width:32px;height:32px; border:1px solid hsl(var(--border)); border-radius:10px; margin-left:6px; background:hsl(var(--background)); color:hsl(var(--foreground)); }
+        .icon-btn:hover { border-color:hsl(var(--border)); background:hsl(var(--muted)); }
       `}</style>
     </div>
   );

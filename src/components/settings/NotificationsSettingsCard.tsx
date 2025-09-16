@@ -145,10 +145,10 @@ export default function NotificationsSettingsCard() {
     <div className="space-y-8">
       {/* Notification Channels */}
       <div>
-        <h3 className="text-base font-medium text-gray-900 mb-2">
+        <h3 className="text-base font-medium text-foreground mb-2">
           Canais de notificação
         </h3>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           Escolha como você gostaria de receber as notificações
         </p>
         
@@ -161,10 +161,10 @@ export default function NotificationsSettingsCard() {
                     {icon}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-foreground">
                       {label}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {description}
                     </p>
                   </div>
@@ -179,14 +179,14 @@ export default function NotificationsSettingsCard() {
       </div>
 
       {/* Divider */}
-      <div className="border-t border-gray-200"></div>
+      <div className="border-t border-border"></div>
 
       {/* Notification Types */}
       <div>
-        <h3 className="text-base font-medium text-gray-900 mb-2">
+        <h3 className="text-base font-medium text-foreground mb-2">
           Tipos de notificação
         </h3>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-muted-foreground mb-6">
           Escolha quais tipos de notificações você deseja receber
         </p>
         
@@ -199,10 +199,10 @@ export default function NotificationsSettingsCard() {
                     {icon}
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-gray-900">
+                    <p className="text-sm font-medium text-foreground">
                       {label}
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       {description}
                     </p>
                   </div>
@@ -217,13 +217,13 @@ export default function NotificationsSettingsCard() {
       </div>
 
       {/* Divider */}
-      <div className="border-t border-gray-200"></div>
+      <div className="border-t border-border"></div>
 
       {/* Save Button */}
       <div className="flex items-center justify-between">
         <div>
           {message && (
-            <div className={`text-sm ${state === "error" ? "text-brand-blue" : "text-green-600"}`}>
+            <div className={`text-sm ${state === "error" ? "text-destructive" : "text-success"}`}>
               {message}
             </div>
           )}
@@ -231,7 +231,7 @@ export default function NotificationsSettingsCard() {
         <button
           onClick={onSave}
           disabled={state === "saving"}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
         >
           {state === "saving" ? "Salvando..." : "Salvar preferências"}
         </button>

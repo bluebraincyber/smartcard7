@@ -45,24 +45,24 @@ export function ActiveUsers24hCard() {
         >
           <defs>
             <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8}/>
-              <stop offset="95%" stopColor="#3b82f6" stopOpacity={0.1}/>
+              <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+              <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0.1}/>
             </linearGradient>
             <linearGradient id="colorBaseline" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.1}/>
-              <stop offset="95%" stopColor="#94a3b8" stopOpacity={0.1}/>
+              <stop offset="5%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.1}/>
+              <stop offset="95%" stopColor="hsl(var(--muted-foreground))" stopOpacity={0.1}/>
             </linearGradient>
           </defs>
           
-          <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
           <XAxis 
             dataKey="hour" 
-            tick={{ fontSize: 12, fill: '#64748b' }}
+            tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
             tickLine={false}
-            axisLine={{ stroke: '#e2e8f0' }}
+            axisLine={{ stroke: 'hsl(var(--border))' }}
           />
           <YAxis 
-            tick={{ fontSize: 12, fill: '#64748b' }}
+            tick={{ fontSize: 12, fill: 'hsl(var(--muted-foreground))' }}
             tickLine={false}
             axisLine={false}
             width={35}
@@ -72,16 +72,16 @@ export function ActiveUsers24hCard() {
               if (active && payload && payload.length) {
                 const data = payload[0].payload;
                 return (
-                  <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-200">
-                    <p className="text-sm text-gray-500">{data.hour}</p>
+                  <div className="bg-card p-3 rounded-lg shadow-lg border border-border">
+                    <p className="text-sm text-muted-foreground">{data.hour}</p>
                     <p className="font-medium">
-                      <span className="text-blue-600">{data.value}</span> usuários
+                      <span className="text-primary">{data.value}</span> usuários
                     </p>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-muted-foreground">
                       Média: {data.baseline} usuários
                     </p>
                     {data.isAnomaly && (
-                      <p className="text-sm text-brand-blue mt-1">
+                      <p className="text-sm text-destructive mt-1">
                         Anomalia detectada
                       </p>
                     )}
@@ -97,7 +97,7 @@ export function ActiveUsers24hCard() {
             type="monotone"
             dataKey="upperBound"
             stroke="none"
-            fill="#e2e8f0"
+            fill="hsl(var(--muted))"
             fillOpacity={0.3}
             stackId="confidence"
           />
@@ -105,7 +105,7 @@ export function ActiveUsers24hCard() {
             type="monotone"
             dataKey="lowerBound"
             stroke="none"
-            fill="#ffffff"
+            fill="hsl(var(--background))"
             fillOpacity={1}
             stackId="confidence"
           />
@@ -114,7 +114,7 @@ export function ActiveUsers24hCard() {
           <Area
             type="monotone"
             dataKey="baseline"
-            stroke="#94a3b8"
+            stroke="hsl(var(--muted-foreground))"
             strokeWidth={1.5}
             strokeDasharray="4 4"
             fillOpacity={0}
@@ -125,16 +125,16 @@ export function ActiveUsers24hCard() {
           <Area
             type="monotone"
             dataKey="value"
-            stroke="#3b82f6"
+            stroke="hsl(var(--primary))"
             strokeWidth={2}
             fillOpacity={1}
             fill="url(#colorValue)"
             activeDot={{
               r: 6,
-              stroke: '#ffffff',
+              stroke: 'hsl(var(--background))',
               strokeWidth: 2,
-              fill: '#3b82f6',
-              style: { filter: 'drop-shadow(0 0 2px rgba(59, 130, 246, 0.8))' }
+              fill: 'hsl(var(--primary))',
+              style: { filter: 'drop-shadow(0 0 2px hsl(var(--primary) / 0.8))' }
             }}
           />
           
@@ -145,8 +145,8 @@ export function ActiveUsers24hCard() {
               cx={point.hour}
               cy={point.value}
               r={4}
-              fill="#ef4444"
-              stroke="#ffffff"
+              fill="hsl(var(--destructive))"
+              stroke="hsl(var(--background))"
               strokeWidth={2}
             />
           ))}
