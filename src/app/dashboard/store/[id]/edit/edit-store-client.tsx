@@ -119,14 +119,14 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-background">
       <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
       
       <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-12">
           <Link
             href={`/dashboard/store/${store.id}`}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-white/80 hover:bg-white rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-gray-200 mb-6"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-card/80 hover:bg-card rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-border mb-6"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar para a Loja
@@ -134,33 +134,33 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
           
           <div className="text-center mb-8">
             <div className="relative mb-8">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-blue-600 opacity-20 rounded-full blur-xl scale-150"></div>
-              <div className="relative z-10 mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
-                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
-                  <ArrowLeft className="h-6 w-6 text-white transform rotate-180" />
+              <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-20 rounded-full blur-xl scale-150"></div>
+              <div className="relative z-10 mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg">
+                <div className="w-10 h-10 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+                  <ArrowLeft className="h-6 w-6 text-primary-foreground transform rotate-180" />
                 </div>
               </div>
             </div>
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-4">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-4">
               Editar Loja
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Atualize as informações e configurações da sua loja
             </p>
           </div>
         </div>
 
-        <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200">
+        <div className="bg-card/90 backdrop-blur-sm rounded-3xl shadow-xl border border-border">
           <form onSubmit={handleSubmit} className="space-y-8 p-8">
             {error && (
-              <div className="bg-red-50/90 backdrop-blur-sm border border-red-200 rounded-2xl p-6">
+              <div className="bg-destructive/10 backdrop-blur-sm border border-destructive/20 rounded-2xl p-6">
                 <div className="flex">
-                  <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center mr-4">
-                    <X className="h-5 w-5 text-red-600" />
+                  <div className="w-10 h-10 rounded-xl bg-destructive/10 flex items-center justify-center mr-4">
+                    <X className="h-5 w-5 text-destructive" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="text-sm font-medium text-red-800 mb-1">Erro ao salvar</h3>
-                    <p className="text-sm text-red-700">{error}</p>
+                    <h3 className="text-sm font-medium text-destructive mb-1">Erro ao salvar</h3>
+                    <p className="text-sm text-destructive">{error}</p>
                   </div>
                 </div>
               </div>
@@ -168,11 +168,11 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
 
             <div className="space-y-8">
               {/* Basic Info */}
-              <div className="bg-gray-50/50 backdrop-blur-sm rounded-2xl p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-6">Informações Básicas</h3>
+              <div className="bg-muted/30 backdrop-blur-sm rounded-2xl p-6">
+                <h3 className="text-lg font-semibold text-foreground mb-6">Informações Básicas</h3>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div>
-                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="name" className="block text-sm font-medium text-foreground">
                       Nome da Loja *
                     </label>
                     <input
@@ -181,20 +181,20 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
                       required
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
-                      className="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
+                      className="mt-1 block w-full border-border rounded-xl shadow-sm focus:ring-primary focus:border-primary sm:text-sm transition-all duration-200 bg-background text-foreground"
                       placeholder="Ex: Minha Loja Incrível"
                     />
                   </div>
 
                   <div>
-                    <label htmlFor="businessType" className="block text-sm font-medium text-gray-700">
+                    <label htmlFor="businessType" className="block text-sm font-medium text-foreground">
                       Tipo de Negócio
                     </label>
                     <select
                       id="businessType"
                       value={formData.businessType}
                       onChange={(e) => handleInputChange('businessType', e.target.value)}
-                      className="mt-1 block w-full border-gray-300 rounded-xl shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-all duration-200"
+                      className="mt-1 block w-full border-border rounded-xl shadow-sm focus:ring-primary focus:border-primary sm:text-sm transition-all duration-200 bg-background text-foreground"
                     >
                       <option value="general">Geral</option>
                       <option value="restaurant">Restaurante</option>
@@ -206,17 +206,17 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
               </div>
 
               {/* Form Actions */}
-              <div className="flex justify-end space-x-4 pt-8 border-t border-gray-200">
+              <div className="flex justify-end space-x-4 pt-8 border-t border-border">
                 <Link
                   href={`/dashboard/store/${store.id}`}
-                  className="px-6 py-3 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all duration-200"
+                  className="px-6 py-3 text-sm font-medium text-foreground bg-background border border-border rounded-xl hover:bg-muted hover:shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200"
                 >
                   Cancelar
                 </Link>
                 <button
                   type="submit"
                   disabled={loading || (slugCheckResult && !slugCheckResult.available)}
-                  className="px-6 py-3 text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-blue-700 border border-transparent rounded-xl hover:from-blue-700 hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="px-6 py-3 text-sm font-medium text-primary-foreground bg-gradient-to-r from-primary to-primary/80 border border-transparent rounded-xl hover:from-primary/90 hover:to-primary/70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   {loading ? (
                     <>

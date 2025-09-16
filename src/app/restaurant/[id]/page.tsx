@@ -113,7 +113,7 @@ export default function RestaurantPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* App Bar */}
       <AppBar
         title={isSearchActive ? '' : mockRestaurant.name}
@@ -196,7 +196,7 @@ export default function RestaurantPage() {
       )}
 
       {/* Tabs */}
-      <div className="sticky top-16 z-40 bg-white">
+      <div className="sticky top-16 z-40 bg-card border-b border-border">
         <TabBar
           tabs={mockTabs}
           activeTab={activeTab}
@@ -209,9 +209,9 @@ export default function RestaurantPage() {
       {/* Products List */}
       <div className="p-4">
         {isSearchActive && (
-          <Text size="sm" color="muted" className="mb-4">
-            {filteredProducts.length} resultados para &quot;{searchQuery}&quot;
-          </Text>
+            <Text size="sm" color="muted" className="mb-4">
+              {filteredProducts.length} resultados para &quot;{searchQuery}&quot;
+            </Text>
         )}
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

@@ -1334,20 +1334,20 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
         {/* Categories and Items */}
         <div className="space-y-8">
           {store.categories.length === 0 ? (
-            <div className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200">
+            <div className="bg-card/90 backdrop-blur-sm rounded-3xl shadow-xl border border-border">
               <div className="px-6 py-12 text-center">
-                <div className="text-gray-400 mb-4">
+                <div className="text-muted-foreground mb-4">
                   <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                   </svg>
                 </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">Nenhuma categoria criada</h3>
-                <p className="text-gray-500 mb-4">
+                <h3 className="text-lg font-medium text-foreground mb-2">Nenhuma categoria criada</h3>
+                <p className="text-muted-foreground mb-4">
                   Crie categorias para organizar seus produtos e facilitar a navegação dos clientes
                 </p>
                 <Link
                   href={`/dashboard/store/${store.id}/categories`}
-                  className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-xl text-white bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 transition-all duration-200"
+                  className="inline-flex items-center px-6 py-3 border border-transparent shadow-sm text-sm font-medium rounded-xl text-primary-foreground bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 transition-all duration-200"
                 >
                   <Plus className="mr-2 h-4 w-4" />
                   Criar Primeira Categoria
@@ -1356,14 +1356,14 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
             </div>
           ) : (
             store.categories.map((category) => (
-            <div key={category.id} className="bg-white/90 backdrop-blur-sm rounded-3xl shadow-xl border border-gray-200 mb-8">
-              <div className="px-6 py-4 border-b border-gray-200">
+            <div className="bg-card/90 backdrop-blur-sm rounded-3xl shadow-xl border border-border mb-8">
+              <div className="px-6 py-4 border-b border-border">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <h2 className="text-lg font-medium text-gray-900">{category.name}</h2>
+                    <h2 className="text-lg font-medium text-foreground">{category.name}</h2>
                     <div className="flex items-center space-x-2">
                       <span className={`text-xs font-medium ${
-                        category.isactive ? 'text-green-700' : 'text-gray-500'
+                        category.isactive ? 'text-success' : 'text-muted-foreground'
                       }`}>
                         {category.isactive ? 'Ativa' : 'Inativa'}
                       </span>
@@ -1379,7 +1379,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                     <div className="relative">
                       <button
                         onClick={() => setCategoryActionsOpen(categoryActionsOpen === category.id ? null : category.id)}
-                        className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                        className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-muted text-muted-foreground hover:bg-muted/80 transition-colors"
                         title="Mais ações"
                       >
                         <MoreVertical className="h-4 w-4" />
@@ -1395,19 +1395,19 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                           />
                           
                           {/* Menu dropdown */}
-                          <div className="absolute right-0 bottom-full mb-2 z-20 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[160px]">
+                          <div className="absolute right-0 bottom-full mb-2 z-20 bg-card rounded-lg shadow-lg border border-border py-1 min-w-[160px]">
                             <button
                               onClick={() => {
                                 duplicateCategory(category.id)
                                 setCategoryActionsOpen(null)
                               }}
-                              className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                              className="flex items-center gap-3 w-full px-4 py-2 text-sm text-foreground hover:bg-muted"
                             >
                               <Copy className="h-4 w-4" />
                               Duplicar
                             </button>
                             
-                            <div className="border-t border-gray-100 my-1" />
+                            <div className="border-t border-border my-1" />
                             
                             <button
                               onClick={() => {
@@ -1423,7 +1423,7 @@ export default function StorePageClient({ store: initialStore }: StorePageClient
                                 })
                                 setCategoryActionsOpen(null)
                               }}
-                              className="flex items-center gap-3 w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
+                              className="flex items-center gap-3 w-full px-4 py-2 text-sm text-destructive hover:bg-destructive/10"
                             >
                               <Trash2 className="h-4 w-4" />
                               Excluir

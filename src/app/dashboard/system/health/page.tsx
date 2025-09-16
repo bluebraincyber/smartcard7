@@ -24,11 +24,11 @@ export default async function HealthPage() {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case 'ok':
-        return <CheckCircle2 className="h-5 w-5 text-green-500" />;
+        return <CheckCircle2 className="h-5 w-5 text-success" />;
       case 'degraded':
-        return <AlertCircle className="h-5 w-5 text-yellow-500" />;
+        return <AlertCircle className="h-5 w-5 text-warning" />;
       default:
-        return <AlertCircle className="h-5 w-5 text-red-500" />;
+        return <AlertCircle className="h-5 w-5 text-destructive" />;
     }
   };
 
@@ -48,7 +48,7 @@ export default async function HealthPage() {
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Status</CardTitle>
-            <div className="h-4 w-4 rounded-full bg-green-500"></div>
+            <div className="h-4 w-4 rounded-full bg-success"></div>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">

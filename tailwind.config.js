@@ -7,6 +7,16 @@ module.exports = {
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
   ],
   theme: {
+    // === MOBILE-FIRST BREAKPOINTS ===
+    screens: {
+      'xs': '375px',   // Mobile pequeno (iPhone SE)
+      'sm': '640px',   // Mobile grande / Tablet pequeno
+      'md': '768px',   // Tablet
+      'lg': '1024px',  // Desktop pequeno
+      'xl': '1280px',  // Desktop médio
+      '2xl': '1536px', // Desktop grande
+    },
+    
     extend: {
       colors: {
         // === CORE THEME COLORS ===

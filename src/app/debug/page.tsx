@@ -13,25 +13,25 @@ export default async function TestPage() {
     );
 
     return (
-      <div className="p-8">
-        <h1 className="text-2xl font-bold mb-4">Debug do Banco de Dados</h1>
+      <div className="min-h-screen bg-background p-8">
+        <h1 className="text-2xl font-bold mb-4 text-foreground">Debug do Banco de Dados</h1>
         
         <div className="mb-6">
-          <h2 className="text-lg font-semibold mb-2">Conexão com Banco:</h2>
-          <p className="text-green-600">✅ OK - {testConnection.rows[0].current_time}</p>
+          <h2 className="text-lg font-semibold mb-2 text-foreground">Conexão com Banco:</h2>
+          <p className="text-success">✅ OK - {testConnection.rows[0].current_time}</p>
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold mb-2">Lojas Cadastradas ({allStores.rows.length}):</h2>
+          <h2 className="text-lg font-semibold mb-2 text-foreground">Lojas Cadastradas ({allStores.rows.length}):</h2>
           {allStores.rows.length === 0 ? (
-            <p className="text-red-600">❌ Nenhuma loja encontrada</p>
+            <p className="text-destructive">❌ Nenhuma loja encontrada</p>
           ) : (
             <div className="space-y-2">
               {allStores.rows.map((store, index) => (
-                <div key={store.id} className="p-3 border rounded">
-                  <div className="font-medium">{store.name}</div>
-                  <div className="text-sm text-gray-600">
-                    Slug: <code className="bg-gray-100 px-1 rounded">{store.slug}</code>
+                <div key={store.id} className="p-3 border border-border rounded bg-card">
+                  <div className="font-medium text-foreground">{store.name}</div>
+                  <div className="text-sm text-muted-foreground">
+                    Slug: <code className="bg-muted px-1 rounded text-foreground">{store.slug}</code>
                   </div>
                   <div className="text-sm text-muted-foreground">
                     Ativa: {store.isactive ? '✅ Sim' : '❌ Não'}

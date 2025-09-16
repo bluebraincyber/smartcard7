@@ -448,9 +448,9 @@ function StoreCard({
   return (
     <div className="group relative">
       {/* Hover Background Effect */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${isArchived ? 'from-gray-50 to-gray-100' : 'from-blue-50 to-blue-100'} rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10 scale-105`}></div>
+      <div className={`absolute inset-0 bg-gradient-to-br ${isArchived ? 'from-muted/50 to-muted' : 'from-primary/5 to-primary/10'} rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10 scale-105`}></div>
       
-      <div className={`w-full h-full bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-lg border hover:shadow-2xl transition-all duration-300 group-hover:border-blue-200 group-hover:bg-white/90 ${
+      <div className={`w-full h-full bg-card backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-border hover:shadow-2xl transition-all duration-300 group-hover:border-primary/20 group-hover:bg-card/90 ${
         isArchived ? 'opacity-75 hover:opacity-100' : ''
       }`}>
         {/* Header */}
@@ -458,24 +458,24 @@ function StoreCard({
           <div className="flex items-center space-x-4 min-w-0 flex-1">
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-all duration-300 shadow-md ${
               isArchived 
-                ? 'bg-gray-100 group-hover:bg-gray-200' 
-                : 'bg-gradient-to-br from-blue-500 to-blue-600 group-hover:from-blue-600 group-hover:to-blue-700 group-hover:shadow-lg'
+                ? 'bg-muted group-hover:bg-muted/80' 
+                : 'bg-gradient-to-br from-primary to-primary/80 group-hover:from-primary/90 group-hover:to-primary group-hover:shadow-lg'
             }`}>
-              <Store className={`w-6 h-6 ${isArchived ? 'text-gray-400' : 'text-white'}`} />
+              <Store className={`w-6 h-6 ${isArchived ? 'text-muted-foreground' : 'text-primary-foreground'}`} />
             </div>
             <div className="min-w-0 flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 group-hover:text-gray-800 truncate transition-colors mb-1">
+              <h3 className="text-lg font-semibold text-foreground group-hover:text-foreground/90 truncate transition-colors mb-1">
                 {store.name}
               </h3>
-              <p className="text-sm text-gray-500 group-hover:text-gray-600 font-medium transition-colors">
+              <p className="text-sm text-muted-foreground group-hover:text-muted-foreground/80 font-medium transition-colors">
                 /{store.slug}
               </p>
             </div>
           </div>
           <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 ${
             store.status === 'active'
-              ? 'bg-green-100 text-green-700 border border-green-200 group-hover:bg-green-200 group-hover:border-green-300'
-              : 'bg-gray-100 text-gray-700 border border-gray-200 group-hover:bg-gray-200 group-hover:border-gray-300'
+              ? 'bg-success/10 text-success border border-success/20 group-hover:bg-success/20 group-hover:border-success/30'
+              : 'bg-muted text-muted-foreground border border-border group-hover:bg-muted/80 group-hover:border-border/80'
           }`}>
             {store.status === 'active' ? 'Ativa' : 'Arquivada'}
           </span>
@@ -483,19 +483,19 @@ function StoreCard({
 
         {/* Stats Grid */}
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 text-center group-hover:from-white group-hover:to-gray-50 transition-all duration-300 shadow-sm group-hover:shadow">
-            <div className="text-2xl font-bold text-gray-900 group-hover:text-gray-800 transition-colors mb-1">
+          <div className="bg-gradient-to-br from-muted/30 to-muted/50 rounded-xl p-4 text-center group-hover:from-background group-hover:to-muted/30 transition-all duration-300 shadow-sm group-hover:shadow dark:from-muted/20 dark:to-muted/40">
+            <div className="text-2xl font-bold text-foreground group-hover:text-foreground/90 transition-colors mb-1">
               {store.categories}
             </div>
-            <div className="text-xs font-medium text-gray-500 group-hover:text-gray-600 uppercase tracking-wider transition-colors">
+            <div className="text-xs font-medium text-muted-foreground group-hover:text-muted-foreground/80 uppercase tracking-wider transition-colors">
               Categorias
             </div>
           </div>
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 text-center group-hover:from-white group-hover:to-gray-50 transition-all duration-300 shadow-sm group-hover:shadow">
-            <div className="text-2xl font-bold text-gray-900 group-hover:text-gray-800 transition-colors mb-1">
+          <div className="bg-gradient-to-br from-muted/30 to-muted/50 rounded-xl p-4 text-center group-hover:from-background group-hover:to-muted/30 transition-all duration-300 shadow-sm group-hover:shadow dark:from-muted/20 dark:to-muted/40">
+            <div className="text-2xl font-bold text-foreground group-hover:text-foreground/90 transition-colors mb-1">
               {store.products}
             </div>
-            <div className="text-xs font-medium text-gray-500 group-hover:text-gray-600 uppercase tracking-wider transition-colors">
+            <div className="text-xs font-medium text-muted-foreground group-hover:text-muted-foreground/80 uppercase tracking-wider transition-colors">
               Produtos
             </div>
           </div>

@@ -304,24 +304,24 @@ export default function OnboardingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Header */}
         <div className="mb-8">
           <Link
             href={`/dashboard/store/${store.id}`}
-            className="inline-flex items-center text-sm font-medium text-gray-500 hover:text-gray-700 mb-4"
+            className="inline-flex items-center text-sm font-medium text-muted-foreground hover:text-foreground mb-4"
           >
             <ArrowLeft className="mr-2 h-4 w-4" />
             Voltar para a Loja
           </Link>
           
           <div className="text-center">
-            <Store className="mx-auto h-12 w-12 text-blue-600 mb-4" />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            <Store className="mx-auto h-12 w-12 text-primary mb-4" />
+            <h1 className="text-3xl font-bold text-foreground mb-2">
               Bem-vindo ao SmartCard!
             </h1>
-            <p className="text-lg text-gray-600 mb-8">
+            <p className="text-lg text-muted-foreground mb-8">
               Vamos configurar sua loja <strong>{store.name}</strong> em poucos passos
             </p>
           </div>
@@ -330,15 +330,15 @@ export default function OnboardingPage() {
           <div className="flex justify-center mb-6 px-2">
             <div className="flex items-center w-full max-w-xs">
               <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                step >= 1 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                step >= 1 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
               }`}>
                 {step > 1 ? <Check className="h-3 w-3" /> : '1'}
               </div>
               <div className={`flex-1 h-0.5 mx-1 ${
-                step >= 2 ? 'bg-blue-600' : 'bg-gray-200'
+                step >= 2 ? 'bg-primary' : 'bg-border'
               }`}></div>
               <div className={`flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold ${
-                step >= 2 ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-600'
+                step >= 2 ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
               }`}>
                 {step > 2 ? <Check className="h-3 w-3" /> : '2'}
               </div>
@@ -372,37 +372,37 @@ export default function OnboardingPage() {
 
         {/* Step 1: Welcome */}
         {step === 1 && (
-          <div className="bg-white rounded-lg shadow-sm p-8 text-center">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
+          <div className="bg-card rounded-lg shadow-sm p-8 text-center border border-border">
+            <h2 className="text-2xl font-bold text-foreground mb-4">
               Escolha como começar
             </h2>
-            <p className="text-gray-600 mb-8">
+            <p className="text-muted-foreground mb-8">
               Você pode usar um template pronto para seu tipo de negócio ou começar do zero
             </p>
             
             <div className="grid md:grid-cols-2 gap-6 max-w-2xl mx-auto">
               <button
                 onClick={() => setStep(2)}
-                className="p-6 border-2 border-blue-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                className="p-6 border-2 border-primary/20 rounded-lg hover:border-primary hover:bg-primary/10 transition-colors"
               >
-                <Sparkles className="h-12 w-12 text-blue-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <Sparkles className="h-12 w-12 text-primary mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   Usar Template
                 </h3>
-                <p className="text-gray-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   Comece com categorias e produtos pré-definidos para seu tipo de negócio
                 </p>
               </button>
               
               <button
                 onClick={skipOnboarding}
-                className="p-6 border-2 border-gray-200 rounded-lg hover:border-gray-400 hover:bg-gray-50 transition-colors"
+                className="p-6 border-2 border-border rounded-lg hover:border-border/80 hover:bg-muted/50 transition-colors"
               >
-                <Package className="h-12 w-12 text-gray-600 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-foreground mb-2">
                   Começar do Zero
                 </h3>
-                <p className="text-gray-600 text-sm">
+                <p className="text-muted-foreground text-sm">
                   Criar suas próprias categorias e produtos manualmente
                 </p>
               </button>
@@ -412,11 +412,11 @@ export default function OnboardingPage() {
 
         {/* Step 2: Template Selection */}
         {step === 2 && (
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+          <div className="bg-card rounded-lg shadow-sm p-8 border border-border">
+            <h2 className="text-2xl font-bold text-foreground mb-4 text-center">
               Escolha um template
             </h2>
-            <p className="text-gray-600 mb-8 text-center">
+            <p className="text-muted-foreground mb-8 text-center">
               Selecione o template que melhor se adequa ao seu negócio
             </p>
             
@@ -429,22 +429,22 @@ export default function OnboardingPage() {
                     onClick={() => setSelectedTemplate(template.id)}
                     className={`p-6 border-2 rounded-lg transition-colors text-left ${
                       selectedTemplate === template.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-200 hover:border-gray-400 hover:bg-gray-50'
+                        ? 'border-primary bg-primary/10'
+                        : 'border-border hover:border-border/80 hover:bg-muted/50'
                     }`}
                   >
                     <IconComponent className={`h-8 w-8 mb-4 ${
-                      selectedTemplate === template.id ? 'text-blue-600' : 'text-gray-600'
+                      selectedTemplate === template.id ? 'text-primary' : 'text-muted-foreground'
                     }`} />
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-lg font-semibold text-foreground mb-2">
                       {template.name}
                     </h3>
-                    <p className="text-gray-600 text-sm">
+                    <p className="text-muted-foreground text-sm">
                       {template.description}
                     </p>
                     {selectedTemplate === template.id && (
                       <div className="mt-4">
-                        <Check className="h-5 w-5 text-blue-600" />
+                        <Check className="h-5 w-5 text-primary" />
                       </div>
                     )}
                   </button>
@@ -453,20 +453,20 @@ export default function OnboardingPage() {
             </div>
 
             {error && (
-              <div className="text-red-600 text-sm mb-4 text-center">{error}</div>
+              <div className="text-destructive text-sm mb-4 text-center">{error}</div>
             )}
 
             <div className="flex justify-center space-x-4">
               <button
                 onClick={() => setStep(1)}
-                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-6 py-2 border border-border rounded-md text-foreground hover:bg-muted"
               >
                 Voltar
               </button>
               <button
                 onClick={applyTemplate}
                 disabled={!selectedTemplate || loading}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 disabled:opacity-50"
               >
                 {loading ? 'Aplicando...' : 'Aplicar Template'}
               </button>
@@ -476,11 +476,11 @@ export default function OnboardingPage() {
 
         {/* Step 3: Store Image */}
         {step === 3 && (
-          <div className="bg-white rounded-lg shadow-sm p-8">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+          <div className="bg-card rounded-lg shadow-sm p-8 border border-border">
+            <h2 className="text-2xl font-bold text-foreground mb-4 text-center">
               Adicione uma imagem para sua loja
             </h2>
-            <p className="text-gray-600 mb-8 text-center">
+            <p className="text-muted-foreground mb-8 text-center">
               Uma boa imagem ajuda os clientes a identificar sua loja. Você pode adicionar o logo ou uma foto representativa.
             </p>
             
@@ -498,13 +498,13 @@ export default function OnboardingPage() {
             <div className="flex justify-center space-x-4">
               <button
                 onClick={() => setStep(2)}
-                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                className="px-6 py-2 border border-border rounded-md text-foreground hover:bg-muted"
               >
                 Voltar
               </button>
               <button
                 onClick={() => setStep(4)}
-                className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+                className="px-6 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
               >
                 Próximo
               </button>
