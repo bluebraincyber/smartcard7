@@ -55,4 +55,4 @@ export const onboardingSchema = z.object({
   products: productSchema,
 })
 
-export type OnboardingData = z.infer<typeof onboardingSchema
+export type OnboardingData = z.infer<typeof onboardingSchema>
