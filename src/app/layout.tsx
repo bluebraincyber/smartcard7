@@ -11,12 +11,31 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata = {
   title: 'SmartCard - Cartão Digital Inteligente',
   description: 'Cartão digital interativo e universal para pequenos e médios negócios',
+  manifest: '/manifest.json',
+  icons: {
+    icon: [
+      { url: '/icon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/apple-touch-icon.png' },
+    ],
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'SmartCard',
+  },
+  formatDetection: {
+    telephone: false,
+  },
 };
 
 export const viewport = {
   width: 'device-width',
   initialScale: 1,
   viewportFit: 'cover',
+  themeColor: '#3072F9',
 };
 
 export default function RootLayout({

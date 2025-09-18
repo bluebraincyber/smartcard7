@@ -1,4 +1,44 @@
 /** @type {import('next').NextConfig} */
+const withPWA = require('next-pwa')({
+  dest: 'public',
+  disable: process.env.NODE_ENV === 'development',
+  register: true,
+  skipWaiting: true,
+  runtimeCaching: [
+    {
+      urlPattern: /^https?:\/\/.*\.(png|jpg|jpeg|svg|gif|webp|ico|woff|woff2|ttf|eot)$/i,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'static-assets',
+        expiration: {
+          maxEntries: 1000,
+          maxAgeSeconds: 30 * 24 * 60 * 60, // 30 dias
+        },
+      },
+    },
+    {
+      urlPattern: /^https?:\/\/fonts\.googleapis\.com/,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'google-fonts-stylesheets',
+      },
+    },
+    {
+      urlPattern: /^https?:\/\/fonts\.gstatic\.com/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'google-fonts-webfonts',
+        expiration: {
+          maxEntries: 30,
+          maxAgeSeconds: 60 * 60 * 24 * 365, // 1 ano
+        },
+      },
+    },
+  ],
+  buildExcludes: [/middleware-manifest\.json$/],
+  publicExcludes: ['!noprecache/**/*'],
+});
+
 const nextConfig = {
   // Forçar a porta 3000
   devIndicators: {
@@ -9,6 +49,8 @@ const nextConfig = {
     serverActions: {
       allowedOrigins: ['localhost:3000'],
     },
+    optimizeCss: true,
+    scrollRestoration: true,
   },
   // Configuração do servidor
   env: {
@@ -24,75 +66,74 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  // async rewrites() {
-  //   return {
-  //     beforeFiles: [
-  //       // Rewrite para subdomínios (ex: barbearia.smartcard.app -> /[slug])
-  //       {
-  //         source: '/',
-  //         destination: '/:slug',
-  //         has: [
-  //           {
-  //             type: 'host',
-  //             value: '(?<slug>.*)\\.smartcard\\.app',
-  //           },
-  //         ],
-  //       },
-  //       {
-  //         source: '/:path*',
-  //         destination: '/:slug/:path*',
-  //         has: [
-  //           {
-  //             type: 'host',
-  //             value: '(?<slug>.*)\\.smartcard\\.app',
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   };
-  // },
+  // Configuração de compressão
+  compress: true,
+  // Configuração de imagens otimizadas
   images: {
+    domains: [
+      'localhost',
+      'smartcard.vercel.app',
+      'lh3.googleusercontent.com',
+      'avatars.githubusercontent.com',
+    ],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**',
       },
     ],
-    // Desabilitar otimização de imagens para domínios externos problemáticos
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Configurações adicionais de imagens
     dangerouslyAllowSVG: true,
     contentDispositionType: 'attachment',
-    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
+  // Configuração de headers de segurança
   async headers() {
     return [
       {
-        source: '/:path*',
+        source: '/(.*)',
         headers: [
           {
             key: 'X-Content-Type-Options',
             value: 'nosniff',
           },
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
-          },
-          {
             key: 'X-Frame-Options',
             value: 'SAMEORIGIN',
-          },
-          {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
           },
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
-          // {
-          //   key: 'Content-Security-Policy',
-          //   value: "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self';",
-          // },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+          },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
         ],
+      },
+    ];
+  },
+  // Configuração de redirecionamentos
+  async redirects() {
+    return [
+      {
+        source: '/admin',
+        destination: '/dashboard',
+        permanent: true,
       },
     ];
   },
@@ -109,4 +150,8 @@ const nextConfig = {
   },
 };
 
-module.exports = nextConfig;
+console.log('Next.js config loaded with PWA support');
+console.log('Environment:', process.env.NODE_ENV);
+console.log('PWA enabled:', process.env.NODE_ENV !== 'development');
+
+module.exports = withPWA(nextConfig);
