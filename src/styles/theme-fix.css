@@ -1,0 +1,165 @@
+/* ===== CORREÇÃO FORÇA BRUTA DOS TEMAS ===== */
+/* Este arquivo força a aplicação correta dos temas */
+
+/* FORÇA TEMA LIGHT */
+html:not(.dark):not([data-theme="dark"]),
+html[data-theme="light"],
+html.light,
+body:not(.dark):not([data-theme="dark"]),
+body[data-theme="light"],
+body.light {
+  --background: #ffffff !important;
+  --foreground: #0f172a !important;
+  --card: #ffffff !important;
+  --card-foreground: #0f172a !important;
+  --muted: #f9fafb !important;
+  --muted-foreground: #6b7280 !important;
+  --border: #e5e7eb !important;
+  --input: #ffffff !important;
+  --primary: #2563eb !important;
+  --primary-foreground: #ffffff !important;
+  --accent: #7c3aed !important;
+  --accent-foreground: #ffffff !important;
+  
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* FORÇA TEMA DARK */
+html.dark,
+html[data-theme="dark"],
+body.dark,
+body[data-theme="dark"] {
+  --background: #0f172a !important;
+  --foreground: #f8fafc !important;
+  --card: #1e293b !important;
+  --card-foreground: #f8fafc !important;
+  --muted: #334155 !important;
+  --muted-foreground: #94a3b8 !important;
+  --border: #334155 !important;
+  --input: #1e293b !important;
+  --primary: #3b82f6 !important;
+  --primary-foreground: #ffffff !important;
+  --accent: #a855f7 !important;
+  --accent-foreground: #ffffff !important;
+  
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+}
+
+/* ===== CORREÇÃO ESPECÍFICA DA SIDEBAR ===== */
+
+/* SIDEBAR LIGHT THEME */
+html:not(.dark) aside {
+  background-color: #ffffff !important;
+  border-color: #e5e7eb !important;
+  color: #0f172a !important;
+}
+
+html:not(.dark) aside .text-muted-foreground {
+  color: #6b7280 !important;
+}
+
+html:not(.dark) aside .hover\:text-foreground:hover {
+  color: #0f172a !important;
+}
+
+html:not(.dark) aside .bg-accent {
+  background-color: #7c3aed !important;
+  color: #ffffff !important;
+}
+
+html:not(.dark) aside .text-accent-foreground {
+  color: #ffffff !important;
+}
+
+html:not(.dark) aside .hover\:bg-muted:hover {
+  background-color: #f9fafb !important;
+}
+
+/* SIDEBAR DARK THEME */
+html.dark aside,
+html[data-theme="dark"] aside {
+  background-color: #1e293b !important;
+  border-color: #334155 !important;
+  color: #f8fafc !important;
+}
+
+html.dark aside .text-muted-foreground,
+html[data-theme="dark"] aside .text-muted-foreground {
+  color: #94a3b8 !important;
+}
+
+html.dark aside .hover\:text-foreground:hover,
+html[data-theme="dark"] aside .hover\:text-foreground:hover {
+  color: #f8fafc !important;
+}
+
+html.dark aside .bg-accent,
+html[data-theme="dark"] aside .bg-accent {
+  background-color: #a855f7 !important;
+  color: #ffffff !important;
+}
+
+html.dark aside .text-accent-foreground,
+html[data-theme="dark"] aside .text-accent-foreground {
+  color: #ffffff !important;
+}
+
+html.dark aside .hover\:bg-muted:hover,
+html[data-theme="dark"] aside .hover\:bg-muted:hover {
+  background-color: #475569 !important;
+}
+
+html.dark aside .hover\:bg-accent\/50:hover,
+html[data-theme="dark"] aside .hover\:bg-accent\/50:hover {
+  background-color: rgba(168, 85, 247, 0.5) !important;
+  color: #ffffff !important;
+}
+
+/* MOBILE SIDEBAR DARK THEME */
+html.dark .bg-background,
+html[data-theme="dark"] .bg-background {
+  background-color: #1e293b !important;
+}
+
+html.dark .border-border,
+html[data-theme="dark"] .border-border {
+  border-color: #334155 !important;
+}
+
+html.dark .text-foreground,
+html[data-theme="dark"] .text-foreground {
+  color: #f8fafc !important;
+}
+
+/* FORÇA CORES DOS CARDS */
+/* Light Theme Cards */
+html:not(.dark) .bg-card,
+html:not(.dark) [class*="bg-card"] {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+}
+
+/* Dark Theme Cards */  
+html.dark .bg-card,
+html.dark [class*="bg-card"] {
+  background-color: #1e293b !important;
+  color: #f8fafc !important;
+}
+
+/* FORÇA BACKGROUNDS */
+/* Light Background */
+html:not(.dark) .bg-background,
+html:not(.dark) .bg-muted {
+  background-color: #f9fafb !important;
+}
+
+/* Dark Background */
+html.dark .bg-background {
+  background-color: #0f172a !important;
+}
+
+html.dark .bg-muted {
+  background-color: #334155 !important;
+}

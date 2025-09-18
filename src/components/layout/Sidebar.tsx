@@ -2,13 +2,13 @@
 
 import { cn } from "@/lib/utils";
 import { useSidebar } from "@/components/providers/sidebar-provider";
-import { Home, Store, Boxes, Banknote, BarChart3, Settings, ChevronLeft, ChevronRight } from "lucide-react";
+import { Home, Boxes, Banknote, BarChart3, Settings, ChevronLeft, ChevronRight, Store } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = () => [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
-  { href: "/dashboard/products", icon: Store, label: "Minha Loja" },
+  { href: "/dashboard/store", icon: Store, label: "Minhas Lojas" },
   { href: "/dashboard/products", icon: Boxes, label: "Categorias e Produtos" },
   { href: "/dashboard/finance", icon: Banknote, label: "Financeiro" },
   { href: "/dashboard/analytics", icon: BarChart3, label: "Analytics" },
@@ -23,7 +23,7 @@ export function Sidebar() {
     <aside
       className={cn(
         "fixed left-0 top-0 z-40 hidden h-screen transition-all duration-300 ease-in-out md:block",
-        "bg-card border-r border-border shadow-lg",
+        "bg-card border-r border-border",
         isOpen ? "w-64" : "w-16"
       )}
     >
@@ -32,7 +32,7 @@ export function Sidebar() {
           onClick={toggle}
           className="
             flex h-9 w-9 items-center justify-center rounded-md 
-            text-muted-foreground hover:text-foreground
+            text-muted-fg hover:text-fg
             hover:bg-muted transition-colors
           "
           aria-label={isOpen ? "Recolher menu" : "Expandir menu"}
@@ -53,10 +53,10 @@ export function Sidebar() {
               key={href}
               href={href}
               className={cn(
-                "mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors",
+                "mb-1 flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
                 isActive 
-                  ? "bg-primary/10 text-primary border border-primary/20" 
-                  : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                  ? "bg-primary text-primary-fg" 
+                  : "text-muted-fg hover:bg-muted hover:text-fg",
                 !isOpen && "justify-center"
               )}
               title={!isOpen ? label : undefined}
@@ -78,14 +78,14 @@ export function Sidebar() {
       {/* User profile at the bottom */}
       <div className="absolute bottom-0 left-0 right-0 p-2">
         <div className="
-          flex items-center gap-2 rounded-lg p-2 text-sm 
-          text-muted-foreground hover:text-foreground 
-          hover:bg-muted transition-colors
+          flex items-center gap-2 rounded-md p-2 text-sm 
+          text-muted-fg hover:bg-muted hover:text-fg 
+          transition-colors cursor-pointer
         ">
-          <div className="h-8 w-8 flex-shrink-0 rounded-full bg-primary/20 flex items-center justify-center">
-            <span className="text-xs font-medium text-primary">U</span>
+          <div className="h-8 w-8 flex-shrink-0 rounded-full bg-accent flex items-center justify-center">
+            <span className="text-xs font-medium text-accent-fg">U</span>
           </div>
-          <span className={cn(isOpen ? "block" : "md:sr-only")}>Usuário</span>
+          <span className={cn("truncate", isOpen ? "block" : "md:sr-only")}>Usuário</span>
         </div>
       </div>
     </aside>

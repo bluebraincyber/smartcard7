@@ -15,28 +15,63 @@ interface UserUpdateData {
 
 export async function GET() {
   try {
-    // util de senha centralizado em src/lib/password.ts (não necessário aqui)
-    const session = await auth()
+    console.log('Iniciando busca de perfil do usuário...');
     
-     if (!session?.user?.id) {
-       return NextResponse.json({ error: 'Não autorizado' }, { status: 401 })
-     }
-
-     const userResult = await pool.query(
-       'SELECT id, name, email, created_at FROM users WHERE id = $1',
-       [session.user.id]
-     )
-
-     if (userResult.rows.length === 0) {
-       return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 })
-     }
+    // Verificar autenticação
+    const session = await auth();
+    console.log('Sessão:', session ? 'Encontrada' : 'Não encontrada');
     
-     const user = userResult.rows[0]
+    if (!session?.user?.id) {
+      console.log('Erro: Usuário não autenticado');
+      return NextResponse.json({ error: 'Não autorizado' }, { status: 401 });
+    }
 
-     return NextResponse.json(user)
+    console.log('ID do usuário da sessão:', session.user.id);
+    
+    try {
+      // Testar conexão com o banco de dados
+      await pool.query('SELECT NOW()');
+      console.log('Conexão com o banco de dados bem-sucedida');
+      
+      // Buscar usuário
+      const userResult = await pool.query(
+        'SELECT id, name, email, created_at FROM users WHERE id = $1',
+        [session.user.id]
+      );
+
+      console.log('Resultado da consulta:', userResult.rows);
+
+      if (userResult.rows.length === 0) {
+        console.log('Erro: Nenhum usuário encontrado com o ID fornecido');
+        return NextResponse.json({ error: 'Usuário não encontrado' }, { status: 404 });
+      }
+      
+      const user = userResult.rows[0];
+      console.log('Usuário encontrado:', { id: user.id, email: user.email });
+
+      return NextResponse.json(user);
+    } catch (dbError) {
+      console.error('Erro no banco de dados:', dbError);
+      return NextResponse.json(
+        { 
+          error: 'DATABASE_ERROR', 
+          message: dbError.message,
+          code: dbError.code,
+          detail: dbError.detail
+        }, 
+        { status: 500 }
+      );
+    }
   } catch (error) {
-     console.error('Erro ao buscar perfil:', error)
-     return NextResponse.json({ error: 'INTERNAL_ERROR', detail: error?.message }, { status: 500 });
+    console.error('Erro ao processar requisição:', error);
+    return NextResponse.json(
+      { 
+        error: 'INTERNAL_SERVER_ERROR',
+        message: error.message,
+        stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+      }, 
+      { status: 500 }
+    );
   }
 }
 

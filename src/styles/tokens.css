@@ -1,0 +1,97 @@
+/* === SmartCard7 — Color Tokens === */
+:root {
+  /* Base / Surfaces */
+  --bg:            210 20% 98%;   /* #F9FAFB */
+  --fg:            220 13% 7%;    /* #111827 */
+
+  --card:          0 0% 100%;
+  --card-fg:       220 13% 7%;
+
+  --muted:         220 14% 96%;   /* dividers / subtle bg */
+  --muted-fg:      220 9% 46%;
+
+  --popover:       0 0% 100%;
+  --popover-fg:    220 13% 7%;
+
+  --border:        220 14% 90%;
+  --input:         220 14% 90%;
+  --ring:          218 90% 71%;   /* focus ring com cor oficial #3072F9 */
+
+  /* Brand */
+  --primary:       218 90% 46.1%;   /* Azul oficial #0c59df */
+  --primary-fg:    0 0% 100%;
+
+  --secondary:     266 66% 50%;   /* Roxo #6D28D9 */
+  --secondary-fg:  0 0% 100%;
+
+  --accent:        160 84% 39%;   /* Verde esmeralda #10B981 */
+  --accent-fg:     0 0% 100%;
+
+  /* States */
+  --success:       160 84% 39%;
+  --success-fg:    0 0% 100%;
+
+  --warning:       42 95% 50%;    /* Âmbar #F59E0B */
+  --warning-fg:    24 100% 10%;
+
+  --destructive:   0 83% 57%;     /* Coral #EF4444 */
+  --destructive-fg:0 0% 100%;
+
+  --info:          211 90% 58%;   /* Azul claro #3B82F6 */
+  --info-fg:       0 0% 100%;
+
+  /* Brand gradient */
+  --brand-gradient: linear-gradient(135deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--secondary)) 50%,
+    hsl(var(--accent)) 100%
+  );
+}
+
+.dark {
+  /* Base / Surfaces */
+  --bg:            220 18% 10%;   /* #111827 */
+  --fg:            210 20% 98%;
+
+  --card:          215 19% 16%;   /* #1F2937 */
+  --card-fg:       210 20% 98%;
+
+  --muted:         215 14% 22%;   /* #374151 */
+  --muted-fg:      215 20% 77%;   /* #9CA3AF */
+
+  --popover:       215 19% 16%;
+  --popover-fg:    210 20% 98%;
+
+  --border:        215 14% 22%;
+  --input:         215 14% 22%;
+  --ring:          218 90% 71%;   /* ring com cor oficial #3072F9 */
+
+  /* Brand (mantendo cor oficial no dark) */
+  --primary:       218 90% 71%;   /* Azul oficial #3072F9 */
+  --primary-fg:    0 0% 100%;
+
+  --secondary:     228 39% 58%;   /* Azul petróleo clareado */
+  --secondary-fg:  0 0% 100%;
+
+  --accent:        160 84% 44%;
+  --accent-fg:     0 0% 100%;
+
+  /* States */
+  --success:       160 84% 44%;
+  --success-fg:    0 0% 100%;
+
+  --warning:       42 95% 57%;
+  --warning-fg:    24 100% 10%;
+
+  --destructive:   0 83% 60%;
+  --destructive-fg:0 0% 100%;
+
+  --info:          211 90% 64%;
+  --info-fg:       0 0% 100%;
+
+  --brand-gradient: linear-gradient(135deg,
+    hsl(var(--primary)) 0%,
+    hsl(var(--secondary)) 60%,
+    hsl(var(--accent)) 100%
+  );
+}

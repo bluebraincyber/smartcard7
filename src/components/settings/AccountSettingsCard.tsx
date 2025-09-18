@@ -1,116 +1,182 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/Button";
+import { Loader2, CheckCircle2, AlertCircle, Info } from "lucide-react";
 
-type State = "idle" | "saving" | "success" | "error";
+type State = "idle" | "saving" | "success" | "error" | "loading";
 
 export default function AccountSettingsCard() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
-  const [state, setState] = useState<State>("idle");
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: ""
+  });
+  const [state, setState] = useState<State>("loading");
   const [message, setMessage] = useState<string | null>(null);
 
   // Load user data on mount
   useEffect(() => {
     async function loadUserData() {
+      setState('loading');
       try {
-        const res = await fetch("/api/user");
-        if (res.ok) {
-          const user = await res.json();
-          setName(user.name || "");
-          setEmail(user.email || "");
-          setPhone(user.phone || "");
+        const res = await fetch("/api/user/profile");
+        
+        if (!res.ok) {
+          const errorData = await res.json().catch(() => ({}));
+          throw new Error(errorData.error || 'Erro ao carregar perfil');
         }
-      } catch (error) {
-        console.error("Failed to load user data:", error);
+        
+        const user = await res.json();
+        setFormData({
+          name: user.name || "",
+          email: user.email || "",
+          phone: user.phone || ""
+        });
+        setState('idle');
+        
+      } catch (err) {
+        const error = err as Error;
+        setMessage(`Falha ao carregar os dados: ${error.message}`);
+        setState('error');
       }
     }
+    
     loadUserData();
   }, []);
 
-  async function onSave() {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [id]: value
+    }));
+  };
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
     setState("saving");
     setMessage(null);
+    
     try {
-      const res = await fetch("/api/user", {
-        method: "PATCH",
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, phone }),
+        body: JSON.stringify(formData),
       });
-      if (!res.ok) throw new Error("Falha ao salvar");
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || "Falha ao salvar as alterações");
+      }
+      
       setState("success");
-      setMessage("Dados atualizados com sucesso");
-      setTimeout(() => setState("idle"), 2000);
-    } catch (e: any) {
+      setMessage("Dados atualizados com sucesso!");
+      setTimeout(() => setMessage(null), 3000);
+    } catch (err) {
+      const error = err as Error;
+      setMessage(error.message);
       setState("error");
-      setMessage(e?.message ?? "Erro ao salvar as alterações");
+    } finally {
+      setState("idle");
     }
   }
 
+  const isLoading = state === 'loading' || state === 'saving';
+
   return (
-    <div className="space-y-6">
-      <div className="grid gap-6 sm:grid-cols-2">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-            Nome completo
-          </label>
-          <input
-            id="name"
-            type="text"
-            className="block w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary focus:outline-none"
-            placeholder="Seu nome completo"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
-            E-mail
-          </label>
-          <input
-            id="email"
-            type="email"
-            className="block w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary focus:outline-none"
-            placeholder="seu@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
-          Telefone (opcional)
-        </label>
-        <input
-          id="phone"
-          type="tel"
-          className="block w-full px-3 py-2 text-sm rounded-md border border-border bg-background text-foreground placeholder-muted-foreground focus:border-primary focus:ring-primary focus:outline-none"
-          placeholder="(11) 99999-9999"
-          value={phone}
-          onChange={(e) => setPhone(e.target.value)}
-        />
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div>
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Dados da Conta</CardTitle>
+        <CardDescription>
+          Atualize suas informações de perfil e endereço de e-mail.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div className="space-y-2">
+              <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Nome completo
+              </label>
+              <Input
+                id="name"
+                type="text"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Seu nome completo"
+                disabled={isLoading}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <label htmlFor="email" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                E-mail
+              </label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="seu@email.com"
+                disabled={isLoading}
+                required
+              />
+            </div>
+            
+            <div className="space-y-2 md:col-span-2">
+              <label htmlFor="phone" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                Telefone
+              </label>
+              <Input
+                id="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="(00) 00000-0000"
+                disabled={isLoading}
+              />
+            </div>
+          </div>
+          
           {message && (
-            <div className={`text-sm ${state === "error" ? "text-destructive" : "text-success"}`}>
-              {message}
+            <div className={`flex items-center p-4 rounded-md text-sm ${
+              state === 'error' 
+                ? 'bg-red-50 text-red-700 border border-red-200' 
+                : 'bg-green-50 text-green-700 border border-green-200'
+            }`}>
+              {state === 'error' ? (
+                <AlertCircle className="h-5 w-5 mr-2 text-red-500" />
+              ) : state === 'success' ? (
+                <CheckCircle2 className="h-5 w-5 mr-2 text-green-500" />
+              ) : (
+                <Info className="h-5 w-5 mr-2 text-blue-500" />
+              )}
+              <span>{message}</span>
             </div>
           )}
-        </div>
-        <button
-          onClick={onSave}
-          disabled={state === "saving"}
-          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-primary-foreground bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50"
-        >
-          {state === "saving" ? "Salvando..." : "Salvar alterações"}
-        </button>
-      </div>
-    </div>
+          
+          <div className="flex justify-end">
+            <Button 
+              type="submit" 
+              disabled={isLoading}
+              className="min-w-[150px]"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                'Salvar alterações'
+              )}
+            </Button>
+          </div>
+        </form>
+      </CardContent>
+    </Card>
   );
 }

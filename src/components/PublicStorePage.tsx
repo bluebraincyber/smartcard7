@@ -521,7 +521,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
             ></div>
 
             {/* Conteúdo do Modal */}
-            <div className="inline-block align-bottom bg-card rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-h-[80vh] flex flex-col">
+            <div className="align-bottom bg-card rounded-2xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[95%] max-h-[80vh] flex flex-col">
               <div className="px-6 pt-6 pb-4 border-b border-border">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-bold text-foreground">Seu Carrinho</h3>

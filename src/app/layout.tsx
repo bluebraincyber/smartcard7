@@ -32,14 +32,14 @@ export default function RootLayout({
     >
       <head>
         {/* Meta tags para PWA */}
-        <meta name="theme-color" content="#2563eb" />
+        <meta name="theme-color" content="#3072F9" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       </head>
       <body 
         className="
           min-h-screen 
-          bg-background text-foreground
+          bg-bg text-fg
           transition-colors duration-300 ease-in-out
           antialiased
         "

@@ -8,9 +8,10 @@ import { Session } from 'next-auth'
 import PageViewsChart from '@/components/analytics/PageViewsChart'
 
 // Import responsive components
-import { ResponsiveContainer, ResponsivePageHeader, ResponsiveCard, ResponsiveGrid } from '@/components/ui/ResponsiveLayout'
+import { ResponsiveCard, ResponsiveGrid } from '@/components/ui/ResponsiveLayout'
 import { ResponsiveButton } from '@/components/ui/ResponsiveForms'
 import { useResponsive, useMobileLayout } from '@/hooks/useResponsive'
+import { PageHeader } from '@/components/layout/PageHeader'
 
 interface Store {
   id: string
@@ -128,58 +129,28 @@ export default function DashboardClient({ session }: DashboardClientProps) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <ResponsiveContainer size="full" padding="lg">
-          <div className="flex flex-col items-center justify-center min-h-64">
-            <div className="relative">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-border border-t-primary"></div>
-              <div className="absolute inset-0 rounded-full bg-primary opacity-20 animate-pulse"></div>
-            </div>
-            <span className="mt-4 text-foreground font-medium">
-              {isMobileLayout ? 'Carregando...' : 'Carregando dashboard...'}
-            </span>
-          </div>
-        </ResponsiveContainer>
+      <div className="flex items-center justify-center min-h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-4 border-border border-t-primary mx-auto"></div>
+          <p className="mt-4 text-foreground font-medium">
+            {isMobileLayout ? 'Carregando...' : 'Carregando dashboard...'}
+          </p>
+        </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <ResponsiveContainer size="full" padding="none">
-        {/* Header Section */}
-        <div className="space-mobile border-b border-border bg-card/50 backdrop-blur-sm">
-          <div className="text-center">
-            {/* Dashboard Icon - Smaller on mobile */}
-            <div className="relative mb-4 sm:mb-6">
-              <div className={`mx-auto flex items-center justify-center rounded-2xl bg-primary shadow-lg mb-4 sm:mb-6 ${
-                isMobileLayout ? 'h-16 w-16' : 'h-20 w-20'
-              }`}>
-                <BarChart3 className={`text-primary-foreground ${
-                  isMobileLayout ? 'h-8 w-8' : 'h-10 w-10'
-                }`} />
-              </div>
-              {!isMobileLayout && (
-                <div className="absolute inset-0 bg-primary opacity-20 rounded-full blur-xl scale-150"></div>
-              )}
-            </div>
-            
-            <h1 className={`font-bold text-foreground mb-2 sm:mb-4 ${
-              isMobileLayout ? 'text-2xl sm:text-3xl' : 'text-4xl'
-            }`}>
-              Dashboard
-            </h1>
-            
-            <p className={`text-muted-foreground max-w-2xl mx-auto leading-relaxed ${
-              isMobileLayout ? 'text-base px-4' : 'text-xl'
-            }`}>
-              {isMobileLayout 
-                ? `Olá, ${session.user?.name || 'Usuário'}! Gerencie seus cartões digitais`
-                : `Bem-vindo, ${session.user?.name || session.user?.email}! Gerencie seus cartões digitais e acompanhe o desempenho`
-              }
-            </p>
-          </div>
-        </div>
+    <>
+      <PageHeader
+        title="Dashboard"
+        description={
+          isMobileLayout
+            ? `Olá, ${session.user?.name || 'Usuário'}! Gerencie seus cartões digitais`
+            : `Bem-vindo, ${session.user?.name || session.user?.email}! Gerencie seus cartões digitais e acompanhe o desempenho`
+        }
+        icon={BarChart3}
+      />
 
         {/* Analytics Overview Cards */}
         <div className="space-mobile">
@@ -392,8 +363,8 @@ export default function DashboardClient({ session }: DashboardClientProps) {
             )}
           </ResponsiveCard>
         </div>
-      </ResponsiveContainer>
-    </div>
+
+    </>
   )
 }
 

@@ -9,15 +9,14 @@ export { Chip } from './Chip';
 export type { ChipProps } from './Chip';
 
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './Card';
-export type { CardProps } from './Card';
 
 export { ImageThumb } from './ImageThumb';
-export type { ImageThumbProps } from './ImageThumb';
 
 export { Divider } from './Divider';
-export type { DividerProps } from './Divider';
 
 export { Text } from './Text';
+
+export { Input } from './input';
 
 export { Skeleton, SkeletonText } from './Skeleton';
 export type { SkeletonProps } from './Skeleton';

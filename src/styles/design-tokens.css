@@ -1,59 +1,65 @@
 /* ===== SMARTCARD7 - DESIGN TOKENS UNIFICADO ===== */
 /* Sistema de temas light/dark consistente */
 
-/* Base Colors - Tema Claro (Default) */
-:root {
+/* ============================================
+   TEMA CLARO (LIGHT) - PADRÃO CORRETO
+   ============================================ */
+:root,
+:root[data-theme="light"],
+.light {
+  color-scheme: light;
+  
   /* === BRAND COLORS === */
-  --brand-blue: #2563eb;
+  --brand-blue: #3072F9;
   --brand-blue-hover: #1d4ed8;
-  --accent-purple: #7A3BFF;
-  --accent-purple-hover: #6b32e6;
-  --success: #1DB954;
-  --warning: #F59E0B;
-  --error: #EF4444;
+  --accent-purple: #7c3aed;
+  --accent-purple-hover: #6d28d9;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
 
-  /* === BACKGROUND SYSTEM === */
+  /* === BACKGROUND SYSTEM (LIGHT) === */
   --background: #ffffff;
-  --foreground: #111418;
+  --foreground: #0f172a;
   --bg: #ffffff;
-  --bg-soft: #f7f7f9;
-  --bg-muted: #f3f4f6;
+  --bg-soft: #f8fafc;
+  --bg-muted: #f1f5f9;
   --bg-input: #ffffff;
   --bg-input-disabled: #f9fafb;
-  --chip-bg: #f3f4f6;
+  --chip-bg: #f1f5f9;
   --overlay: rgba(0, 0, 0, 0.5);
 
-  /* === TEXT COLORS === */
-  --text-strong: #111418;
-  --text: #1f2937;
-  --text-muted: #4b5563;
-  --text-light: #6b7280;
-  --text-placeholder: #9ca3af;
+  /* === TEXT COLORS (LIGHT) === */
+  --text-strong: #0f172a;
+  --text: #374151;
+  --text-muted: #6b7280;
+  --text-light: #9ca3af;
+  --text-placeholder: #d1d5db;
   --text-inverse: #ffffff;
 
-  /* === BORDER COLORS === */
-  --border: #e2e8f0;
-  --border-light: #f1f5f9;
+  /* === BORDER COLORS (LIGHT) === */
+  --border: #e5e7eb;
+  --border-light: #f3f4f6;
   --border-input: #d1d5db;
   --border-focus: var(--brand-blue);
   --border-error: var(--error);
 
-  /* === COMPONENT COLORS === */
-  --card: #f9fafb;
-  --card-foreground: #111827;
+  /* === COMPONENT COLORS (LIGHT) === */
+  --card: #ffffff;
+  --card-foreground: #0f172a;
   --popover: #ffffff;
-  --popover-foreground: #111827;
+  --popover-foreground: #0f172a;
   --primary: var(--brand-blue);
   --primary-foreground: #ffffff;
-  --secondary: #4f46e5;
-  --secondary-foreground: #f8fafc;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #4f46e5;
-  --accent-foreground: #f8fafc;
+  --secondary: var(--accent-purple);
+  --secondary-foreground: #ffffff;
+  --muted: #f9fafb;
+  --muted-foreground: #6b7280;
+  --accent: var(--accent-purple);
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
-  --destructive-foreground: #f8fafc;
-  --input: #e2e8f0;
+  --destructive-foreground: #ffffff;
+  --input: #ffffff;
   --ring: var(--brand-blue);
 
   /* === TYPOGRAPHY === */
@@ -153,21 +159,23 @@
   --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===== DARK THEME ===== */
+/* ============================================
+   TEMA ESCURO (DARK) - CORRETO
+   ============================================ */
 :root[data-theme="dark"],
 .dark {
   color-scheme: dark;
   
-  /* === BRAND COLORS (Ajustados para dark) === */
-  --brand-blue: #3b82f6;
+  /* === BRAND COLORS (DARK) === */
+  --brand-blue: #3072F9;
   --brand-blue-hover: #60a5fa;
-  --accent-purple: #9c75ff;
-  --accent-purple-hover: #b08dff;
-  --success: #20c997;
-  --warning: #ffd43b;
-  --error: #ff8787;
+  --accent-purple: #a855f7;
+  --accent-purple-hover: #c084fc;
+  --success: #10b981;
+  --warning: #f59e0b;
+  --error: #ef4444;
 
-  /* === BACKGROUND SYSTEM === */
+  /* === BACKGROUND SYSTEM (DARK) === */
   --background: #0f172a;
   --foreground: #f8fafc;
   --bg: #0f172a;
@@ -193,23 +201,23 @@
   --border-focus: var(--brand-blue);
   --border-error: var(--error);
 
-  /* === COMPONENT COLORS === */
+  /* === COMPONENT COLORS (DARK) === */
   --card: #1e293b;
   --card-foreground: #f8fafc;
   --popover: #1e293b;
   --popover-foreground: #f8fafc;
-  --primary: #3072F9;
-  --primary-foreground: #0f172a;
-  --secondary: #6366f1;
-  --secondary-foreground: #f8fafc;
+  --primary: var(--brand-blue);
+  --primary-foreground: #ffffff;
+  --secondary: var(--accent-purple);
+  --secondary-foreground: #ffffff;
   --muted: #334155;
   --muted-foreground: #94a3b8;
-  --accent: #6366f1;
-  --accent-foreground: #f8fafc;
+  --accent: var(--accent-purple);
+  --accent-foreground: #ffffff;
   --destructive: #ef4444;
-  --destructive-foreground: #f8fafc;
-  --input: #334155;
-  --ring: #3072F9;
+  --destructive-foreground: #ffffff;
+  --input: #1e293b;
+  --ring: var(--brand-blue);
 
   /* === SHADOWS (Ajustados para dark) === */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
