@@ -27,7 +27,7 @@ export default function ReviewPage() {
   }
 
   return (
-    <OnboardingContainer
+    <OnboardingContainer<React.ReactNode>
       title="Revisar Informações"
       description="Confira se todas as informações estão corretas antes de finalizar."
     >
@@ -36,7 +36,7 @@ export default function ReviewPage() {
 
       // Remove duplicate title prop since it's already defined above
       description="Confira se todas as informações estão corretas antes de finalizar."
-    >
+      {'>'}
       <div className="space-y-8">
         {/* Business Info Section */}
         <div className="p-6 rounded-lg border">

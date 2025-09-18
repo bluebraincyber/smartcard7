@@ -1,13 +1,13 @@
 'use client';
 
-import { usePathname, useParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Topbar } from '@/components/layout/Topbar';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { MobileSidebar } from '@/components/layout/MobileSidebar';
 import { BottomNavigation } from '@/components/navigation/BottomNavigation';
 import { useMobileLayout } from '@/hooks/use-responsive';
-import { ResponsiveMainLayout } from '@/components/ui/ResponsiveLayout';
+import { ResponsiveMainLayout } from '@/components/ui/responsive-layout';
 
 export function DashboardLayoutWrapper({ 
   children,
@@ -18,9 +18,7 @@ export function DashboardLayoutWrapper({
 }) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const params = useParams();
   const isMobileLayout = useMobileLayout();
-  const storeId = params?.id as string | undefined;
 
   // Loading state
   if (status === 'loading') {
@@ -80,7 +78,7 @@ export function DashboardLayoutWrapper({
       bottomNav={
         shouldShowBottomNav ? (
           <div className="fixed bottom-0 left-0 right-0 z-50">
-            <BottomNavigation storeId={storeId} />
+            <BottomNavigation />
           </div>
         ) : null
       }

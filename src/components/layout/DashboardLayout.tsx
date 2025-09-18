@@ -1,6 +1,6 @@
 'use client';
 
-import { usePathname, useParams } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { useSession } from 'next-auth/react';
 import { Page, Stack } from '@/components/layout';
 import { Topbar } from '@/components/layout/Topbar';
@@ -21,9 +21,7 @@ export function DashboardLayout({
 }: DashboardLayoutProps) {
   const { data: session, status } = useSession();
   const pathname = usePathname();
-  const params = useParams();
   const isMobileLayout = useMobileLayout();
-  const storeId = params?.id as string | undefined;
 
   // Loading state
   if (status === 'loading') {
@@ -105,7 +103,7 @@ export function DashboardLayout({
         {/* Bottom Navigation (Mobile) */}
         {shouldShowBottomNav && (
           <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border">
-            <BottomNavigation storeId={storeId} />
+            <BottomNavigation />
           </div>
         )}
       </div>

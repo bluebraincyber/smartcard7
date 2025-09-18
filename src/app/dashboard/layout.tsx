@@ -4,7 +4,6 @@ import { useSession } from 'next-auth/react'
 import { Topbar } from '@/components/layout/Topbar'
 import { Sidebar } from '@/components/layout/Sidebar'
 import { MobileSidebar } from '@/components/layout/MobileSidebar'
-import { SidebarProvider } from '@/components/providers/sidebar-provider'
 import { usePathname } from 'next/navigation'
 
 export default function DashboardLayout({
@@ -51,19 +50,21 @@ export default function DashboardLayout({
   console.log('Dashboard Layout - Pathname:', pathname)
 
   return (
-    <div className="min-h-screen bg-background relative" suppressHydrationWarning>
+    <div className="min-h-screen bg-background flex flex-col" suppressHydrationWarning>
       <Topbar />
-      <div className="flex pt-2">
+      <div className="flex flex-1 overflow-hidden">
         <Sidebar />
         <MobileSidebar />
         
-        {/* Main content - BottomNavigation é gerenciado pelo layout principal */}
-        <main 
-          className="flex-1 max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8"
-          data-scroll-root
-        >
-          {children}
-        </main>
+        {/* Main content */}
+        <div className="flex-1 overflow-auto pb-16 md:pb-0">
+          <main 
+            className="max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8"
+            data-scroll-root
+          >
+            {children}
+          </main>
+        </div>
       </div>
     </div>
   )
