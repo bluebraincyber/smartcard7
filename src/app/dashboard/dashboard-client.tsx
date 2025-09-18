@@ -2,15 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { Store, Plus, Eye, BarChart3, Users, Activity, ShoppingBag } from 'lucide-react'
+import { Store as StoreIcon, Plus, Eye, BarChart3, Users, Activity, AlertCircle } from 'lucide-react'
 import { Session } from 'next-auth'
 import PageViewsChart from '@/components/analytics/PageViewsChart'
-
-// Import responsive components
-import { ResponsiveCard, ResponsiveGrid } from '@/components/ui/responsive-layout'
-import { ResponsiveButton } from '@/components/ui/responsive-forms'
-import { useMobileLayout } from '@/hooks/useResponsive'
-import { PageHeader } from '@/components/layout/PageHeader'
+import React from 'react'
 
 interface Store {
   id: string
@@ -26,14 +21,7 @@ interface Analytics {
   totalVisits: number
   totalClicks: number
   totalStores: number
-}
-
-interface QuickAction {
-  title: string
-  description: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  color: 'blue' | 'green' | 'purple' | 'orange'
+  totalSales: number
 }
 
 interface DashboardClientProps {
@@ -41,24 +29,31 @@ interface DashboardClientProps {
 }
 
 export default function DashboardClient({ session }: DashboardClientProps) {
-  const isMobileLayout = useMobileLayout()
-  
   const [stores, setStores] = useState<Store[]>([])
   const [analytics, setAnalytics] = useState<Analytics>({
     totalVisits: 0,
     totalClicks: 0,
-    totalStores: 0
+    totalStores: 0,
+    totalSales: 0,
   })
-  const [pageViewsData, setPageViewsData] = useState<{
-    name: string;
-    views: number;
-  }[]>([])
+  const [pageViewsData, setPageViewsData] = useState<{ name: string; views: number }[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<{ message: string; retry?: () => void } | null>(null)
 
   useEffect(() => {
-    fetchStores()
-    fetchAnalytics()
-    fetchPageViews()
+    const fetchAll = async () => {
+      setLoading(true)
+      try {
+        await Promise.all([fetchStores(), fetchAnalytics(), fetchPageViews()])
+        setError(null)
+      } catch (err) {
+        // Errors already handled in each fetch
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchAll()
   }, [])
 
   const fetchStores = async () => {
@@ -68,9 +63,16 @@ export default function DashboardClient({ session }: DashboardClientProps) {
         const data = await response.json()
         const userStores = data.stores || []
         setStores(userStores)
+      } else {
+        throw new Error('Falha ao carregar as lojas')
       }
     } catch (error) {
       console.error('Erro ao buscar lojas:', error)
+      setError({
+        message: 'Não foi possível carregar suas lojas. Por favor, tente novamente.',
+        retry: fetchStores
+      })
+      throw error
     }
   }
 
@@ -80,11 +82,16 @@ export default function DashboardClient({ session }: DashboardClientProps) {
       if (response.ok) {
         const data = await response.json()
         setAnalytics(data)
+      } else {
+        throw new Error('Falha ao carregar as estatísticas')
       }
     } catch (error) {
       console.error('Erro ao buscar analytics:', error)
-    } finally {
-      setLoading(false)
+      setError(prev => ({
+        message: 'Não foi possível carregar as estatísticas. Alguns dados podem estar indisponíveis.',
+        retry: fetchAnalytics
+      }))
+      throw error
     }
   }
 
@@ -93,437 +100,391 @@ export default function DashboardClient({ session }: DashboardClientProps) {
       const response = await fetch('/api/analytics/page-views')
       if (response.ok) {
         const data = await response.json()
-        setPageViewsData(data.pageViews)
+        setPageViewsData(data.pageViews || [])
       }
     } catch (error) {
       console.error('Erro ao buscar visualizações de página:', error)
+      // Não seta erro para manter UX
     }
   }
 
-  // Quick actions for dashboard
-  const quickActions: QuickAction[] = [
+  const quickActions = [
     {
       title: 'Nova Loja',
-      description: 'Crie uma nova loja digital',
-      href: '/dashboard/store/new',
+      description: 'Criar loja para cartões',
       icon: Plus,
-      color: 'green'
+      href: '/dashboard/stores/new',
+      color: 'blue' as const,
     },
     {
-      title: isMobileLayout ? 'Produtos' : 'Gerenciar Produtos',
-      description: 'Categorias e produtos das lojas',
-      href: '/dashboard/products',
-      icon: ShoppingBag,
-      color: 'blue'
-    },
-    {
-      title: 'Analytics',
-      description: 'Visualize métricas e relatórios',
-      href: '/dashboard/analytics',
+      title: 'Relatórios',
+      description: 'Acompanhe métricas',
       icon: BarChart3,
-      color: 'purple'
+      href: '/dashboard/analytics',
+      color: 'orange' as const,
+    },
+    {
+      title: 'Suporte',
+      description: 'Ajuda e suporte',
+      icon: AlertCircle,
+      href: '/support',
+      color: 'purple' as const,
     },
     {
       title: 'Financeiro',
-      description: isMobileLayout ? 'Receitas e despesas' : 'Controle receitas e despesas',
+      description: 'Receitas e despesas',
       href: '/dashboard/finance',
       icon: Activity,
-      color: 'orange'
-    }
+      color: 'green' as const,
+    },
   ]
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-card backdrop-blur-sm rounded-2xl shadow-xl border border-border p-8 text-center">
+          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-destructive/10 mb-6">
+            <AlertCircle className="h-8 w-8 text-destructive" />
+          </div>
+          <h2 className="text-xl font-semibold text-foreground mb-3">Ocorreu um erro</h2>
+          <p className="text-muted-foreground mb-8 leading-relaxed">{error.message}</p>
+          {error.retry && (
+            <button
+              onClick={error.retry}
+              className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+            >
+              Tentar novamente
+            </button>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-64">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-4 border-border border-t-primary mx-auto"></div>
-          <p className="mt-4 text-foreground font-medium">
-            {isMobileLayout ? 'Carregando...' : 'Carregando dashboard...'}
-          </p>
+      <div className="min-h-screen bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="flex flex-col items-center justify-center h-64">
+            <div className="relative">
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-border border-t-primary"></div>
+              <div className="absolute inset-0 rounded-full bg-primary opacity-20 animate-pulse"></div>
+            </div>
+            <span className="mt-4 text-foreground font-medium">Carregando dashboard...</span>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <>
-      <PageHeader
-        title="Dashboard"
-        description={
-          isMobileLayout
-            ? `Olá, ${session.user?.name || 'Usuário'}! Gerencie seus cartões digitais`
-            : `Bem-vindo, ${session.user?.name || session.user?.email}! Gerencie seus cartões digitais e acompanhe o desempenho`
-        }
-        icon={BarChart3}
-      />
+    <div className="min-h-screen bg-background">
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="mb-12">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="inline-flex items-center px-4 py-2 text-sm font-medium text-foreground bg-card hover:bg-accent rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-border">
+                <BarChart3 className="mr-2 h-4 w-4 text-primary" />
+                <span className="font-semibold">Dashboard Principal</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Hero Section */}
+        <div className="text-center mb-12">
+          <div className="relative mb-8">
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-primary shadow-lg mb-6">
+              <BarChart3 className="h-10 w-10 text-primary-foreground" />
+            </div>
+            <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl -z-10 scale-150"></div>
+          </div>
+          <h1 className="text-4xl font-bold text-foreground mb-4">
+            Dashboard
+          </h1>
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            {`Bem-vindo, ${session.user?.name || session.user?.email}!`} <span className="block sm:inline">Gerencie seus cartões digitais e acompanhe o desempenho</span>
+          </p>
+        </div>
 
         {/* Analytics Overview Cards */}
-        <div className="space-mobile">
-          <ResponsiveGrid
-            cols={{ default: 1, sm: 2, lg: 3 }}
-            gap="md"
-          >
-            {/* Total Stores Card */}
-            <ResponsiveCard className="card-hover" padding="md">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`rounded-xl bg-primary flex items-center justify-center ${
-                  isMobileLayout ? 'w-10 h-10' : 'w-12 h-12'
-                }`}>
-                  <Store className={`text-primary-foreground ${
-                    isMobileLayout ? 'w-5 h-5' : 'w-6 h-6'
-                  }`} />
+        <div className="bg-card backdrop-blur-sm rounded-3xl shadow-xl border border-border p-8 mb-12 transition-colors duration-200">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-semibold text-foreground mb-2">Visão Geral</h2>
+            <p className="text-muted-foreground">Métricas principais da sua conta</p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {/* Card de Lojas */}
+            <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-2 rounded-xl bg-primary/10">
+                  <StoreIcon className="w-5 h-5 text-primary" />
                 </div>
-                <span className="text-xs font-medium text-primary bg-primary/10 px-2 py-1 rounded-full">
+                <span className="text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                   LOJAS
                 </span>
               </div>
-              <div className={`font-bold text-foreground mb-1 ${
-                isMobileLayout ? 'text-xl' : 'text-2xl'
-              }`}>
-                {analytics.totalStores}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {isMobileLayout ? 'Lojas' : 'Total de lojas'}
-              </p>
-            </ResponsiveCard>
-
-            {/* Total Visits Card */}
-            <ResponsiveCard className="card-hover" padding="md">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`rounded-xl bg-secondary flex items-center justify-center ${
-                  isMobileLayout ? 'w-10 h-10' : 'w-12 h-12'
-                }`}>
-                  <Eye className={`text-secondary-foreground ${
-                    isMobileLayout ? 'w-5 h-5' : 'w-6 h-6'
-                  }`} />
+              <div className="mt-auto">
+                <div className="text-xl font-bold text-foreground">
+                  {analytics.totalStores}
                 </div>
-                <span className="text-xs font-medium text-secondary bg-secondary/10 px-2 py-1 rounded-full">
+                <p className="text-xs text-muted-foreground">Total de lojas</p>
+              </div>
+            </div>
+
+            {/* Card de Visitas */}
+            <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-2 rounded-xl bg-purple-500/10">
+                  <Eye className="w-5 h-5 text-purple-500" />
+                </div>
+                <span className="text-[10px] font-medium text-purple-500 bg-purple-500/10 px-2 py-0.5 rounded-full">
                   VISITAS
                 </span>
               </div>
-              <div className={`font-bold text-foreground mb-1 ${
-                isMobileLayout ? 'text-xl' : 'text-2xl'
-              }`}>
-                {analytics.totalVisits.toLocaleString()}
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {isMobileLayout ? 'Visitas' : 'Visitas totais'}
-              </p>
-            </ResponsiveCard>
-
-            {/* WhatsApp Clicks Card */}
-            <ResponsiveCard className="card-hover" padding="md">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`rounded-xl bg-accent flex items-center justify-center ${
-                  isMobileLayout ? 'w-10 h-10' : 'w-12 h-12'
-                }`}>
-                  <Users className={`text-accent-foreground ${
-                    isMobileLayout ? 'w-5 h-5' : 'w-6 h-6'
-                  }`} />
+              <div className="mt-auto">
+                <div className="text-xl font-bold text-foreground">
+                  {analytics.totalVisits.toLocaleString()}
                 </div>
-                <span className="text-xs font-medium text-accent bg-accent/10 px-2 py-1 rounded-full">
+                <p className="text-xs text-muted-foreground">Visitas totais</p>
+              </div>
+            </div>
+
+            {/* Card de Cliques */}
+            <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-2 rounded-xl bg-green-500/10">
+                  <Users className="w-5 h-5 text-green-500" />
+                </div>
+                <span className="text-[10px] font-medium text-green-500 bg-green-500/10 px-2 py-0.5 rounded-full">
                   CLICKS
                 </span>
               </div>
-              <div className={`font-bold text-foreground mb-1 ${
-                isMobileLayout ? 'text-xl' : 'text-2xl'
-              }`}>
-                {analytics.totalClicks.toLocaleString()}
+              <div className="mt-auto">
+                <div className="text-xl font-bold text-foreground">
+                  {analytics.totalClicks.toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground">Total de cliques</p>
               </div>
-              <p className="text-sm text-muted-foreground">
-                {isMobileLayout ? 'WhatsApp' : 'Cliques WhatsApp'}
-              </p>
-            </ResponsiveCard>
-          </ResponsiveGrid>
+            </div>
+
+            {/* Card de Vendas */}
+            <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-4 hover:shadow-xl transition-all duration-300 h-full flex flex-col">
+              <div className="flex items-center justify-between mb-3">
+                <div className="p-2 rounded-xl bg-blue-500/10">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-blue-500">
+                    <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path>
+                    <path d="M3 6h18"></path>
+                    <path d="M16 10a4 4 0 0 1-8 0"></path>
+                  </svg>
+                </div>
+                <span className="text-[10px] font-medium text-blue-500 bg-blue-500/10 px-2 py-0.5 rounded-full">
+                  VENDAS
+                </span>
+              </div>
+              <div className="mt-auto">
+                <div className="text-xl font-bold text-foreground">
+                  {(analytics.totalSales || 0).toLocaleString()}
+                </div>
+                <p className="text-xs text-muted-foreground">Total de vendas</p>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Quick Actions */}
-        <div className="space-mobile">
-          <ResponsiveCard padding="lg">
-            <div className="mb-6 text-center sm:text-left">
-              <h2 className={`font-semibold text-foreground mb-2 ${
-                isMobileLayout ? 'text-xl' : 'text-2xl'
-              }`}>
-                Ações Rápidas
-              </h2>
-              <p className="text-muted-foreground">
-                {isMobileLayout 
-                  ? 'Acesse as principais funcionalidades'
-                  : 'Acesse rapidamente as principais funcionalidades'
-                }
-              </p>
-            </div>
-            
-            <ResponsiveGrid
-              cols={{ default: 1, xs: 2, md: 4 }}
-              gap="md"
-            >
-              {quickActions.map((action, index) => (
-                <QuickActionCard
-                  key={index}
+        <div className="bg-card backdrop-blur-sm rounded-3xl shadow-xl border border-border p-8 mb-12 transition-colors duration-200">
+          <div className="mb-8 text-center">
+            <h2 className="text-2xl font-semibold text-foreground mb-2">Ações Rápidas</h2>
+            <p className="text-muted-foreground">Acesse rapidamente as principais funcionalidades</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+            {quickActions.map((action, index) => (
+              <QuickActionCard
+                  key={`quick-action-${index}`}
                   href={action.href}
                   icon={action.icon}
                   title={action.title}
                   description={action.description}
                   color={action.color}
-                  isMobile={isMobileLayout}
-                />
-              ))}
-            </ResponsiveGrid>
-          </ResponsiveCard>
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Page Views Chart - Hidden on small mobile */}
+        {/* Page Views Chart */}
         {pageViewsData.length > 0 && (
-          <div className="space-mobile hidden sm:block">
-            <ResponsiveCard padding="lg">
-              <div className="mb-6">
-                <h2 className={`font-semibold text-foreground mb-2 ${
-                  isMobileLayout ? 'text-lg' : 'text-xl'
-                }`}>
-                  Visualizações por Página
-                </h2>
-                <p className="text-muted-foreground">
-                  Acompanhe o desempenho das suas páginas
-                </p>
-              </div>
-              <div className="w-full overflow-x-auto">
-                <PageViewsChart data={pageViewsData} />
-              </div>
-            </ResponsiveCard>
+          <div className="bg-card backdrop-blur-sm rounded-3xl shadow-xl border border-border p-8 mb-12 transition-colors duration-200">
+            <div className="mb-8 text-center">
+              <h2 className="text-2xl font-semibold text-foreground mb-2">Visualizações por Página</h2>
+              <p className="text-muted-foreground">Acompanhe o desempenho das suas páginas</p>
+            </div>
+            <div className="w-full overflow-x-auto">
+              <PageViewsChart data={pageViewsData} />
+            </div>
           </div>
         )}
 
         {/* Stores Section */}
-        <div className="space-mobile">
-          <ResponsiveCard padding="lg">
-            <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h2 className={`font-semibold text-foreground mb-2 ${
-                  isMobileLayout ? 'text-xl' : 'text-2xl'
-                }`}>
-                  {isMobileLayout ? 'Lojas' : 'Suas Lojas'}
-                </h2>
-                <p className="text-muted-foreground">
-                  {isMobileLayout 
-                    ? 'Gerencie suas lojas digitais'
-                    : 'Gerencie todas as suas lojas digitais'
-                  }
-                </p>
+        <div className="bg-card backdrop-blur-sm rounded-3xl shadow-xl border border-border p-8 transition-colors duration-200">
+          <div className="flex flex-col gap-4 mb-8 sm:flex-row sm:items-center sm:justify-between">
+            <div className="text-center sm:text-left">
+              <h2 className="text-2xl font-semibold text-foreground mb-2">Suas Lojas</h2>
+              <p className="text-muted-foreground">Gerencie todas as suas lojas digitais</p>
+            </div>
+
+            <Link
+              href="/dashboard/store/new"
+              className="inline-flex items-center justify-center rounded-xl bg-primary px-6 py-3 text-sm font-medium text-primary-foreground shadow-md transition-all hover:shadow-lg hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Loja
+            </Link>
+          </div>
+
+          {stores.length === 0 ? (
+            <div className="text-center py-16">
+              <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-2xl bg-muted mb-6">
+                <StoreIcon className="h-8 w-8 text-muted-foreground" />
               </div>
-              
-              <Link href="/dashboard/store/new">
-                <ResponsiveButton
-                  size={isMobileLayout ? 'md' : 'lg'}
-                  leftIcon={<Plus className="h-4 w-4" />}
-                  fullWidth={isMobileLayout}
-                >
-                  Nova Loja
-                </ResponsiveButton>
+              <h3 className="text-xl font-semibold text-foreground mb-3">Nenhuma loja criada</h3>
+              <p className="text-muted-foreground mb-8 max-w-md mx-auto leading-relaxed">
+                Comece criando sua primeira loja digital e transforme seu negócio
+              </p>
+              <Link
+                href="/dashboard/store/new"
+                className="inline-flex items-center justify-center rounded-xl bg-primary px-8 py-4 text-lg font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <Plus className="h-5 w-5 mr-3" />
+                Criar Primeira Loja
               </Link>
             </div>
-
-            {stores.length === 0 ? (
-              <div className="text-center py-12 sm:py-16">
-                <div className={`mx-auto flex items-center justify-center rounded-2xl bg-muted mb-6 ${
-                  isMobileLayout ? 'h-12 w-12' : 'h-16 w-16'
-                }`}>
-                  <Store className={`text-muted-foreground ${
-                    isMobileLayout ? 'h-6 w-6' : 'h-8 w-8'
-                  }`} />
-                </div>
-                <h3 className={`font-semibold text-foreground mb-3 ${
-                  isMobileLayout ? 'text-lg' : 'text-xl'
-                }`}>
-                  Nenhuma loja criada
-                </h3>
-                <p className="text-muted-foreground mb-6 max-w-md mx-auto leading-relaxed px-4">
-                  {isMobileLayout
-                    ? 'Crie sua primeira loja digital'
-                    : 'Comece criando sua primeira loja digital e transforme seu negócio'
-                  }
-                </p>
-                <Link href="/dashboard/store/new">
-                  <ResponsiveButton
-                    size={isMobileLayout ? 'lg' : 'xl'}
-                    leftIcon={<Plus className="h-5 w-5" />}
-                  >
-                    {isMobileLayout ? 'Criar Loja' : 'Criar Primeira Loja'}
-                  </ResponsiveButton>
-                </Link>
-              </div>
-            ) : (
-              <ResponsiveGrid
-                cols={{ default: 1, sm: 2, lg: 3 }}
-                gap="md"
-              >
-                {stores.map((store) => (
-                  <StoreCard
-                    key={store.id}
-                    store={store}
-                    isMobile={isMobileLayout}
-                  />
-                ))}
-              </ResponsiveGrid>
-            )}
-          </ResponsiveCard>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {stores.map((store) => (
+                <StoreCard key={store.id} store={store} />
+              ))}
+            </div>
+          )}
         </div>
-
-    </>
-  )
-}
-
-// Store Card Component - Updated for responsiveness
-function StoreCard({ store, isMobile }: { store: Store; isMobile: boolean }) {
-  return (
-    <div className="group relative">
-      <ResponsiveCard hover className="h-full">
-        <Link
-          href={`/dashboard/store/${store.id}`}
-          className="block p-4 sm:p-6"
-        >
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4 sm:mb-6">
-            <div className="flex items-center space-x-3 sm:space-x-4 min-w-0 flex-1">
-              <div className={`rounded-2xl bg-primary group-hover:bg-primary/90 flex items-center justify-center transition-all duration-300 shadow-md ${
-                isMobile ? 'w-10 h-10' : 'w-12 h-12 sm:w-14 sm:h-14'
-              }`}>
-                <Store className={`text-primary-foreground ${
-                  isMobile ? 'w-5 h-5' : 'w-5 h-5 sm:w-6 sm:h-6'
-                }`} />
-              </div>
-              <div className="min-w-0 flex-1">
-                <h3 className={`font-semibold text-foreground group-hover:text-primary truncate transition-colors mb-1 ${
-                  isMobile ? 'text-base' : 'text-lg'
-                }`}>
-                  {store.name}
-                </h3>
-                <p className="text-xs sm:text-sm text-muted-foreground group-hover:text-foreground font-medium transition-colors">
-                  /{store.slug}
-                </p>
-              </div>
-            </div>
-            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 ${
-              store.isActive
-                ? 'bg-green-100 text-green-700 border border-green-200 dark:bg-green-900/20 dark:text-green-400 dark:border-green-800'
-                : 'bg-amber-100 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800'
-            }`}>
-              {store.isActive ? 'Ativa' : 'Inativa'}
-            </span>
-          </div>
-
-          {/* Stats */}
-          <div className="bg-muted/50 rounded-xl p-3 sm:p-4 text-center group-hover:bg-muted/70 transition-all duration-300 mb-4 sm:mb-6">
-            <div className={`font-bold text-foreground group-hover:text-primary transition-colors mb-1 ${
-              isMobile ? 'text-xl' : 'text-2xl'
-            }`}>
-              {store._count.categories}
-            </div>
-            <div className="text-xs font-medium text-muted-foreground group-hover:text-foreground uppercase tracking-wider transition-colors">
-              Categorias
-            </div>
-          </div>
-
-          {/* Footer */}
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">
-              {isMobile ? 'Ver' : 'Ver detalhes'}
-            </span>
-            <span className="inline-flex items-center text-primary group-hover:text-primary/80 text-sm font-medium transition-all duration-200">
-              Gerenciar
-              <svg className="w-4 h-4 ml-1 -mr-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </span>
-          </div>
-        </Link>
-      </ResponsiveCard>
+      </div>
     </div>
   )
 }
 
-// Quick Action Card Component - Updated for responsiveness
-function QuickActionCard({ 
-  href, 
-  icon: Icon, 
-  title, 
-  description, 
+function StoreCard({ store }: { store: Store }) {
+  return (
+    <div className="group relative">
+      <Link
+        href={`/dashboard/store/${store.id}`}
+        className="block h-full bg-muted/50 backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-border hover:shadow-2xl transition-all duration-300 group-hover:border-primary/50"
+      >
+        <div className="flex items-start justify-between mb-6">
+          <div className="flex items-center space-x-4 min-w-0 flex-1">
+            <div className="w-12 h-12 rounded-2xl bg-primary group-hover:bg-primary/90 flex items-center justify-center transition-all duration-300 shadow-md group-hover:shadow-lg">
+              <StoreIcon className="w-6 h-6 text-primary-foreground" />
+            </div>
+            <div className="min-w-0 flex-1">
+              <h3 className="text-lg font-semibold text-foreground group-hover:text-primary truncate transition-colors mb-1">{store.name}</h3>
+              <p className="text-sm text-muted-foreground group-hover:text-foreground font-medium transition-colors">/{store.slug}</p>
+            </div>
+          </div>
+          <span
+            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold tracking-wide transition-all duration-200 ${
+              store.isActive
+                ? 'bg-success/10 text-success border border-success/20'
+                : 'bg-warning/10 text-warning border border-warning/20'
+            }`}
+          >
+            {store.isActive ? 'Ativa' : 'Inativa'}
+          </span>
+        </div>
+
+        <div className="bg-card/50 rounded-xl p-4 text-center group-hover:bg-card/70 transition-all duration-300 mb-6">
+          <div className="text-2xl font-bold text-foreground group-hover:text-primary transition-colors mb-1">{store._count.categories}</div>
+          <div className="text-xs font-medium text-muted-foreground group-hover:text-foreground uppercase tracking-wider transition-colors">Categorias</div>
+        </div>
+
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground group-hover:text-foreground transition-colors">Ver detalhes</span>
+          <span className="inline-flex items-center text-primary group-hover:text-primary/80 text-sm font-medium transition-all duration-200">
+            Gerenciar
+            <svg className="w-4 h-4 ml-1 -mr-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </span>
+        </div>
+      </Link>
+    </div>
+  )
+}
+
+function QuickActionCard({
+  href,
+  icon: Icon,
+  title,
+  description,
   color,
-  isMobile
 }: {
   href: string
-  icon: React.ComponentType<{ className?: string }>
+  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>
   title: string
   description: string
   color: 'blue' | 'green' | 'purple' | 'orange'
-  isMobile: boolean
 }) {
   const colorClasses = {
     blue: {
-      bg: 'bg-primary group-hover:bg-primary/90',
-      text: 'text-primary group-hover:text-primary/80',
-      border: 'group-hover:border-primary/50',
-      bgHover: 'bg-primary/5'
+      bg: 'bg-primary',
+      text: 'text-primary',
+      border: 'border-primary/20 group-hover:border-primary/40',
+      bgHover: 'bg-primary/10'
     },
     green: {
-      bg: 'bg-secondary group-hover:bg-secondary/90',
-      text: 'text-secondary group-hover:text-secondary/80',
-      border: 'group-hover:border-secondary/50',
-      bgHover: 'bg-secondary/5'
+      bg: 'bg-green-500',
+      text: 'text-green-600',
+      border: 'border-green-500/20 group-hover:border-green-500/40',
+      bgHover: 'bg-green-500/10'
     },
     purple: {
-      bg: 'bg-accent group-hover:bg-accent/90',
-      text: 'text-accent group-hover:text-accent/80',
-      border: 'group-hover:border-accent/50',
-      bgHover: 'bg-accent/5'
+      bg: 'bg-purple-500',
+      text: 'text-purple-600',
+      border: 'border-purple-500/20 group-hover:border-purple-500/40',
+      bgHover: 'bg-purple-500/10'
     },
     orange: {
-      bg: 'bg-destructive group-hover:bg-destructive/90',
-      text: 'text-destructive group-hover:text-destructive/80',
-      border: 'group-hover:border-destructive/50',
-      bgHover: 'bg-destructive/5'
+      bg: 'bg-orange-500',
+      text: 'text-orange-600',
+      border: 'border-orange-500/20 group-hover:border-orange-500/40',
+      bgHover: 'bg-orange-500/10'
     }
   }
 
   const classes = colorClasses[color]
 
   return (
-    <div className="group relative">
-      <ResponsiveCard hover className="h-full">
-        <Link
-          href={href}
-          className="p-4 sm:p-6 text-center h-full flex flex-col"
-        >
-          <div className={`mx-auto flex items-center justify-center rounded-2xl ${classes.bg} transition-all duration-300 mb-4 shadow-md group-hover:shadow-lg ${
-            isMobile ? 'h-12 w-12' : 'h-14 w-14 sm:h-16 sm:w-16'
-          }`}>
-            <Icon className={`text-white ${
-              isMobile ? 'h-6 w-6' : 'h-6 w-6 sm:h-7 sm:w-7'
-            }`} />
-          </div>
-          
-          <h3 className={`font-semibold text-foreground mb-2 transition-colors flex-shrink-0 ${
-            isMobile ? 'text-sm' : 'text-base sm:text-lg'
-          }`}>
-            {title}
-          </h3>
-          
-          <p className={`text-muted-foreground leading-relaxed mb-4 flex-1 ${
-            isMobile ? 'text-xs' : 'text-sm'
-          }`}>
-            {description}
-          </p>
-          
-          <div className={`inline-flex items-center ${classes.text} font-medium transition-all duration-200 ${
-            isMobile ? 'text-xs' : 'text-sm'
-          }`}>
-            Acessar
-            <svg className="w-4 h-4 ml-1 sm:ml-2 -mr-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
-        </Link>
-      </ResponsiveCard>
-    </div>
+    <Link
+      href={href}
+      className={`group relative flex flex-col h-full p-4 rounded-2xl border border-border bg-card hover:shadow-lg transition-all duration-200 overflow-hidden ${classes.border} min-h-[140px]`}
+    >
+      <div className="flex flex-col h-full">
+        {/* Ícone */}
+        <div className={`p-2 rounded-lg ${classes.bgHover} w-10 h-10 flex items-center justify-center mb-3`}>
+          <Icon className={`w-4 h-4 ${classes.text}`} />
+        </div>
+        
+        {/* Título */}
+        <h3 className={`text-sm font-semibold ${classes.text} mb-1`}>
+          {title}
+        </h3>
+        
+        {/* Descrição */}
+        <p className="text-xs text-muted-foreground leading-tight">
+          {description}
+        </p>
+      </div>
+    </Link>
   )
 }

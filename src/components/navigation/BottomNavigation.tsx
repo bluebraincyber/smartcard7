@@ -24,31 +24,31 @@ const NAV_ITEMS: BottomNavItem[] = [
     href: '/dashboard',
     icon: Home,
     label: 'Início',
-    activePattern: /^\/dashboard(\/|$)/
+    activePattern: /^\/dashboard(\/)?$/
   },
   {
     href: '/dashboard/store',
     icon: Store,
     label: 'Minhas Lojas',
-    activePattern: /\/dashboard\/store(\/|$)/
+    activePattern: /^\/dashboard\/store(\/)?$/
   },
   {
     href: '/dashboard/orders',
     icon: ShoppingBag,
     label: 'Pedidos',
-    activePattern: /\/dashboard\/orders(\/|$)/
+    activePattern: /^\/dashboard\/orders(\/)?$/
   },
   {
     href: '/dashboard/products',
     icon: Boxes,
     label: 'Produtos',
-    activePattern: /\/dashboard\/products(\/|$)/
+    activePattern: /^\/dashboard\/products(\/)?$/
   },
   {
     href: '/dashboard/settings',
     icon: Settings,
     label: 'Configurações',
-    activePattern: /\/dashboard\/settings(\/|$)/
+    activePattern: /^\/dashboard\/settings(\/)?$/
   }
 ]
 

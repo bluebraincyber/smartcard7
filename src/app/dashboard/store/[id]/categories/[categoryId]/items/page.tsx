@@ -118,13 +118,16 @@ const ImageUploadField = ({
       <div className="relative group">
         {/* Preview da imagem */}
         <div className="overflow-hidden relative rounded-xl border aspect-video bg-muted dark:bg-gray-800 border-border dark:border-gray-700">
-          <Image
+          <img
             src={value}
             alt="Preview"
-            fill
-            className="object-cover"
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover'
+            }}
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-            priority
           />
           
           {/* Overlay com botões ao hover */}

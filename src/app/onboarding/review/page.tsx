@@ -3,7 +3,6 @@
 import { useRouter } from 'next/navigation'
 import { useOnboarding } from '@/contexts/onboarding-context'
 import { Button } from '@/components/ui/button'
-import { OnboardingContainer } from '@/components/onboarding/OnboardingContainer'
 import { Loader2 } from 'lucide-react'
 import { useOnboardingToast } from '@/hooks/use-onboarding-toast'
 
@@ -27,16 +26,11 @@ export default function ReviewPage() {
   }
 
   return (
-    <OnboardingContainer<React.ReactNode>
-      title="Revisar Informações"
-      description="Confira se todas as informações estão corretas antes de finalizar."
-    >
-      // Remove duplicate title prop since it's already defined in the opening tag
-      description="Confira se todas as informações estão corretas antes de finalizar."
-
-      // Remove duplicate title prop since it's already defined above
-      description="Confira se todas as informações estão corretas antes de finalizar."
-      {'>'}
+    <div className="w-full max-w-4xl mx-auto">
+      <div className="mb-8 text-center">
+        <h1 className="text-3xl font-bold tracking-tight">Revisar Informações</h1>
+        <p className="text-muted-foreground mt-2">Confira se todas as informações estão corretas antes de finalizar.</p>
+      </div>
       <div className="space-y-8">
         {/* Business Info Section */}
         <div className="p-6 rounded-lg border">
@@ -136,7 +130,7 @@ export default function ReviewPage() {
           
           {Array.isArray(formData.products?.products) && formData.products.products.length > 0 ? (
             <div className="space-y-4">
-              {formData.products.products.map((product: any, index: number) => (
+              {formData.products.products.map((product: { name: string; price: number; category?: string; description?: string }, index: number) => (
                 <div key={index} className="pb-4 border-b last:border-0 last:pb-0">
                   <div className="flex justify-between">
                     <h4 className="font-medium">{product.name}</h4>
@@ -189,6 +183,6 @@ export default function ReviewPage() {
           </Button>
         </div>
       </div>
-    </OnboardingContainer>
+    </div>
   );
 }
