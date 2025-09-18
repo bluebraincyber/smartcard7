@@ -9,7 +9,7 @@ import { signOut } from "next-auth/react";
 
 const NAV_ITEMS = () => [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
-  { href: "/dashboard/store", icon: Store, label: "Minha Loja" },
+  { href: "/dashboard/products", icon: Store, label: "Minha Loja" },
   { href: "/dashboard/products", icon: Boxes, label: "Categorias e Produtos" },
   { href: "/dashboard/finance", icon: Banknote, label: "Financeiro" },
   { href: "/dashboard/analytics", icon: BarChart3, label: "Analytics" },

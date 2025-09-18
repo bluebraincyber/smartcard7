@@ -2,15 +2,16 @@
 
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { 
   Home, 
   Store, 
-  Package, 
   BarChart3, 
   Settings,
   ShoppingBag,
   Users,
-  MessageSquare
+  Banknote,
+  Boxes
 } from 'lucide-react'
 
 interface BottomNavItem {
@@ -26,11 +27,20 @@ interface BottomNavigationProps {
 
 export function BottomNavigation({ storeId }: BottomNavigationProps) {
   const pathname = usePathname()
+  const [isMounted, setIsMounted] = useState(false)
+  
+  // Debug
+  console.log('BottomNavigation - Pathname:', pathname, 'StoreId:', storeId, 'Mounted:', isMounted)
+  
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
   
   // Define navigation items based on context
   const getNavItems = (): BottomNavItem[] => {
     if (storeId) {
-      // Store-specific navigation
+      // Store-specific navigation - 5 itens
       return [
         {
           href: `/dashboard/store/${storeId}`,
@@ -40,7 +50,7 @@ export function BottomNavigation({ storeId }: BottomNavigationProps) {
         },
         {
           href: `/dashboard/store/${storeId}/products`,
-          icon: Package,
+          icon: Boxes,
           label: 'Produtos',
           activePattern: new RegExp(`/dashboard/store/${storeId}/products`)
         },
@@ -63,32 +73,66 @@ export function BottomNavigation({ storeId }: BottomNavigationProps) {
           activePattern: new RegExp(`/dashboard/store/${storeId}/settings`)
         }
       ]
-    } else {
-      // General dashboard navigation
+    } else if (pathname.startsWith('/dashboard')) {
+      // Dashboard navigation - 5 itens
       return [
         {
           href: '/dashboard',
-          icon: Home,
+          icon: BarChart3,
           label: 'Dashboard',
           activePattern: new RegExp('^/dashboard$')
         },
         {
-          href: '/dashboard/stores',
+          href: '/dashboard/store',
           icon: Store,
-          label: 'Lojas',
-          activePattern: new RegExp('/dashboard/stores')
+          label: 'Minha Loja',
+          activePattern: new RegExp('/dashboard/store')
+        },
+        {
+          href: '/dashboard/products',
+          icon: Boxes,
+          label: 'Produtos',
+          activePattern: new RegExp('/dashboard/products')
+        },
+        {
+          href: '/dashboard/finance',
+          icon: Banknote,
+          label: 'Financeiro',
+          activePattern: new RegExp('/dashboard/finance')
         },
         {
           href: '/dashboard/analytics',
           icon: BarChart3,
           label: 'Analytics',
           activePattern: new RegExp('/dashboard/analytics')
+        }
+      ]
+    } else {
+      // Universal app navigation - para outras áreas do app além do dashboard
+      return [
+        {
+          href: '/dashboard',
+          icon: Home,
+          label: 'Início',
+          activePattern: new RegExp('^/dashboard$')
         },
         {
-          href: '/dashboard/messages',
-          icon: MessageSquare,
-          label: 'Mensagens',
-          activePattern: new RegExp('/dashboard/messages')
+          href: '/dashboard/store',
+          icon: Store,
+          label: 'Lojas',
+          activePattern: new RegExp('/dashboard/store')
+        },
+        {
+          href: '/dashboard/products',
+          icon: Boxes,
+          label: 'Produtos',
+          activePattern: new RegExp('/dashboard/products')
+        },
+        {
+          href: '/dashboard/analytics',
+          icon: BarChart3,
+          label: 'Analytics',
+          activePattern: new RegExp('/dashboard/analytics')
         },
         {
           href: '/dashboard/settings',
@@ -109,10 +153,15 @@ export function BottomNavigation({ storeId }: BottomNavigationProps) {
     return pathname === item.href
   }
 
+  // Don't render until mounted to prevent hydration mismatch
+  if (!isMounted) {
+    return <div className="h-16 md:h-0" />
+  }
+
   return (
     <>
       {/* Bottom Navigation - Mobile Only */}
-      <nav className="nav-mobile">
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border flex items-center justify-around py-2 px-1 shadow-lg md:hidden">
         {navItems.map((item) => {
           const Icon = item.icon
           const active = isActive(item)
@@ -122,8 +171,8 @@ export function BottomNavigation({ storeId }: BottomNavigationProps) {
               key={item.href}
               href={item.href}
               className={`
-                touch-target flex flex-col items-center justify-center gap-1
-                text-xs font-medium transition-colors duration-200
+                flex flex-col items-center justify-center gap-1 p-2
+                text-xs font-medium transition-colors duration-200 min-w-0 flex-1
                 ${active 
                   ? 'text-primary' 
                   : 'text-muted-foreground hover:text-foreground'
@@ -131,14 +180,14 @@ export function BottomNavigation({ storeId }: BottomNavigationProps) {
               `}
             >
               <Icon className={`h-5 w-5 ${active ? 'text-primary' : ''}`} />
-              <span className="leading-none">{item.label}</span>
+              <span className="leading-none text-center truncate">{item.label}</span>
             </Link>
           )
         })}
       </nav>
 
       {/* Spacer para não sobrepor conteúdo */}
-      <div className="h-20 md:h-0" />
+      <div className="h-16 md:h-0" />
     </>
   )
 }
@@ -148,22 +197,31 @@ export function useBottomNavigation() {
   const pathname = usePathname()
   
   const shouldShowBottomNav = () => {
+    // Debug
+    console.log('useBottomNavigation - Checking pathname:', pathname)
+    
     // Não mostrar em páginas de autenticação
     if (pathname.startsWith('/auth') || pathname.startsWith('/login')) {
+      console.log('Hiding because auth page')
       return false
     }
     
     // Não mostrar em páginas públicas da loja
     if (pathname.startsWith('/store/') && !pathname.startsWith('/dashboard/store/')) {
+      console.log('Hiding because public store page')
       return false
     }
     
     // Não mostrar em páginas de onboarding
     if (pathname.includes('/onboarding')) {
+      console.log('Hiding because onboarding')
       return false
     }
     
-    return pathname.startsWith('/dashboard')
+    // Agora mostra em toda a app, não apenas no dashboard
+    const show = !pathname.startsWith('/auth') && !pathname.includes('/onboarding') && pathname !== '/'
+    console.log('Should show bottom nav:', show)
+    return show
   }
   
   return { shouldShowBottomNav: shouldShowBottomNav() }

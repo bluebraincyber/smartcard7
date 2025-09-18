@@ -9,15 +9,33 @@ module.exports = {
   theme: {
     // === MOBILE-FIRST BREAKPOINTS ===
     screens: {
-      'xs': '375px',   // Mobile pequeno (iPhone SE)
+      'xs': '360px',   // Mobile pequeno (Android básico)
       'sm': '640px',   // Mobile grande / Tablet pequeno
-      'md': '768px',   // Tablet
+      'md': '768px',   // Tablet/landscape phones
       'lg': '1024px',  // Desktop pequeno
       'xl': '1280px',  // Desktop médio
       '2xl': '1536px', // Desktop grande
     },
     
     extend: {
+      // Tokens fluidos para tipografia e espaçamentos
+      fontSize: {
+        'fluid-xs': 'clamp(0.75rem, 0.7rem + 0.25vw, 0.875rem)',
+        'fluid-sm': 'clamp(0.85rem, 0.8rem + 0.25vw, 1rem)',
+        'fluid-base': 'clamp(0.95rem, 0.9rem + 0.25vw, 1.125rem)',
+        'fluid-lg': 'clamp(1.1rem, 1rem + 0.5vw, 1.25rem)',
+        'fluid-xl': 'clamp(1.25rem, 1.1rem + 0.75vw, 1.5rem)',
+        'fluid-2xl': 'clamp(1.5rem, 1.2rem + 1.5vw, 2rem)',
+        'fluid-3xl': 'clamp(1.8rem, 1.3rem + 2.5vw, 2.5rem)',
+      },
+      spacing: {
+        'fluid-1': 'clamp(0.25rem, 0.2rem + 0.25vw, 0.5rem)',
+        'fluid-2': 'clamp(0.5rem, 0.4rem + 0.5vw, 0.75rem)',
+        'fluid-3': 'clamp(0.75rem, 0.6rem + 0.75vw, 1rem)',
+        'fluid-4': 'clamp(1rem, 0.8rem + 1vw, 1.5rem)',
+        'fluid-5': 'clamp(1.5rem, 1rem + 2.5vw, 2rem)',
+        'fluid-6': 'clamp(2rem, 1.5rem + 2.5vw, 3rem)',
+      },
       colors: {
         brand: {
           blue: "#3072F9",

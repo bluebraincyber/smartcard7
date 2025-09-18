@@ -33,6 +33,7 @@
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.3",
     "@radix-ui/react-switch": "^1.2.6",
+    "@radix-ui/react-toast": "^1.2.15",
     "@types/pg": "^8.10.9",
     "@types/qrcode": "^1.5.5",
     "@visx/responsive": "^3.12.0",

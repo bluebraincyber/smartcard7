@@ -10,7 +10,6 @@ import PageViewsChart from '@/components/analytics/PageViewsChart'
 // Import responsive components
 import { ResponsiveContainer, ResponsivePageHeader, ResponsiveCard, ResponsiveGrid } from '@/components/ui/ResponsiveLayout'
 import { ResponsiveButton } from '@/components/ui/ResponsiveForms'
-import { BottomNavigation } from '@/components/navigation/BottomNavigation'
 import { useResponsive, useMobileLayout } from '@/hooks/useResponsive'
 
 interface Store {
@@ -393,9 +392,6 @@ export default function DashboardClient({ session }: DashboardClientProps) {
             )}
           </ResponsiveCard>
         </div>
-
-        {/* Bottom Navigation */}
-        <BottomNavigation />
       </ResponsiveContainer>
     </div>
   )

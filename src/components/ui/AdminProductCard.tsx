@@ -62,27 +62,28 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
       <div
         ref={ref}
         className={cn(
-          'group relative bg-card rounded-2xl border border-border overflow-hidden transition-all duration-200 shadow-lg hover:shadow-xl hover:-translate-y-0.5',
-          'hover:shadow-foreground/5 dark:hover:shadow-foreground/10',
+          'group relative bg-card rounded-2xl border border-border overflow-hidden transition-all duration-200',
+          'shadow-sm hover:shadow-lg hover:-translate-y-0.5',
+          'dark:bg-gray-900 dark:border-gray-800',
           !isActive && 'opacity-60',
           className
         )}
         {...props}
       >
         {/* HEADER DE MÍDIA — imagem GRANDE */}
-        <div className="relative w-full bg-muted/30 rounded-t-2xl overflow-hidden">
+        <div className="relative w-full bg-muted/25 dark:bg-gray-800/40 rounded-t-2xl overflow-hidden">
           <div className="relative w-full aspect-square">
             <ImageThumb
               src={image ?? ''}
               alt={name}
               rounded="none"
               fluid
-              className="bg-muted"
+              className="bg-muted dark:bg-gray-800"
             />
 
             {/* Switch no canto superior esquerdo */}
             <div className="absolute top-3 left-3 z-10">
-              <div className="[&>button]:outline [&>button]:outline-2 [&>button]:outline-muted-foreground/20 [&>button]:drop-shadow-md">
+              <div className="[&>button]:outline [&>button]:outline-2 [&>button]:outline-white/20 [&>button]:drop-shadow-md">
                 <Switch
                   checked={isActive}
                   onCheckedChange={handleSwitchChange}
@@ -93,9 +94,9 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
 
             {/* Overlay de produto Indisponível */}
             {isPaused && (
-              <div className="absolute inset-0 bg-foreground/10 dark:bg-foreground/20 flex items-center justify-center">
-                <div className="bg-card/95 rounded-xl p-2 shadow-sm">
-                  <PauseIcon size="lg" className="text-yellow-600 dark:text-yellow-500" />
+              <div className="absolute inset-0 bg-black/30 dark:bg-black/50 flex items-center justify-center backdrop-blur-[1px]">
+                <div className="bg-card/95 dark:bg-gray-900/95 rounded-xl p-2 shadow-sm">
+                  <PauseIcon size="lg" className="text-yellow-500 dark:text-yellow-400" />
                 </div>
               </div>
             )}
@@ -103,14 +104,14 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
         </div>
 
         {/* Conteúdo do card */}
-        <div className="p-3">
+        <div className="p-3 bg-card dark:bg-gray-900">
           {/* Nome e descrição */}
           <div className="mb-2">
-            <h3 className="font-semibold text-gray-900 text-base leading-tight mb-1 line-clamp-1">
+            <h3 className="font-semibold text-foreground dark:text-gray-100 text-base leading-tight mb-1 line-clamp-1">
               {name}
             </h3>
             {description && (
-              <p className="text-gray-500 text-xs line-clamp-1 leading-relaxed">
+              <p className="text-muted-foreground dark:text-gray-400 text-xs line-clamp-1 leading-relaxed">
                 {description}
               </p>
             )}
@@ -119,11 +120,11 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
           {/* Preço */}
           <div className="mb-3">
             <div className="flex items-baseline gap-2">
-              <span className="text-lg font-bold text-green-600">
+              <span className="text-lg font-bold text-green-600 dark:text-green-400">
                 {formatPrice(price)}
               </span>
               {originalPrice && originalPrice > price && (
-                <span className="text-xs text-gray-400 line-through">
+                <span className="text-xs text-muted-foreground dark:text-gray-500 line-through">
                   {formatPrice(originalPrice)}
                 </span>
               )}
@@ -136,8 +137,8 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
               className={cn(
                 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
                 isActive
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-500'
+                  ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                  : 'bg-gray-100 text-gray-500 dark:bg-gray-800 dark:text-gray-400'
               )}
             >
               {isActive ? 'Ativo' : 'Inativo'}
@@ -147,8 +148,8 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
               className={cn(
                 'inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium',
                 isPaused
-                  ? 'bg-yellow-100 text-yellow-700'
-                  : 'bg-blue-100 text-blue-700'
+                  ? 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                  : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
               )}
             >
               {isPaused ? 'Indisponível' : 'Disponível'}
@@ -161,7 +162,11 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
             <div className="flex items-center gap-1">
               <button
                 onClick={() => onEdit(id)}
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600 transition-colors"
+                className={cn(
+                  'inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors',
+                  'bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600',
+                  'dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400'
+                )}
                 title="Editar produto"
               >
                 <EditIcon size="sm" />
@@ -172,8 +177,8 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
                 className={cn(
                   'inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors',
                   isPaused
-                    ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200'
-                    : 'bg-gray-100 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600'
+                    ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50'
+                    : 'bg-gray-100 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-yellow-900/30 dark:hover:text-yellow-400'
                 )}
                 title={isPaused ? 'Retomar produto' : 'Pausar produto'}
               >
@@ -185,7 +190,11 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
             <div className="relative">
               <button
                 onClick={() => setIsActionsOpen(!isActionsOpen)}
-                className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+                className={cn(
+                  'inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors',
+                  'bg-gray-100 text-gray-600 hover:bg-gray-200',
+                  'dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
+                )}
                 title="Mais ações"
               >
                 <MoreIcon size="sm" />
@@ -201,26 +210,38 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
                   />
                   
                   {/* Menu dropdown */}
-                  <div className="absolute right-0 bottom-full mb-2 z-20 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[160px]">
+                  <div className={cn(
+                    'absolute right-0 bottom-full mb-2 z-20 rounded-lg shadow-lg border py-1 min-w-[160px]',
+                    'bg-white border-gray-200',
+                    'dark:bg-gray-900 dark:border-gray-700'
+                  )}>
                     <button
                       onClick={() => {
                         onDuplicate(id);
                         setIsActionsOpen(false);
                       }}
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
+                      className={cn(
+                        'flex items-center gap-3 w-full px-4 py-2 text-sm',
+                        'text-gray-700 hover:bg-gray-50',
+                        'dark:text-gray-300 dark:hover:bg-gray-800'
+                      )}
                     >
                       <CopyIcon size="sm" />
                       Duplicar
                     </button>
                     
-                    <div className="border-t border-gray-100 my-1" />
+                    <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
                     
                     <button
                       onClick={() => {
                         onDelete(id);
                         setIsActionsOpen(false);
                       }}
-                      className="flex items-center gap-3 w-full px-4 py-2 text-sm text-brand-blue hover:bg-brand-blue/10"
+                      className={cn(
+                        'flex items-center gap-3 w-full px-4 py-2 text-sm',
+                        'text-red-600 hover:bg-red-50',
+                        'dark:text-red-400 dark:hover:bg-red-900/20'
+                      )}
                     >
                       <TrashIcon size="sm" />
                       Excluir

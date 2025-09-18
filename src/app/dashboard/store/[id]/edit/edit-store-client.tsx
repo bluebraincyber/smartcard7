@@ -3,8 +3,8 @@
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Loader2, Check, X } from 'lucide-react'
-import ImageUpload from '@/components/ImageUpload'
+import { ArrowLeft, Loader2, X, Clock } from 'lucide-react'
+import { BusinessHoursInput, type BusinessHours, type DayOfWeek } from '@/components/BusinessHoursInput'
 
 interface Store {
   id: string
@@ -16,6 +16,8 @@ interface Store {
   businessType: string
   requiresAddress: boolean
   isactive: boolean
+  businessHours?: BusinessHours[]
+  timezone?: string
 }
 
 interface SlugCheckResult {
@@ -31,7 +33,7 @@ interface EditStoreClientProps {
 export default function EditStoreClient({ store }: EditStoreClientProps) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [slugChecking, setSlugChecking] = useState(false)
+  const [, setSlugChecking] = useState(false)
   const [slugCheckResult, setSlugCheckResult] = useState<SlugCheckResult | null>(null)
   const [error, setError] = useState('')
   
@@ -43,6 +45,8 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
     address: store.address || '',
     businessType: store.businessType || 'general',
     requiresAddress: store.requiresAddress || false,
+    businessHours: store.businessHours || [],
+    timezone: store.timezone || 'America/Sao_Paulo',
     coverImage: '',
     profileImage: ''
   })
@@ -69,17 +73,18 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
     }
   }, [store.slug])
 
-  const handleSlugChange = (value: string) => {
-    const slug = value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-')
-    setFormData(prev => ({ ...prev, slug }))
+  // Função comentada pois não está sendo usada atualmente
+  // const handleSlugChange = (value: string) => {
+  //   const slug = value.toLowerCase().replace(/[^a-z0-9-]/g, '-').replace(/-+/g, '-')
+  //   setFormData(prev => ({ ...prev, slug }))
     
-    // Debounce slug check
-    const timeoutId = setTimeout(() => {
-      checkSlugAvailability(slug)
-    }, 500)
+  //   // Debounce slug check
+  //   const timeoutId = setTimeout(() => {
+  //     checkSlugAvailability(slug)
+  //   }, 500)
     
-    return () => clearTimeout(timeoutId)
-  }
+  //   return () => clearTimeout(timeoutId)
+  // }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -114,7 +119,7 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
     }
   }
 
-  const handleInputChange = (field: string, value: any) => {
+  const handleInputChange = (field: keyof typeof formData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }
 
@@ -205,6 +210,21 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
                 </div>
               </div>
 
+              {/* Business Hours */}
+              <div className="bg-muted/30 backdrop-blur-sm rounded-2xl p-6">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-lg font-semibold text-foreground">Horário de Funcionamento</h3>
+                  <div className="flex items-center text-sm text-muted-foreground">
+                    <Clock className="h-4 w-4 mr-2" />
+                    Fuso Horário: {formData.timezone || 'America/Sao_Paulo'}
+                  </div>
+                </div>
+                <BusinessHoursInput
+                  value={formData.businessHours as BusinessHours[]}
+                  onChange={(hours) => setFormData(prev => ({ ...prev, businessHours: hours }))}
+                />
+              </div>
+
               {/* Form Actions */}
               <div className="flex justify-end space-x-4 pt-8 border-t border-border">
                 <Link
@@ -215,7 +235,7 @@ export default function EditStoreClient({ store }: EditStoreClientProps) {
                 </Link>
                 <button
                   type="submit"
-                  disabled={loading || (slugCheckResult && !slugCheckResult.available)}
+                  disabled={loading || (slugCheckResult ? !slugCheckResult.available : false)}
                   className="px-6 py-3 text-sm font-medium text-primary-foreground bg-gradient-to-r from-primary to-primary/80 border border-transparent rounded-xl hover:from-primary/90 hover:to-primary/70 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
                   {loading ? (

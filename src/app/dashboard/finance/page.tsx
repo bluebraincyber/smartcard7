@@ -1,13 +1,67 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { ArrowLeft, DollarSign, TrendingUp, TrendingDown, Calculator, Plus, CreditCard, PiggyBank, Receipt } from 'lucide-react'
+import { ArrowLeft, DollarSign, TrendingUp, TrendingDown, Calculator, CreditCard, PiggyBank, Receipt, Ticket } from 'lucide-react'
 import Link from 'next/link'
 
-export default function FinancePage() {
-  const router = useRouter()
+interface QuickActionCardProps {
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  title: string;
+  description: string;
+  color: 'blue' | 'green' | 'purple' | 'orange';
+}
 
+const QuickActionCard = ({ 
+  href, 
+  icon: Icon, 
+  title, 
+  description, 
+  color 
+}: QuickActionCardProps) => {
+  const colorClasses = {
+    blue: {
+      bg: 'bg-primary group-hover:bg-primary/90',
+      text: 'text-primary group-hover:text-primary/80',
+      border: 'group-hover:border-primary/50',
+      bgHover: 'bg-primary/10'
+    },
+    green: {
+      bg: 'bg-green-500 group-hover:bg-green-600',
+      text: 'text-green-600 group-hover:text-green-700',
+      border: 'group-hover:border-green-500/50',
+      bgHover: 'bg-green-100'
+    },
+    purple: {
+      bg: 'bg-purple-500 group-hover:bg-purple-600',
+      text: 'text-purple-600 group-hover:text-purple-700',
+      border: 'group-hover:border-purple-500/50',
+      bgHover: 'bg-purple-100'
+    },
+    orange: {
+      bg: 'bg-orange-500 group-hover:bg-orange-600',
+      text: 'text-orange-600 group-hover:text-orange-700',
+      border: 'group-hover:border-orange-500/50',
+      bgHover: 'bg-orange-100'
+    }
+  }
+
+  return (
+    <Link
+      href={href}
+      className={`group relative flex flex-col items-center p-6 rounded-2xl border border-border bg-card hover:shadow-lg transition-all duration-300 overflow-hidden ${colorClasses[color].border}`}
+    >
+      <div className={`absolute top-0 right-0 w-full h-1 ${colorClasses[color].bg}`}></div>
+      <div className={`w-12 h-12 rounded-xl ${colorClasses[color].bgHover} flex items-center justify-center mb-4`}>
+        <Icon className={`w-6 h-6 ${colorClasses[color].text}`} />
+      </div>
+      <h3 className="text-lg font-semibold text-foreground mb-1">{title}</h3>
+      <p className="text-sm text-muted-foreground text-center">{description}</p>
+    </Link>
+  )
+}
+
+export default function FinancePage() {
   // Mock data - substituir por dados reais da API
   const [financeData, setFinanceData] = useState({
     balance: 15750.80,
@@ -15,8 +69,19 @@ export default function FinancePage() {
     monthlyExpenses: 3200.50,
     netProfit: 5249.50,
     transactions: 47,
-    pendingPayments: 3
+    pendingPayments: 3,
+    averageTicket: 0
   })
+
+  // Calcular ticket médio (receita mensal / número de transações)
+  useEffect(() => {
+    if (financeData.transactions > 0) {
+      setFinanceData(prev => ({
+        ...prev,
+        averageTicket: prev.monthlyRevenue / prev.transactions
+      }))
+    }
+  }, [financeData.monthlyRevenue, financeData.transactions])
 
   const quickActions = [
     {
@@ -24,28 +89,28 @@ export default function FinancePage() {
       description: 'Registre receitas e despesas',
       href: '/dashboard/finance/ledger',
       icon: Receipt,
-      color: 'blue'
+      color: 'blue' as const
     },
     {
       title: 'Relatórios',
       description: 'Visualize relatórios financeiros',
       href: '/dashboard/finance/reports',
       icon: TrendingUp,
-      color: 'green'
+      color: 'green' as const
     },
     {
       title: 'Calculadora',
       description: 'Calcule preços e margens',
       href: '/dashboard/finance/calculator',
       icon: Calculator,
-      color: 'purple'
+      color: 'purple' as const
     },
     {
       title: 'Configurações',
       description: 'Configure categorias e métodos',
       href: '/dashboard/finance/settings',
       icon: CreditCard,
-      color: 'orange'
+      color: 'orange' as const
     }
   ]
 
@@ -84,7 +149,7 @@ export default function FinancePage() {
         </div>
 
         {/* Finance Overview Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-12">
           {/* Saldo Total */}
           <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
@@ -148,6 +213,24 @@ export default function FinancePage() {
             </div>
             <p className="text-sm text-muted-foreground">Lucro líquido</p>
           </div>
+
+          {/* Ticket Médio */}
+          <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-300">
+            <div className="flex items-center justify-between mb-4">
+              <div className="w-12 h-12 rounded-xl bg-indigo-500 flex items-center justify-center">
+                <Ticket className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-xs font-medium text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">
+                TICKET MÉDIO
+              </span>
+            </div>
+            <div className="text-2xl font-bold text-foreground mb-1">
+              R$ {financeData.averageTicket.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {financeData.transactions} {financeData.transactions === 1 ? 'venda' : 'vendas'} no mês
+            </p>
+          </div>
         </div>
 
         {/* Quick Actions */}
@@ -169,7 +252,7 @@ export default function FinancePage() {
                 icon={action.icon}
                 title={action.title}
                 description={action.description}
-                color={action.color as any}
+                color={action.color}
               />
             ))}
           </div>
@@ -229,78 +312,6 @@ export default function FinancePage() {
           </div>
         </div>
       </div>
-    </div>
-  )
-}
-
-// Quick Action Card Component
-function QuickActionCard({ 
-  href, 
-  icon: Icon, 
-  title, 
-  description, 
-  color 
-}: {
-  href: string
-  icon: any
-  title: string
-  description: string
-  color: 'blue' | 'green' | 'purple' | 'orange'
-}) {
-  const colorClasses = {
-    blue: {
-      bg: 'bg-primary group-hover:bg-primary/90',
-      text: 'text-primary group-hover:text-primary/80',
-      border: 'group-hover:border-primary/50',
-      bgHover: 'bg-primary/10'
-    },
-    green: {
-      bg: 'bg-secondary group-hover:bg-secondary/90',
-      text: 'text-secondary group-hover:text-secondary/80',
-      border: 'group-hover:border-secondary/50',
-      bgHover: 'bg-secondary/10'
-    },
-    purple: {
-      bg: 'bg-accent group-hover:bg-accent/90',
-      text: 'text-accent group-hover:text-accent/80',
-      border: 'group-hover:border-accent/50',
-      bgHover: 'bg-accent/10'
-    },
-    orange: {
-      bg: 'bg-destructive group-hover:bg-destructive/90',
-      text: 'text-destructive group-hover:text-destructive/80',
-      border: 'group-hover:border-destructive/50',
-      bgHover: 'bg-destructive/10'
-    }
-  }
-
-  const classes = colorClasses[color]
-
-  return (
-    <div className="group relative">
-      {/* Hover Background Effect */}
-      <div className={`absolute inset-0 ${classes.bgHover} rounded-2xl opacity-0 group-hover:opacity-100 transition-all duration-300 -z-10 scale-105`}></div>
-      
-      <Link
-        href={href}
-        className={`block w-full h-full bg-card backdrop-blur-sm p-6 rounded-2xl shadow-lg border border-border hover:shadow-2xl transition-all duration-300 text-center ${classes.border}`}
-      >
-        <div className={`mx-auto flex items-center justify-center h-16 w-16 rounded-2xl ${classes.bg} transition-all duration-300 mb-6 shadow-md group-hover:shadow-lg`}>
-          <Icon className="h-7 w-7 text-white" />
-        </div>
-        <h3 className="text-lg font-semibold text-foreground mb-3 transition-colors">
-          {title}
-        </h3>
-        <p className="text-sm text-muted-foreground leading-relaxed mb-4">
-          {description}
-        </p>
-        <div className={`inline-flex items-center ${classes.text} text-sm font-medium transition-all duration-200`}>
-          Acessar
-          <svg className="w-4 h-4 ml-2 -mr-1 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-          </svg>
-        </div>
-      </Link>
     </div>
   )
 }

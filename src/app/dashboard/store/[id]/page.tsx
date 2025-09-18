@@ -3,6 +3,7 @@ import pool from '@/lib/db'
 import { getServerSession } from 'next-auth/next'
 import { authOptions } from '@/lib/authOptions'
 import StorePageClient from './store-page-client'
+import OverflowGuard from '../../OverflowGuard'
 
 interface Store {
   id: string
@@ -105,7 +106,13 @@ export default async function StorePage({ params }: { params: { id: string } }) 
     }
 
     // 4. Somente se a validação passar, renderize a página com os dados da loja
-    return <StorePageClient store={store} />
+    return (
+      <OverflowGuard>
+        <div className="mx-auto max-w-screen-2xl px-4 sm:px-6 lg:px-8">
+          <StorePageClient store={store} />
+        </div>
+      </OverflowGuard>
+    )
     
   } catch (error) {
     console.error('Erro ao buscar loja:', error)

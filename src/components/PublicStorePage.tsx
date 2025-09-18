@@ -146,8 +146,8 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
       return newCart
     })
     
-    // Abre o carrinho automaticamente
-    setIsCartOpen(true)
+    // Não abre mais o carrinho automaticamente
+    // O usuário pode abrir o carrinho quando quiser
   }, [])
 
   const removeFromCart = useCallback((itemId: string) => {
@@ -238,7 +238,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
 
   // 6) A estrutura de renderização do componente.
   return (
-    <div className="min-h-screen bg-background font-[Inter]">
+    <div className="min-h-screen bg-white font-[Inter]">
       
       {/* Secção Hero da Loja, com tratamento para imagens e fallback. */}
       <div className="relative">
@@ -257,9 +257,9 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
               }}
             />
             {/* Conteúdo de fallback (oculto por padrão, mostrado em caso de erro) */}
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center opacity-0 transition-opacity duration-300">
+            <div className="absolute inset-0 bg-blue-500 flex items-center justify-center opacity-0 transition-opacity duration-300">
               <div className="text-center text-white px-4">
-                <div className="bg-white/20 p-2 sm:p-4 rounded-full mb-2 sm:mb-4 inline-block">
+                <div className="bg-white p-2 sm:p-4 rounded-full mb-2 sm:mb-4 inline-block">
                   <svg className="h-8 w-8 sm:h-12 sm:w-12" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h8v2H6V8zm0 4h12v2H6v-2z"/>
                   </svg>
@@ -269,9 +269,9 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
             </div>
           </div>
         ) : (
-          <div className="h-32 sm:h-48 md:h-64 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+          <div className="h-32 sm:h-48 md:h-64 bg-blue-500 flex items-center justify-center">
             <div className="text-center text-white px-4">
-              <div className="bg-white/20 p-2 sm:p-4 rounded-full mb-2 sm:mb-4 inline-block">
+              <div className="bg-white p-2 sm:p-4 rounded-full mb-2 sm:mb-4 inline-block">
                 <svg className="h-8 w-8 sm:h-12 sm:w-12" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h8v2H6V8zm0 4h12v2H6v-2z"/>
                 </svg>
@@ -283,7 +283,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
 
         {/* Cartão de Informações da Loja */}
         <div className="max-w-4xl mx-auto px-3 sm:px-4">
-          <div className="bg-card/95 backdrop-blur-sm -mt-8 sm:-mt-12 relative z-10 rounded-2xl shadow-2xl border border-border">
+          <div className="bg-white -mt-8 sm:-mt-12 relative z-10 rounded-2xl shadow-2xl border border-gray-200">
             <div className="p-5 sm:p-8">
               <div className="flex items-start space-x-4 sm:space-x-6">
                 {/* Imagem de Perfil */}
@@ -294,7 +294,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                       alt={`Logo da ${store.name}`}
                       width={80}
                       height={80}
-                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover border-4 border-white shadow-lg"
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl object-cover shadow-sm"
                       onError={(e) => {
                         console.error('Erro ao carregar imagem de perfil:', store.profileImage)
                         // Oculta a imagem e mostra o fallback.
@@ -306,10 +306,10 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                   ) : null}
                   {/* Fallback está sempre presente */}
                     <div
-                      className="w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-muted to-muted/80 rounded-2xl flex items-center justify-center border-4 border-background shadow-lg"
+                      className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-100 rounded-2xl flex items-center justify-center border-4 border-white shadow-lg"
                       style={{ display: store.profileImage ? 'none' : 'flex' }}
                     >
-                      <svg className="h-8 w-8 sm:h-10 sm:w-10 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <svg className="h-10 w-10 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                       <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v12h16V6H4zm2 2h8v2H6V8zm0 4h12v2H6v-2z"/>
                     </svg>
                   </div>
@@ -317,7 +317,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
 
                 {/* Detalhes da Loja */}
                 <div className="flex-1 min-w-0">
-                  <h1 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-2">{store.name}</h1>
+                  <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{store.name}</h1>
                   {store.description && (
                     <p className="text-muted-foreground text-sm sm:text-base mb-4 leading-relaxed">{store.description}</p>
                   )}
@@ -326,14 +326,14 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                   <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-6 text-sm text-muted-foreground">
                     {store.address && (
                       <div className="flex items-center">
-                        <div className="p-1.5 rounded-lg bg-primary/10 mr-2">
+                        <div className="p-1.5 rounded-lg bg-blue-100 mr-2">
                           <MapPin className="h-4 w-4 text-primary" aria-hidden="true" />
                         </div>
                         <span className="truncate">{store.address}</span>
                       </div>
                     )}
                     <div className="flex items-center">
-                      <div className="p-1.5 rounded-lg bg-success/10 mr-2">
+                        <div className="p-1.5 rounded-lg bg-green-100 mr-2">
                         <Phone className="h-4 w-4 text-success" aria-hidden="true" />
                       </div>
                       <span>{store.whatsapp}</span>
@@ -382,7 +382,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                         {available.map(item => (
                           <div
                             key={item.id}
-                            className="bg-card/90 backdrop-blur-sm rounded-2xl shadow-lg border border-border p-4 sm:p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
+                            className="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-5 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group"
                           >
                             <div className="flex items-start space-x-4">
                               {/* Imagem do Produto com fallback */}
@@ -400,7 +400,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                                   />
                                 ) : null}
                                 <div
-                                  className="w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-muted to-muted/80 rounded-xl flex items-center justify-center border border-border"
+                                  className="w-20 h-20 sm:w-24 sm:h-24 bg-gray-100 rounded-xl flex items-center justify-center border border-gray-200"
                                   style={{ display: item.imageUrl ? 'none' : 'flex' }}
                                 >
                                   <svg className="h-10 w-10 text-muted-foreground" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -413,7 +413,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                               <div className="flex-1 min-w-0">
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2">
                                   <h3 className="font-semibold text-foreground text-base sm:text-lg mb-1 sm:mb-0 leading-tight">{item.name}</h3>
-                                  <span className="text-lg sm:text-xl font-bold bg-gradient-to-r from-success to-success/80 bg-clip-text text-transparent sm:ml-3">
+                                  <span className="text-lg sm:text-xl font-bold text-green-600 sm:ml-3">
                                     {formatBRL(Number(item.price) || 0)}
                                   </span>
                                 </div>
@@ -445,7 +445,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                                   ) : (
                                     <button
                                       onClick={() => addToCart(item)}
-                                      className="bg-gradient-to-r from-success to-success/90 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:from-success/90 hover:to-success/80 transition-all duration-200 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl"
+                                      className="bg-green-600 text-white px-4 sm:px-6 py-2 sm:py-2.5 rounded-xl hover:bg-green-700 transition-all duration-200 text-sm sm:text-base font-semibold shadow-lg hover:shadow-xl"
                                     >
                                       Adicionar
                                     </button>
@@ -464,17 +464,17 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
 
             {/* Rodapé com total e botão para finalizar no WhatsApp */}
             {cart.length > 0 && (
-              <div className="p-6 border-t border-border bg-muted/30 mt-8 rounded-2xl">
+              <div className="p-6 border-t border-gray-200 bg-gray-50 mt-8 rounded-2xl">
                 <div className="flex items-center justify-between mb-6">
                   <span className="text-lg font-bold text-foreground">Total:</span>
-                  <span className="text-2xl font-bold bg-gradient-to-r from-success to-success/80 bg-clip-text text-transparent">
+                  <span className="text-2xl font-bold text-green-600">
                     {formatBRL(cartTotal)}
                   </span>
                 </div>
 
                 <button
                   onClick={sendWhatsAppOrder}
-                  className="w-full bg-gradient-to-r from-success to-success/90 text-white py-4 rounded-xl hover:from-success/90 hover:to-success/80 transition-all duration-200 font-bold flex items-center justify-center shadow-lg hover:shadow-xl"
+                  className="w-full bg-green-600 text-white py-4 rounded-xl hover:bg-green-700 transition-all duration-200 font-bold flex items-center justify-center shadow-lg hover:shadow-xl"
                 >
                   <MessageCircle className="h-5 w-5 mr-3" aria-hidden="true" />
                   Finalizar no WhatsApp
@@ -599,7 +599,7 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
                   </div>
                   <button
                     onClick={sendWhatsAppOrder}
-                    className="w-full bg-gradient-to-r from-success to-success/90 text-white py-3 px-4 rounded-xl hover:from-success/90 hover:to-success/80 transition-all duration-200 font-medium flex items-center justify-center"
+                    className="w-full bg-green-600 text-white py-3 px-4 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium flex items-center justify-center"
                   >
                     <MessageCircle className="h-5 w-5 mr-2" />
                     Finalizar Pedido
@@ -614,14 +614,14 @@ export default function PublicStorePage({ store }: PublicStorePageProps) {
       {/* Botão FAB (Floating Action Button) do WhatsApp */}
       <button
         onClick={() => sendWhatsAppInquiry('general')}
-        className="fixed bottom-6 right-6 bg-gradient-to-r from-success to-success/90 text-white p-4 rounded-2xl shadow-2xl hover:from-success/90 hover:to-success/80 transition-all duration-300 z-30 hover:scale-110 hover:-translate-y-1"
+        className="fixed bottom-6 right-6 bg-green-600 text-white p-4 rounded-2xl shadow-2xl hover:bg-green-700 transition-all duration-300 z-30 hover:scale-110 hover:-translate-y-1"
         aria-label="Abrir conversa no WhatsApp"
       >
         <MessageCircle className="h-6 w-6" aria-hidden="true" />
       </button>
 
       {/* Rodapé da página */}
-      <footer className="bg-card border-t border-border mt-8 sm:mt-12">
+      <footer className="bg-white border-t border-gray-200 mt-8 sm:mt-12">
         <div className="max-w-4xl mx-auto px-3 sm:px-4 py-6 sm:py-8">
           <div className="text-center">
             <div className="flex items-center justify-center space-x-2 mb-3 sm:mb-4">

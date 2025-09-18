@@ -24,33 +24,33 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  async rewrites() {
-    return {
-      beforeFiles: [
-        // Rewrite para subdomínios (ex: barbearia.smartcard.app -> /[slug])
-        {
-          source: '/',
-          destination: '/:slug',
-          has: [
-            {
-              type: 'host',
-              value: '(?<slug>.*)\\.smartcard\\.app',
-            },
-          ],
-        },
-        {
-          source: '/:path*',
-          destination: '/:slug/:path*',
-          has: [
-            {
-              type: 'host',
-              value: '(?<slug>.*)\\.smartcard\\.app',
-            },
-          ],
-        },
-      ],
-    };
-  },
+  // async rewrites() {
+  //   return {
+  //     beforeFiles: [
+  //       // Rewrite para subdomínios (ex: barbearia.smartcard.app -> /[slug])
+  //       {
+  //         source: '/',
+  //         destination: '/:slug',
+  //         has: [
+  //           {
+  //             type: 'host',
+  //             value: '(?<slug>.*)\\.smartcard\\.app',
+  //           },
+  //         ],
+  //       },
+  //       {
+  //         source: '/:path*',
+  //         destination: '/:slug/:path*',
+  //         has: [
+  //           {
+  //             type: 'host',
+  //             value: '(?<slug>.*)\\.smartcard\\.app',
+  //           },
+  //         ],
+  //       },
+  //     ],
+  //   };
+  // },
   images: {
     remotePatterns: [
       {

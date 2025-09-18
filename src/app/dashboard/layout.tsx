@@ -48,23 +48,23 @@ export default function DashboardLayout({
     return <>{children}</>
   }
 
+  console.log('Dashboard Layout - Pathname:', pathname)
+
   return (
-    <SidebarProvider>
-      <div className="min-h-screen bg-background relative">
-        <Topbar />
-        <div className="flex pt-2">
-          <Sidebar />
-          <MobileSidebar />
-          
-          {/* Main content */}
-          <main 
-            className="flex-1 max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8"
-            data-scroll-root
-          >
-            {children}
-          </main>
-        </div>
+    <div className="min-h-screen bg-background relative" suppressHydrationWarning>
+      <Topbar />
+      <div className="flex pt-2">
+        <Sidebar />
+        <MobileSidebar />
+        
+        {/* Main content - BottomNavigation é gerenciado pelo layout principal */}
+        <main 
+          className="flex-1 max-w-7xl mx-auto px-4 py-6 sm:px-6 lg:px-8"
+          data-scroll-root
+        >
+          {children}
+        </main>
       </div>
-    </SidebarProvider>
+    </div>
   )
 }

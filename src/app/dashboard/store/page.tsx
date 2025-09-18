@@ -5,6 +5,7 @@ import { useEffect, useState, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Loader2, Plus, Store, Search, Filter, SortAsc, Eye, Package, Layers, BarChart3, Settings, Archive, Play } from 'lucide-react'
+import OverflowGuard from '../OverflowGuard'
 
 type StoreStatus = 'active' | 'archived'
 
@@ -179,8 +180,8 @@ export default function MyStoresPage() {
 
   if (!isClient) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-background overflow-x-hidden">
+        <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col items-center justify-center h-64">
             <div className="relative">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-border border-t-primary"></div>
@@ -193,8 +194,8 @@ export default function MyStoresPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="min-h-screen bg-background overflow-x-hidden">
+        <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col items-center justify-center h-64">
             <div className="relative">
               <div className="animate-spin rounded-full h-12 w-12 border-4 border-border border-t-primary"></div>
@@ -208,11 +209,11 @@ export default function MyStoresPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <OverflowGuard>
       {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none overflow-hidden"></div>
       
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-12">
           <div className="flex items-center justify-between">
@@ -245,8 +246,8 @@ export default function MyStoresPage() {
         </div>
 
         {/* Search and Filters */}
-        <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-6 mb-12">
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
+        <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-6 mb-12 overflow-hidden">
+          <div className="flex flex-col lg:flex-row gap-4 items-stretch lg:items-center justify-between w-full">
             {/* Search */}
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-5 w-5" />
@@ -260,12 +261,12 @@ export default function MyStoresPage() {
             </div>
 
             {/* Filters */}
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
               {/* Status Filter */}
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as 'all' | 'active' | 'archived')}
-                className="px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background text-foreground"
+                className="w-full sm:w-auto px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background text-foreground"
               >
                 <option value="all">Todas</option>
                 <option value="active">Ativas</option>
@@ -276,7 +277,7 @@ export default function MyStoresPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as 'recent' | 'az' | 'views')}
-                className="px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background text-foreground"
+                className="w-full sm:w-auto px-4 py-3 border border-border rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 bg-background text-foreground"
               >
                 <option value="recent">Mais recentes</option>
                 <option value="az">A-Z</option>
@@ -286,7 +287,7 @@ export default function MyStoresPage() {
               {/* Create Button */}
               <Link
                 href="/dashboard/store/new"
-                className="inline-flex items-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200"
+                className="inline-flex items-center justify-center px-6 py-3 bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 w-full sm:w-auto text-center"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Nova Loja
@@ -326,7 +327,7 @@ export default function MyStoresPage() {
 
         {/* Stores Grid */}
         {stores.length > 0 && (
-          <div className="space-y-12">
+          <div className="space-y-12 max-w-full overflow-hidden">
             {/* Active Stores */}
             {filteredStores.activeStores.length > 0 && (
               <section>
@@ -339,7 +340,7 @@ export default function MyStoresPage() {
                     {filteredStores.activeStores.length} loja{filteredStores.activeStores.length !== 1 ? 's' : ''}
                   </span>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-full">
                   {filteredStores.activeStores.map((store) => (
                     <StoreCard
                       key={store.id}
@@ -406,7 +407,7 @@ export default function MyStoresPage() {
 
         {/* Quick Actions */}
         {stores.length > 0 && (
-          <div className="bg-card backdrop-blur-sm rounded-3xl shadow-xl border border-border p-8 mt-12">
+          <div className="bg-card backdrop-blur-sm rounded-3xl shadow-xl border border-border p-8 mt-12 overflow-hidden">
             <div className="mb-8 text-center">
               <h2 className="text-2xl font-semibold text-foreground mb-2">
                 Ações Rápidas
@@ -431,7 +432,7 @@ export default function MyStoresPage() {
           </div>
         )}
       </div>
-    </div>
+    </OverflowGuard>
   )
 }
 

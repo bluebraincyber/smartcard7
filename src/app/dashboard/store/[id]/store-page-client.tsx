@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback, useTransition } from 'react';
 import { ArrowLeft, Plus, Trash2, Eye, ExternalLink, Camera, Upload, MoreVertical, Copy } from 'lucide-react';
+import StoreHeader from '@/components/store/StoreHeader';
 
 // Este é um aplicativo React self-contained, em um único arquivo.
 // Ele inclui todos os componentes e mocks para uma demonstração totalmente funcional.
@@ -562,45 +563,47 @@ interface AdminProductCardProps {
   onTogglePause: (isPaused: boolean) => void;
 }
 
-const AdminProductCard = ({ product, onEdit, onDelete, onDuplicate, onToggleActive, onTogglePause }: AdminProductCardProps) => (
-  <div className="relative bg-card/70 backdrop-blur-sm border border-border rounded-xl shadow-md p-4 flex flex-col items-center text-center">
-    <div className="w-full flex justify-end mb-2">
-      <div className="flex items-center space-x-2">
-        <span className={`text-xs font-medium ${product.isactive ? 'text-success' : 'text-destructive'}`}>
-          {product.isactive ? 'Active' : 'Inactive'}
-        </span>
-        <ToggleSwitch checked={product.isactive} onChange={onToggleActive} />
-        <button onClick={() => onDelete(product.id)} className="text-destructive hover:text-destructive/80 transition-colors">
-          <Trash2 size={16} />
+const AdminProductCard = ({ product, onEdit, onDelete, onDuplicate, onToggleActive }: AdminProductCardProps) => {
+  return (
+    <div className="relative bg-card/70 backdrop-blur-sm border border-border rounded-xl shadow-md p-4 flex flex-col items-center text-center">
+      <div className="w-full flex justify-end mb-2">
+        <div className="flex items-center space-x-2">
+          <span className={`text-xs font-medium ${product.isactive ? 'text-success' : 'text-destructive'}`}>
+            {product.isactive ? 'Active' : 'Inactive'}
+          </span>
+          <ToggleSwitch checked={product.isactive} onChange={onToggleActive} />
+          <button onClick={() => onDelete(product.id)} className="text-destructive hover:text-destructive/80 transition-colors">
+            <Trash2 size={16} />
+          </button>
+        </div>
+      </div>
+      <div className="relative w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-primary">
+        <img
+          src={product.image || 'https://placehold.co/100x100/1f2937/ffffff?text=Product'}
+          alt={product.name}
+          className="w-full h-full object-cover"
+        />
+      </div>
+      <h3 className="text-md font-bold mb-1">{product.name}</h3>
+      <p className="text-sm text-muted-foreground">{product.description}</p>
+      <p className="text-lg font-semibold text-primary mt-2">R$ {product.price.toFixed(2)}</p>
+      <div className="mt-4 flex space-x-2">
+        <button
+          onClick={() => onEdit(product.id)}
+          className="flex items-center px-3 py-1 bg-primary text-white text-xs rounded-full hover:bg-primary-dark transition-colors"
+        >
+          <Eye size={12} className="mr-1" /> Edit
+        </button>
+        <button
+          onClick={() => onDuplicate(product)}
+          className="flex items-center px-3 py-1 bg-muted text-foreground text-xs rounded-full hover:bg-muted/80 transition-colors"
+        >
+          <Copy size={12} className="mr-1" /> Duplicate
         </button>
       </div>
     </div>
-    <div className="relative w-24 h-24 rounded-full overflow-hidden mb-4 border-2 border-primary">
-      <img
-        src={product.image || 'https://placehold.co/100x100/1f2937/ffffff?text=Product'}
-        alt={product.name}
-        className="w-full h-full object-cover"
-      />
-    </div>
-    <h3 className="text-md font-bold mb-1">{product.name}</h3>
-    <p className="text-sm text-muted-foreground">{product.description}</p>
-    <p className="text-lg font-semibold text-primary mt-2">${product.price.toFixed(2)}</p>
-    <div className="mt-4 flex space-x-2">
-      <button
-        onClick={() => onEdit(product.id)}
-        className="flex items-center px-3 py-1 bg-primary text-white text-xs rounded-full hover:bg-primary-dark transition-colors"
-      >
-        <Eye size={12} className="mr-1" /> Edit
-      </button>
-      <button
-        onClick={() => onDuplicate(product)}
-        className="flex items-center px-3 py-1 bg-muted text-foreground text-xs rounded-full hover:bg-muted/80 transition-colors"
-      >
-        <Copy size={12} className="mr-1" /> Duplicate
-      </button>
-    </div>
-  </div>
-);
+  );
+};
 
 interface AddItemCardProps {
   onClick: () => void;
@@ -1020,20 +1023,36 @@ const StoreManager = ({ store: initialStore }: StoreManagerProps) => {
       <div className="absolute inset-0 bg-grid-pattern opacity-5 dark:opacity-[0.02]" />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-12">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+        <StoreHeader
+          name={store.name}
+          description={store.description}
+          coverImage={store.coverImage}
+          profileImage={store.profileImage}
+          slugUrl={store.slug ? `https://smartcard.com/${store.slug}` : null}
+          primaryColor={store.primaryColor}
+          showSearch={false}
+          accent="none"
+          variant="stacked"
+          statusPill={
+            store.isactive ? (
+              <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-400">
+                Ativa
+              </span>
+            ) : null
+          }
+          actions={
+            <>
               <a
                 href="#"
-                onClick={() => console.log('Back to dashboard')}
+                onClick={(e) => {
+                  e.preventDefault();
+                  console.log('Back to dashboard');
+                }}
                 className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-card/80 hover:bg-card rounded-xl shadow-sm hover:shadow-md transition-all duration-200 backdrop-blur-sm border border-border"
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Voltar para Seleção de Lojas
+                Voltar
               </a>
-            </div>
-            <div className="flex items-center space-x-3">
               <a
                 href={`/${store.slug}`}
                 target="_blank"
@@ -1044,253 +1063,12 @@ const StoreManager = ({ store: initialStore }: StoreManagerProps) => {
                 Visualizar Loja
                 <ExternalLink className="ml-2 h-4 w-4" />
               </a>
-            </div>
-          </div>
-        </div>
+            </>
+          }
+          className="mb-12"
+        />
 
-        {/* Hero Section */}
-        <div className="text-center mb-12">
-          <div className="relative mb-8">
-            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-gradient-to-br from-primary to-primary/80 shadow-lg mb-6">
-              <div className="w-10 h-10 rounded-full" style={{ backgroundColor: store.primaryColor }} />
-            </div>
-            <div className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 opacity-20 rounded-full blur-xl scale-150" />
-          </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent mb-4">
-            {store.name}
-          </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-            Gerencie categorias, produtos e configurações desta loja
-          </p>
-        </div>
 
-        {/* Store Images Preview */}
-        <div className="bg-card/90 backdrop-blur-sm rounded-3xl shadow-xl border border-border mb-12">
-          <div className="px-6 py-4 border-b border-border">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-medium text-foreground">Imagens da Loja</h3>
-                <p className="mt-1 text-sm text-muted-foreground">Como sua loja aparece para os clientes</p>
-              </div>
-            </div>
-          </div>
-
-          {(store.image || store.coverImage || store.profileImage) ? (
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Imagem de Capa - Editável */}
-                {(store.coverImage || store.image) ? (
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground mb-2">Imagem de Capa</h4>
-                    <div
-                      className="relative aspect-video rounded-lg overflow-hidden border-2 border-border bg-muted group cursor-pointer"
-                      onClick={() => openImageModal('cover')}
-                    >
-                      <img
-                        src={store.coverImage || store.image || 'https://placehold.co/800x300/1f2937/ffffff?text=Placeholder'}
-                        alt="Imagem de capa da loja"
-                        className="w-full h-full object-cover rounded-t-2xl"
-                      />
-                      {/* Overlay de edição */}
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
-                        <div className="bg-card text-foreground px-3 py-1.5 rounded-md text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center">
-                          <Camera className="h-4 w-4 mr-2" />
-                          Trocar Imagem
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">Aparece no topo da sua loja</p>
-                  </div>
-                ) : (
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground mb-2">Imagem de Capa</h4>
-                    <div
-                      className="relative aspect-video rounded-lg border-2 border-dashed border-border bg-muted hover:border-border/80 hover:bg-muted/80 cursor-pointer transition-colors flex items-center justify-center group"
-                      onClick={() => openImageModal('cover')}
-                    >
-                      <div className="text-center">
-                        <Upload className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                        <p className="text-sm text-foreground font-medium">Adicionar Capa</p>
-                        <p className="text-xs text-muted-foreground">Clique para fazer upload</p>
-                      </div>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">Aparece no topo da sua loja</p>
-                  </div>
-                )}
-
-                {/* Logo/Perfil - Editável */}
-                {store.profileImage ? (
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground mb-2">Logo/Perfil</h4>
-                    <div
-                      className="relative aspect-square rounded-lg overflow-hidden border-2 border-border bg-muted max-w-[200px] group cursor-pointer"
-                      onClick={() => openImageModal('profile')}
-                    >
-                      <img
-                        src={store.profileImage || 'https://placehold.co/200x200/1f2937/ffffff?text=Logo'}
-                        alt="Logo da loja"
-                        className="w-full h-full object-cover rounded-full"
-                      />
-                      {/* Overlay de edição */}
-                      <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-50 transition-all duration-200 flex items-center justify-center">
-                        <div className="bg-card text-foreground px-2 py-1 rounded text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center">
-                          <Camera className="h-3 w-3 mr-1" />
-                          Trocar
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">Logo da sua empresa</p>
-                  </div>
-                ) : (
-                  <div>
-                    <h4 className="text-sm font-medium text-foreground mb-2">Logo/Perfil</h4>
-                    <div
-                      className="relative aspect-square rounded-lg border-2 border-dashed border-border bg-muted hover:border-border/80 hover:bg-muted/80 cursor-pointer transition-colors max-w-[200px] mx-auto"
-                      onClick={() => openImageModal('profile')}
-                    >
-                      <div className="text-center">
-                        <Camera className="h-6 w-6 text-muted-foreground mx-auto mb-1" />
-                        <p className="text-xs text-foreground font-medium">Adicionar Logo</p>
-                      </div>
-                    </div>
-                    <p className="mt-1 text-xs text-muted-foreground">Logo da sua empresa</p>
-                  </div>
-                )}
-
-                {/* Preview Card Combinado */}
-                <div>
-                  <h4 className="text-sm font-medium text-foreground mb-2">Preview da Loja</h4>
-                  <div className="border-2 border-border rounded-lg overflow-hidden bg-card max-w-[200px]">
-                    {(store.coverImage || store.image) && (
-                      <div className="relative h-20 bg-muted">
-                        <img
-                          src={store.coverImage || store.image || 'https://placehold.co/800x300/1f2937/ffffff?text=Preview+Capa'}
-                          alt="Preview capa"
-                          className="w-full h-20 object-cover"
-                        />
-                      </div>
-                    )}
-
-                    <div className="p-3">
-                      <div className="flex items-center space-x-2 mb-2">
-                        {store.profileImage && (
-                          <img src={store.profileImage} alt="Logo da loja" className="w-8 h-8 rounded-full object-cover" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium text-foreground truncate">{store.name}</p>
-                          <p className="text-xs text-muted-foreground truncate">smartcard.com/{store.slug}</p>
-                        </div>
-                      </div>
-                      <div className="h-2 bg-muted rounded mb-1"></div>
-                      <div className="h-2 bg-muted rounded w-3/4"></div>
-                    </div>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground">Como aparece para clientes</p>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="px-6 py-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
-                {/* Card Upload Capa */}
-                <div
-                  className="relative aspect-video rounded-lg border-2 border-dashed border-border bg-muted hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all group"
-                  onClick={() => openImageModal('cover')}
-                >
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <Upload className="h-10 w-10 text-muted-foreground group-hover:text-primary mb-3 transition-colors" />
-                    <h4 className="text-lg font-medium text-foreground mb-1">Imagem de Capa</h4>
-                    <p className="text-sm text-muted-foreground text-center px-4">Adicione uma imagem de fundo para sua loja</p>
-                    <p className="text-xs text-muted-foreground mt-2">Clique para fazer upload</p>
-                  </div>
-                </div>
-                {/* Card Upload Logo */}
-                <div
-                  className="relative aspect-square rounded-lg border-2 border-dashed border-border bg-muted hover:border-primary/40 hover:bg-primary/5 cursor-pointer transition-all group max-w-[300px] mx-auto"
-                  onClick={() => openImageModal('profile')}
-                >
-                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                    <Camera className="h-6 w-6 text-muted-foreground mx-auto mb-1" />
-                    <p className="text-xs text-foreground font-medium">Adicionar Logo</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Texto explicativo */}
-              <div className="text-center mt-6">
-                <p className="text-muted-foreground text-sm">
-                  As imagens ajudam a transmitir profissionalismo e personalidade à sua loja.
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Store Info - Com Inline Editing */}
-        <div className="bg-card/90 backdrop-blur-sm rounded-3xl shadow-xl border border-border mb-12">
-          <div className="px-6 py-4 border-b border-border">
-            <div className="flex items-center justify-between">
-              <div className="flex-1 pr-4">
-                {/* Nome da loja editável */}
-                <div className="mb-2">
-                  <EditableField
-                    field="name"
-                    value={store.name}
-                    placeholder="Nome da sua loja"
-                    className="text-2xl font-bold text-foreground"
-                    onSave={handleSaveName}
-                  />
-                </div>
-                {/* URL editável */}
-                <div className="mt-1">
-                  <EditableSlugField value={store.slug} onSave={handleSaveSlug} />
-                </div>
-              </div>
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center space-x-2">
-                  <span className={`text-xs font-medium ${store.isactive ? 'text-success' : 'text-destructive'}`}>
-                    {store.isactive ? 'Ativa' : 'Inativa'}
-                  </span>
-                  <ToggleSwitch checked={store.isactive} onChange={toggleStoreStatus} />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="px-6 py-4">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Endereço</dt>
-                <dd className="mt-1 text-sm font-medium text-foreground">
-                  <EditableField field="address" value={store.address || ''} placeholder="Adicione um endereço" onSave={handleSave} />
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Whatsapp</dt>
-                <dd className="mt-1 text-sm font-medium text-foreground">
-                  <EditableField field="whatsapp" value={store.whatsapp} placeholder="Adicione um número" onSave={handleSave} />
-                </dd>
-              </div>
-              <div>
-                <dt className="text-sm font-medium text-muted-foreground">Cor Principal</dt>
-                <dd className="mt-1 text-sm font-medium text-foreground">
-                  <EditableColorField field="primaryColor" value={store.primaryColor} onSave={handleSave} />
-                </dd>
-              </div>
-            </div>
-            <div className="mt-6">
-              <dt className="text-sm font-medium text-muted-foreground">Descrição</dt>
-              <dd className="mt-1 text-sm font-medium text-foreground">
-                <EditableField
-                  field="description"
-                  value={store.description || ''}
-                  placeholder="Adicione uma descrição para sua loja"
-                  onSave={handleSave}
-                />
-              </dd>
-            </div>
-          </div>
-        </div>
 
         {/* Categories and Products Section */}
         <div className="space-y-12">

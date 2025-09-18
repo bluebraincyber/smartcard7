@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # Configurações
-PORT=3000
+DEFAULT_PORT=3000
+PORT=${1:-$DEFAULT_PORT}
 NODE_BIN="./node_modules/.bin/next"
 
 # Função para matar processos na porta especificada

@@ -96,14 +96,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   // Evitar flash de conteúdo sem estilo
   if (!mounted) {
     return (
-      <div 
-        className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center"
-        suppressHydrationWarning
-      >
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-brand-blue mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Carregando tema...</p>
-        </div>
+      <div suppressHydrationWarning>
+        {children}
       </div>
     );
   }

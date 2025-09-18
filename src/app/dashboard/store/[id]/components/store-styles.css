@@ -1,0 +1,97 @@
+/* Estilos específicos para a página da loja */
+
+/* Estilo do cabeçalho com imagem de capa */
+.store-cover-container {
+  @apply relative h-32 sm:h-48 lg:h-64 bg-gradient-to-r from-primary/20 to-primary/10;
+}
+
+.store-cover-overlay {
+  @apply absolute inset-0 bg-gradient-to-t from-background/80 to-transparent;
+}
+
+/* Container de informações da loja */
+.store-info-container {
+  @apply relative -mt-16 sm:-mt-20;
+}
+
+.store-info-card {
+  @apply bg-card/95 backdrop-blur;
+}
+
+/* Layout responsivo do cabeçalho */
+.store-header-content {
+  @apply flex flex-col sm:flex-row gap-4 sm:gap-6;
+}
+
+/* Logo da loja */
+.store-logo {
+  @apply relative h-20 w-20 sm:h-24 sm:w-24 lg:h-32 lg:w-32 rounded-lg overflow-hidden bg-muted flex-shrink-0;
+}
+
+/* Estatísticas da loja */
+.store-stats {
+  @apply flex flex-wrap gap-4 text-sm;
+}
+
+/* Filtros de busca */
+.store-filters {
+  @apply flex flex-col sm:flex-row gap-3;
+}
+
+/* Layout dos produtos */
+.products-container {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4;
+}
+
+/* Estado vazio */
+.empty-state {
+  @apply text-center py-12;
+}
+
+.empty-state-icon {
+  @apply h-12 w-12 text-muted-foreground mx-auto mb-4;
+}
+
+/* Modal de produto */
+.product-modal-content {
+  @apply space-y-4;
+}
+
+/* Botões de ação */
+.action-buttons {
+  @apply flex justify-end gap-3;
+}
+
+/* Tags de filtro ativo */
+.active-filter-tag {
+  @apply inline-flex items-center gap-1 px-3 py-1 bg-primary/10 text-primary rounded-full text-sm;
+}
+
+/* Responsividade para telas muito pequenas */
+@screen xs {
+  .products-container {
+    @apply grid-cols-2;
+  }
+}
+
+/* Ajustes para modo escuro */
+.dark .store-info-card {
+  @apply bg-card/90;
+}
+
+/* Animações */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out forwards;
+}
+
+/* Transições suaves */
+.transition-all {
+  transition-property: all;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
