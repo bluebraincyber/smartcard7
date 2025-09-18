@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react'
 import Image from 'next/image'
 import { Edit, Trash2, Eye, MoreVertical, Package } from 'lucide-react'
 
-interface Product {
+export interface Product {
   id: string
   name: string
   price: number
@@ -16,9 +16,9 @@ interface Product {
 
 interface ProductCardProps {
   product: Product
-  onEdit?: (product: Product) => void
-  onDelete?: (product: Product) => void
-  onView?: (product: Product) => void
+  onEdit?: (product: Product) => void | Promise<void>
+  onDelete?: (product: Product) => void | Promise<void>
+  onView?: (product: Product) => void | Promise<void>
   className?: string
   layout?: 'grid' | 'list'
 }
@@ -357,9 +357,9 @@ export function ProductCard({
 // Grid container for products
 interface ProductGridProps {
   products: Product[]
-  onEdit?: (product: Product) => void
-  onDelete?: (product: Product) => void
-  onView?: (product: Product) => void
+  onEdit?: (product: Product) => void | Promise<void>
+  onDelete?: (product: Product) => void | Promise<void>
+  onView?: (product: Product) => void | Promise<void>
   layout?: 'grid' | 'list'
   loading?: boolean
   emptyMessage?: string

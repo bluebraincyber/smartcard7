@@ -1,26 +1,26 @@
 // Atomic Components - Design System
-export { Button } from './Button';
-export type { ButtonProps } from './Button';
+export { Button, buttonVariants } from './button';
+export type { ButtonProps } from './button';
 
-export { Badge } from './Badge';
-export type { BadgeProps } from './Badge';
+export { Badge } from './badge';
+export type { BadgeProps } from './badge';
 
-export { Chip } from './Chip';
-export type { ChipProps } from './Chip';
+export { Chip } from './chip';
+export type { ChipProps } from './chip';
 
-export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './Card';
+export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './card';
 
-export { ImageThumb } from './ImageThumb';
+export { ImageThumb } from './image-thumb';
 
-export { Divider } from './Divider';
+export { Divider } from './divider';
 
-export { Text } from './Text';
+export { Text } from './text';
 
 export { Input } from './input';
 
-export { Skeleton, SkeletonText } from './Skeleton';
-export type { SkeletonProps } from './Skeleton';
-export type { TextProps } from './Text';
+export { Skeleton, SkeletonText } from './skeleton';
+export type { SkeletonProps } from './skeleton';
+export type { TextProps } from './text';
 
 export { 
   Icon,
@@ -44,11 +44,11 @@ export {
   CopyIcon,
   TrashIcon,
   MoreIcon
-} from './Icon';
-export type { IconProps } from './Icon';
+} from './icon';
+export type { IconProps } from './icon';
 
-export { Switch } from './Switch';
-export type { SwitchProps } from './Switch';
+export { Switch } from './switch';
+export type { SwitchProps } from './switch';
 
-export { AdminProductCard } from './AdminProductCard';
-export type { AdminProductCardProps } from './AdminProductCard';
+export { AdminProductCard } from './admin-product-card';
+export type { AdminProductCardProps } from './admin-product-card';

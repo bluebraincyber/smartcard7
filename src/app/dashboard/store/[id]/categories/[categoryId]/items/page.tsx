@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Package, X, Upload, Camera, Trash2 } from 'lucide-react'
-import { AdminProductCard } from '@/components/ui/AdminProductCard'
+import { AdminProductCard } from '@/components/ui/admin-product-card'
 
 interface Store {
   id: string
@@ -117,30 +117,33 @@ const ImageUploadField = ({
     return (
       <div className="relative group">
         {/* Preview da imagem */}
-        <div className="relative aspect-video rounded-xl overflow-hidden bg-muted dark:bg-gray-800 border border-border dark:border-gray-700">
-          <img
+        <div className="overflow-hidden relative rounded-xl border aspect-video bg-muted dark:bg-gray-800 border-border dark:border-gray-700">
+          <Image
             src={value}
             alt="Preview"
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            priority={false}
           />
           
           {/* Overlay com botões ao hover */}
-          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+          <div className="flex absolute inset-0 gap-2 justify-center items-center opacity-0 transition-opacity bg-black/50 group-hover:opacity-100">
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              className="p-2 bg-white/90 dark:bg-gray-900/90 rounded-lg hover:bg-white dark:hover:bg-gray-900 transition-colors"
+              className="p-2 rounded-lg transition-colors bg-white/90 dark:bg-gray-900/90 hover:bg-white dark:hover:bg-gray-900"
               title="Trocar imagem"
             >
-              <Camera className="h-5 w-5 text-gray-700 dark:text-gray-300" />
+              <Camera className="w-5 h-5 text-gray-700 dark:text-gray-300" />
             </button>
             <button
               type="button"
               onClick={onRemove}
-              className="p-2 bg-white/90 dark:bg-gray-900/90 rounded-lg hover:bg-white dark:hover:bg-gray-900 transition-colors"
+              className="p-2 rounded-lg transition-colors bg-white/90 dark:bg-gray-900/90 hover:bg-white dark:hover:bg-gray-900"
               title="Remover imagem"
             >
-              <Trash2 className="h-5 w-5 text-red-500 dark:text-red-400" />
+              <Trash2 className="w-5 h-5 text-red-500 dark:text-red-400" />
             </button>
           </div>
         </div>
@@ -175,13 +178,13 @@ const ImageUploadField = ({
       <div className="p-8 text-center">
         {uploading ? (
           <>
-            <div className="animate-spin rounded-full h-10 w-10 border-2 border-primary dark:border-blue-500 border-t-transparent mx-auto mb-3" />
+            <div className="mx-auto mb-3 w-10 h-10 rounded-full border-2 animate-spin border-primary dark:border-blue-500 border-t-transparent" />
             <p className="text-sm text-muted-foreground dark:text-gray-400">Enviando imagem...</p>
           </>
         ) : (
           <>
-            <Upload className="h-10 w-10 text-muted-foreground dark:text-gray-500 mx-auto mb-3" />
-            <p className="text-sm font-medium text-foreground dark:text-gray-100 mb-1">
+            <Upload className="mx-auto mb-3 w-10 h-10 text-muted-foreground dark:text-gray-500" />
+            <p className="mb-1 text-sm font-medium text-foreground dark:text-gray-100">
               Clique para enviar ou arraste uma imagem aqui
             </p>
             <p className="text-xs text-muted-foreground dark:text-gray-400">
@@ -226,33 +229,33 @@ const ProductModal = ({
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 z-40 backdrop-blur-sm transition-opacity bg-black/50 dark:bg-black/70"
         onClick={onClose}
       />
       
       {/* Modal */}
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="flex fixed inset-0 z-50 justify-center items-center p-4">
         <div className="w-full max-w-lg bg-card dark:bg-gray-900 rounded-2xl shadow-2xl border border-border dark:border-gray-800 animate-in fade-in zoom-in-95 duration-200 max-h-[90vh] overflow-hidden flex flex-col">
           {/* Header */}
-          <div className="flex items-center justify-between p-6 border-b border-border dark:border-gray-800 flex-shrink-0">
+          <div className="flex flex-shrink-0 justify-between items-center p-6 border-b border-border dark:border-gray-800">
             <h3 className="text-lg font-semibold text-foreground dark:text-gray-100">
               {isEditing ? 'Editar Produto' : 'Novo Produto'}
             </h3>
             <button
               onClick={onClose}
-              className="p-2 rounded-lg hover:bg-muted dark:hover:bg-gray-800 transition-colors"
+              className="p-2 rounded-lg transition-colors hover:bg-muted dark:hover:bg-gray-800"
             >
-              <X className="h-4 w-4 text-muted-foreground dark:text-gray-400" />
+              <X className="w-4 h-4 text-muted-foreground dark:text-gray-400" />
             </button>
           </div>
 
           {/* Form - Scrollable */}
-          <div className="flex-1 overflow-y-auto">
+          <div className="overflow-y-auto flex-1">
             <form id="product-form" onSubmit={onSubmit} className="p-6">
               <div className="space-y-5">
                 {/* Nome */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground dark:text-gray-100 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-foreground dark:text-gray-100">
                     Nome do Produto *
                   </label>
                   <input
@@ -269,11 +272,11 @@ const ProductModal = ({
 
                 {/* Preço */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground dark:text-gray-100 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-foreground dark:text-gray-100">
                     Preço
                   </label>
                   <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <div className="flex absolute inset-y-0 left-0 items-center pl-4 pointer-events-none">
                       <span className="text-sm font-medium text-muted-foreground dark:text-gray-400">R$</span>
                     </div>
                     <input
@@ -291,7 +294,7 @@ const ProductModal = ({
 
                 {/* Descrição */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground dark:text-gray-100 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-foreground dark:text-gray-100">
                     Descrição
                   </label>
                   <textarea
@@ -306,7 +309,7 @@ const ProductModal = ({
 
                 {/* Imagem */}
                 <div>
-                  <label className="block text-sm font-medium text-foreground dark:text-gray-100 mb-2">
+                  <label className="block mb-2 text-sm font-medium text-foreground dark:text-gray-100">
                     Imagem do Produto
                   </label>
                   <ImageUploadField
@@ -318,7 +321,7 @@ const ProductModal = ({
                   {/* Campo de URL alternativo */}
                   {!formData.image && (
                     <div className="mt-3">
-                      <p className="text-xs text-muted-foreground dark:text-gray-400 mb-2">
+                      <p className="mb-2 text-xs text-muted-foreground dark:text-gray-400">
                         Ou cole a URL de uma imagem:
                       </p>
                       <input
@@ -326,7 +329,7 @@ const ProductModal = ({
                         disabled={creating}
                         value={formData.image}
                         onChange={(e) => setFormData(prev => ({ ...prev, image: e.target.value }))}
-                        className="w-full px-3 py-2 rounded-lg text-xs bg-background dark:bg-gray-800 text-foreground dark:text-gray-100 border border-border dark:border-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-blue-500 focus:border-transparent transition-all"
+                        className="px-3 py-2 w-full text-xs rounded-lg border transition-all bg-background dark:bg-gray-800 text-foreground dark:text-gray-100 border-border dark:border-gray-700 focus:ring-2 focus:ring-primary dark:focus:ring-blue-500 focus:border-transparent"
                         placeholder="https://exemplo.com/imagem.jpg"
                       />
                     </div>
@@ -337,7 +340,7 @@ const ProductModal = ({
           </div>
 
           {/* Actions - Fixed at bottom */}
-          <div className="flex items-center justify-end gap-3 p-6 border-t border-border dark:border-gray-800 flex-shrink-0 bg-card dark:bg-gray-900">
+          <div className="flex flex-shrink-0 gap-3 justify-end items-center p-6 border-t border-border dark:border-gray-800 bg-card dark:bg-gray-900">
             <button
               type="button"
               onClick={onClose}
@@ -352,7 +355,7 @@ const ProductModal = ({
               className="px-6 py-2.5 text-sm font-medium bg-primary dark:bg-blue-600 text-primary-foreground dark:text-white rounded-xl hover:bg-primary/90 dark:hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all inline-flex items-center gap-2"
             >
               {creating && (
-                <span className="inline-block h-4 w-4 border-2 border-primary-foreground border-t-transparent rounded-full animate-spin" />
+                <span className="inline-block w-4 h-4 rounded-full border-2 animate-spin border-primary-foreground border-t-transparent" />
               )}
               {creating ? 'Salvando...' : (isEditing ? 'Atualizar Produto' : 'Criar Produto')}
             </button>
@@ -444,7 +447,12 @@ export default function ItemsPage() {
     setCreating(true)
     try {
       const normalized = normalizePrice(formData.price)
-      const payload: any = {
+      const payload: {
+        name: string;
+        description: string | null;
+        image: string | null;
+        price?: number;
+      } = {
         name: formData.name.trim(),
         description: formData.description.trim() || null,
         image: formData.image.trim() || null
@@ -602,12 +610,12 @@ export default function ItemsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-background dark:bg-gray-950">
-        <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-8">
-          <div className="flex flex-col items-center justify-center h-64">
+        <div className="px-4 py-8 mx-auto w-full max-w-screen-2xl sm:px-6 lg:px-8">
+          <div className="flex flex-col justify-center items-center h-64">
             <div className="relative">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-border dark:border-gray-800 border-t-primary dark:border-t-blue-500"></div>
+              <div className="w-12 h-12 rounded-full border-4 animate-spin border-border dark:border-gray-800 border-t-primary dark:border-t-blue-500"></div>
             </div>
-            <span className="mt-4 text-foreground dark:text-gray-100 font-medium">Carregando produtos...</span>
+            <span className="mt-4 font-medium text-foreground dark:text-gray-100">Carregando produtos...</span>
           </div>
         </div>
       </div>
@@ -617,26 +625,26 @@ export default function ItemsPage() {
   return (
     <div className="min-h-screen bg-background">
       {/* Background Pattern disabled to avoid darker banding */}
-      {/* <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none overflow-hidden"></div> */}
+      {/* <div className="overflow-hidden absolute inset-0 opacity-5 pointer-events-none bg-grid-pattern"></div> */}
       
-      <div className="relative mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-8 py-8">
+      <div className="relative px-4 py-8 mx-auto w-full max-w-screen-2xl sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-8">
-          <div className="flex items-center space-x-4 mb-6">
+          <div className="flex items-center mb-6 space-x-4">
             <Link
               href={`/dashboard/store/${params.id}`}
-              className="inline-flex items-center px-4 py-2 text-sm font-medium text-muted-foreground hover:text-foreground bg-background hover:bg-muted/40 rounded-xl transition-colors border border-transparent shadow-none"
+              className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-xl border border-transparent shadow-none transition-colors text-muted-foreground hover:text-foreground bg-background hover:bg-muted/40"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <ArrowLeft className="mr-2 w-4 h-4" />
               Voltar à Loja
             </Link>
           </div>
         </div>
 
         {/* Main Content */}
-        <div className="bg-card rounded-3xl shadow-lg border border-border">
-          <div className="px-6 sm:px-8 py-6 border-b border-border">
-            <div className="flex items-center justify-between">
+        <div className="rounded-3xl border shadow-lg bg-card border-border">
+          <div className="px-6 py-6 border-b sm:px-8 border-border">
+            <div className="flex justify-between items-center">
               <div>
                 <h2 className="text-xl font-semibold text-foreground">
                   {category?.name} - {store?.name}
@@ -649,7 +657,7 @@ export default function ItemsPage() {
                 onClick={openNewModal}
                 className="inline-flex items-center px-4 py-2.5 text-sm font-medium rounded-xl shadow-sm bg-primary dark:bg-blue-600 text-primary-foreground dark:text-white hover:bg-primary/90 dark:hover:bg-blue-700 transition-all duration-200"
               >
-                <Plus className="mr-2 h-4 w-4" />
+                <Plus className="mr-2 w-4 h-4" />
                 Novo Produto
               </button>
             </div>
@@ -657,7 +665,7 @@ export default function ItemsPage() {
           
           <div className="p-6 sm:p-8">
             {/* Products Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
               {items.map((item) => (
                 <AdminProductCard
                   key={item.id}
@@ -679,15 +687,15 @@ export default function ItemsPage() {
 
             {/* Empty State */}
             {items.length === 0 && (
-              <div className="text-center py-12">
-                <Package className="mx-auto h-16 w-16 text-muted-foreground dark:text-gray-500 mb-4" />
-                <h3 className="text-lg font-medium text-foreground dark:text-gray-100 mb-2">Nenhum produto ainda</h3>
-                <p className="text-sm text-muted-foreground dark:text-gray-400 mb-6">Adicione seu primeiro produto nesta categoria</p>
+              <div className="py-12 text-center">
+                <Package className="mx-auto mb-4 w-16 h-16 text-muted-foreground dark:text-gray-500" />
+                <h3 className="mb-2 text-lg font-medium text-foreground dark:text-gray-100">Nenhum produto ainda</h3>
+                <p className="mb-6 text-sm text-muted-foreground dark:text-gray-400">Adicione seu primeiro produto nesta categoria</p>
                 <button
                   onClick={openNewModal}
-                  className="inline-flex items-center px-6 py-3 text-sm font-medium rounded-xl shadow-sm bg-primary dark:bg-blue-600 text-primary-foreground dark:text-white hover:bg-primary/90 dark:hover:bg-blue-700 transition-all duration-200"
+                  className="inline-flex items-center px-6 py-3 text-sm font-medium rounded-xl shadow-sm transition-all duration-200 bg-primary dark:bg-blue-600 text-primary-foreground dark:text-white hover:bg-primary/90 dark:hover:bg-blue-700"
                 >
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="mr-2 w-4 h-4" />
                   Adicionar Produto
                 </button>
               </div>
@@ -710,8 +718,8 @@ export default function ItemsPage() {
       {confirm.open && (
         <>
           <div className="fixed inset-0 bg-black/50 backdrop-blur-[1px] z-40" onClick={() => setConfirm({ open: false, id: null, name: '' })} />
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-md rounded-2xl bg-card border border-border shadow-xl">
+          <div className="flex fixed inset-0 z-50 justify-center items-center p-4">
+            <div className="w-full max-w-md rounded-2xl border shadow-xl bg-card border-border">
               <div className="p-5 border-b border-border">
                 <h4 className="text-base font-semibold text-foreground">Confirmar exclusão</h4>
               </div>
@@ -720,7 +728,7 @@ export default function ItemsPage() {
                   <span className="font-medium text-foreground"> {confirm.name}</span>?
                 </p>
               </div>
-              <div className="px-5 py-4 border-t border-border flex justify-end gap-3">
+              <div className="flex gap-3 justify-end px-5 py-4 border-t border-border">
                 <button
                   className="px-4 py-2 rounded-xl bg-muted text-foreground hover:bg-muted/80"
                   onClick={() => setConfirm({ open: false, id: null, name: '' })}

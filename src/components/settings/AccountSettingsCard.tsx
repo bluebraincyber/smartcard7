@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/Card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/Button";
+import { Button } from "@/components/ui/button";
 import { Loader2, CheckCircle2, AlertCircle, Info } from "lucide-react";
 
 type State = "idle" | "saving" | "success" | "error" | "loading";

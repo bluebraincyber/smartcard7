@@ -24,4 +24,6 @@ const Switch = React.forwardRef<
 ))
 Switch.displayName = SwitchPrimitives.Root.displayName
 
+export type { SwitchProps } from '@radix-ui/react-switch';
+
 export { Switch }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Switch } from "@/components/ui/Switch";
+import { Switch } from "@/components/ui/switch";
 import { Mail, MessageSquare, Bell, BellRing, AlertTriangle, Tag } from "lucide-react";
 
 type NotificationChannel = 'email' | 'whatsapp' | 'push';

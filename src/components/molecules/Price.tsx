@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { cn } from '@/lib/utils';
-import { formatPrice } from '@/lib/utils';
+import { fmtBRL } from '@/lib/format';
 import { Text } from '@/components/ui';
 
 export interface PriceProps {
@@ -37,7 +37,7 @@ const Price = React.forwardRef<HTMLDivElement, PriceProps>(
 
     const formatValue = (price: number) => {
       if (showCurrency) {
-        return formatPrice(price);
+        return fmtBRL(price * 100); // fmtBRL espera centavos
       }
       return price.toLocaleString('pt-BR', {
         minimumFractionDigits: 2,
@@ -71,7 +71,7 @@ const Price = React.forwardRef<HTMLDivElement, PriceProps>(
           {...props}
         >
           {prefix && (
-            <Text size={size} color="muted">
+            <Text size={size === 'md' ? 'base' : size === 'sm' ? 'sm' : 'lg'} color="muted">
               {prefix}
             </Text>
           )}
@@ -93,7 +93,7 @@ const Price = React.forwardRef<HTMLDivElement, PriceProps>(
           )}
           
           {suffix && (
-            <Text size={size} color="muted">
+            <Text size={size === 'md' ? 'base' : size === 'sm' ? 'sm' : 'lg'} color="muted">
               {suffix}
             </Text>
           )}
@@ -113,7 +113,7 @@ const Price = React.forwardRef<HTMLDivElement, PriceProps>(
       >
         <div className="flex items-center gap-2">
           {prefix && (
-            <Text size={size} color="muted">
+            <Text size={size === 'md' ? 'base' : size === 'sm' ? 'sm' : 'lg'} color="muted">
               {prefix}
             </Text>
           )}
@@ -133,7 +133,7 @@ const Price = React.forwardRef<HTMLDivElement, PriceProps>(
           )}
           
           {suffix && (
-            <Text size={size} color="muted">
+            <Text size={size === 'md' ? 'base' : size === 'sm' ? 'sm' : 'lg'} color="muted">
               {suffix}
             </Text>
           )}

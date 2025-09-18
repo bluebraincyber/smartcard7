@@ -10,16 +10,21 @@ import {
   ResponsiveContainer, 
   ResponsivePageHeader,
   ResponsiveCard,
-  ResponsiveInput,
-  ResponsiveButton,
+  ResponsiveGrid
+} from '@/components/ui/responsive-layout';
+import { 
+  ResponsiveButton, 
+  ResponsiveInput, 
   ResponsiveSelect 
-} from '@/components/ui/ResponsiveLayout';
-import { AdaptiveModal } from '@/components/ui/ResponsiveModal';
-import { ProductGrid } from '@/components/ui/ProductCard';
+} from '@/components/ui/responsive-forms';
+import { ProductGrid } from '@/components/ui/product-card';
+import { AdaptiveModal } from '@/components/ui/responsive-modal';
 import { useMobileLayout } from '@/hooks/use-media-query';
 
 // Types
-import type { Store, Category, Item } from '@/types/store';
+import type { Store, Category } from '@/types/store';
+import type { Product } from '@/components/ui/product-card';
+
 
 interface StorePageClientProps {
   store: Store;
@@ -38,12 +43,16 @@ export default function StorePageClient({ store }: StorePageClientProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   // Get all products with category info
-  const products = useMemo(() => {
+  const products: Product[] = useMemo(() => {
     return store.categories.flatMap(category => 
       category.items.map(item => ({
-        ...item,
-        categoryName: category.name,
-        categoryId: category.id
+        id: item.id,
+        name: item.name,
+        description: item.description,
+        price: item.price,
+        imageUrl: item.image,
+        category: category.name,
+        inStock: item.isAvailable
       }))
     );
   }, [store.categories]);
@@ -53,11 +62,11 @@ export default function StorePageClient({ store }: StorePageClientProps) {
     return products.filter(product => {
       const matchesSearch = searchQuery 
         ? product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          product.description?.toLowerCase().includes(searchQuery.toLowerCase())
+          (product.description?.toLowerCase() || '').includes(searchQuery.toLowerCase())
         : true;
       
       const matchesCategory = selectedCategory !== 'all' 
-        ? product.categoryId === selectedCategory
+        ? product.category === selectedCategory
         : true;
       
       return matchesSearch && matchesCategory;
@@ -65,23 +74,46 @@ export default function StorePageClient({ store }: StorePageClientProps) {
   }, [products, searchQuery, selectedCategory]);
 
   // Handlers
-  const handleEditProduct = useCallback((productId: string) => {
-    router.push(`/dashboard/store/${params.id}/product/${productId}/edit`);
+  const handleEditProduct = useCallback((product: Product) => {
+    router.push(`/dashboard/store/${params.id}/product/${product.id}/edit`);
   }, [params.id, router]);
 
-  const handleDeleteProduct = useCallback(async (productId: string) => {
+  const handleDeleteProduct = useCallback(async (product: Product) => {
     if (confirm('Tem certeza que deseja excluir este produto?')) {
       try {
         setIsLoading(true);
         // TODO: Implement delete logic
-        console.log('Deleting product:', productId);
+        console.log('Deleting product:', product.id);
+        // In a real app, you would await an API call here
+        // await deleteProduct(product.id);
       } catch (error) {
         console.error('Error deleting product:', error);
+        // In a real app, you might want to show an error toast here
+        // toast.error('Falha ao excluir o produto');
       } finally {
         setIsLoading(false);
       }
     }
   }, []);
+
+  // Get all items from categories and transform them to match the Product interface
+  const products: Product[] = useMemo(() => {
+    return store.categories.flatMap(category => 
+      category.items.map(item => {
+        // Create a new object with only the properties we need
+        const product: Product = {
+          id: item.id,
+          name: item.name,
+          description: item.description,
+          price: item.price,
+          imageUrl: item.image,
+          category: category.name,
+          inStock: item.isAvailable
+        };
+        return product;
+      })
+    );
+  }, [store.categories]);
 
   // Render
   return (
@@ -268,14 +300,14 @@ const StoreFilters = ({
               onChange={(e: any) => onCategoryChange(e.target.value)}
               size={isMobileLayout ? 'lg' : 'md'}
               className="flex-1 sm:flex-none sm:w-48"
-            >
-              <option value="all">Todas as categorias</option>
-              {categories.map((category: any) => (
-                <option key={category.id} value={category.id}>
-                  {category.name}
-                </option>
-              ))}
-            </ResponsiveSelect>
+              options={[
+                { value: 'all', label: 'Todas as categorias' },
+                ...categories.map((category: any) => ({
+                  value: category.id,
+                  label: category.name
+                }))
+              ]}
+            />
 
             {!isMobileLayout && (
               <div className="flex bg-muted rounded-lg p-1">
@@ -328,7 +360,7 @@ const EmptyState = ({ hasSearch, onAddProduct }: any) => (
         onClick={onAddProduct}
       >
         Adicionar Produto
-      </ResponsibleButton>
+      </ResponsiveButton>
     )}
   </ResponsiveCard>
 );

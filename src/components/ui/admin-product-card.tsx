@@ -2,9 +2,9 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Switch } from '@/components/ui/Switch';
-import { ImageThumb } from '@/components/ui/ImageThumb';
-import { EditIcon, PauseIcon, PlayIcon, CopyIcon, TrashIcon, MoreIcon } from '@/components/ui/Icon';
+import { Switch } from '@/components/ui/switch';
+import { ImageThumb } from '@/components/ui/image-thumb';
+import { EditIcon, PauseIcon, PlayIcon, CopyIcon, TrashIcon, MoreIcon } from '@/components/ui/icon';
 
 export interface AdminProductCardProps {
   id: string;
@@ -87,7 +87,6 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
                 <Switch
                   checked={isActive}
                   onCheckedChange={handleSwitchChange}
-                  size="md"
                 />
               </div>
             </div>

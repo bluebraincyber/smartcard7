@@ -1,16 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { Store, Plus, Eye, BarChart3, Users, TrendingUp, Activity, Calendar, ShoppingBag } from 'lucide-react'
+import { Store, Plus, Eye, BarChart3, Users, Activity, ShoppingBag } from 'lucide-react'
 import { Session } from 'next-auth'
 import PageViewsChart from '@/components/analytics/PageViewsChart'
 
 // Import responsive components
-import { ResponsiveCard, ResponsiveGrid } from '@/components/ui/ResponsiveLayout'
-import { ResponsiveButton } from '@/components/ui/ResponsiveForms'
-import { useResponsive, useMobileLayout } from '@/hooks/useResponsive'
+import { ResponsiveCard, ResponsiveGrid } from '@/components/ui/responsive-layout'
+import { ResponsiveButton } from '@/components/ui/responsive-forms'
+import { useMobileLayout } from '@/hooks/useResponsive'
 import { PageHeader } from '@/components/layout/PageHeader'
 
 interface Store {
@@ -29,13 +28,19 @@ interface Analytics {
   totalStores: number
 }
 
+interface QuickAction {
+  title: string
+  description: string
+  href: string
+  icon: React.ComponentType<{ className?: string }>
+  color: 'blue' | 'green' | 'purple' | 'orange'
+}
+
 interface DashboardClientProps {
   session: Session
 }
 
 export default function DashboardClient({ session }: DashboardClientProps) {
-  const router = useRouter()
-  const { isMobile } = useResponsive()
   const isMobileLayout = useMobileLayout()
   
   const [stores, setStores] = useState<Store[]>([])
@@ -96,7 +101,7 @@ export default function DashboardClient({ session }: DashboardClientProps) {
   }
 
   // Quick actions for dashboard
-  const quickActions = [
+  const quickActions: QuickAction[] = [
     {
       title: 'Nova Loja',
       description: 'Crie uma nova loja digital',
@@ -260,7 +265,7 @@ export default function DashboardClient({ session }: DashboardClientProps) {
                   icon={action.icon}
                   title={action.title}
                   description={action.description}
-                  color={action.color as any}
+                  color={action.color}
                   isMobile={isMobileLayout}
                 />
               ))}
@@ -447,7 +452,7 @@ function QuickActionCard({
   isMobile
 }: {
   href: string
-  icon: any
+  icon: React.ComponentType<{ className?: string }>
   title: string
   description: string
   color: 'blue' | 'green' | 'purple' | 'orange'
@@ -487,7 +492,7 @@ function QuickActionCard({
       <ResponsiveCard hover className="h-full">
         <Link
           href={href}
-          className="block p-4 sm:p-6 text-center h-full flex flex-col"
+          className="p-4 sm:p-6 text-center h-full flex flex-col"
         >
           <div className={`mx-auto flex items-center justify-center rounded-2xl ${classes.bg} transition-all duration-300 mb-4 shadow-md group-hover:shadow-lg ${
             isMobile ? 'h-12 w-12' : 'h-14 w-14 sm:h-16 sm:w-16'

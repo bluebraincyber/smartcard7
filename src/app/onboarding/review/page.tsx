@@ -5,24 +5,24 @@ import { useOnboarding } from '@/contexts/onboarding-context'
 import { Button } from '@/components/ui/button'
 import { OnboardingContainer } from '@/components/onboarding/OnboardingContainer'
 import { Loader2 } from 'lucide-react'
-import { useToast } from '@/hooks/use-onboarding-toast'
+import { useOnboardingToast } from '@/hooks/use-onboarding-toast'
 
 export default function ReviewPage() {
   const router = useRouter()
   const { prevStep, formMethods, onSubmit, isSubmitting } = useOnboarding()
-  const { toast } = useToast()
+  const { showSuccess, showError } = useOnboardingToast()
   
   const { handleSubmit, watch } = formMethods
   
   const formData = watch()
 
-  const handleFormSubmit = async (data: any) => {
+  const handleFormSubmit = async (data: typeof formData) => {
     try {
       await onSubmit(data)
-      toast.showSuccess('Configuração concluída com sucesso!', 'Sua loja está pronta para uso.')
+      showSuccess('Configuração concluída com sucesso!', 'Sua loja está pronta para uso.')
     } catch (error) {
       console.error('Error submitting form:', error)
-      toast.showError('Erro ao salvar configuração', 'Tente novamente mais tarde.')
+      showError('Erro ao salvar configuração', 'Tente novamente mais tarde.')
     }
   }
 
@@ -31,11 +31,17 @@ export default function ReviewPage() {
       title="Revisar Informações"
       description="Confira se todas as informações estão corretas antes de finalizar."
     >
+      // Remove duplicate title prop since it's already defined in the opening tag
+      description="Confira se todas as informações estão corretas antes de finalizar."
+
+      // Remove duplicate title prop since it's already defined above
+      description="Confira se todas as informações estão corretas antes de finalizar."
+    >
       <div className="space-y-8">
         {/* Business Info Section */}
-        <div className="border rounded-lg p-6">
+        <div className="p-6 rounded-lg border">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-medium text-lg">Informações da Empresa</h3>
+            <h3 className="text-lg font-medium">Informações da Empresa</h3>
             <Button
               type="button"
               variant="ghost"
@@ -46,7 +52,7 @@ export default function ReviewPage() {
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <p className="text-sm text-muted-foreground">Nome da Empresa</p>
               <p>{formData.businessInfo?.businessName}</p>
@@ -69,7 +75,7 @@ export default function ReviewPage() {
                 {formData.businessInfo?.address?.street}, {formData.businessInfo?.address?.number}
                 {formData.businessInfo?.address?.complement && `, ${formData.businessInfo.address.complement}`}
               </p>
-              <p>
+              <p className="mt-1">
                 {formData.businessInfo?.address?.neighborhood} - {formData.businessInfo?.address?.city}/{formData.businessInfo?.address?.state}
               </p>
               <p>CEP: {formData.businessInfo?.address?.zipCode}</p>
@@ -78,9 +84,9 @@ export default function ReviewPage() {
         </div>
 
         {/* Template Section */}
-        <div className="border rounded-lg p-6">
+        <div className="p-6 rounded-lg border">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-medium text-lg">Template Escolhido</h3>
+            <h3 className="text-lg font-medium">Template Escolhido</h3>
             <Button
               type="button"
               variant="ghost"
@@ -91,14 +97,14 @@ export default function ReviewPage() {
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
               <p className="text-sm text-muted-foreground">Template</p>
               <p>{formData.template?.templateId}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Cores</p>
-              <div className="flex items-center gap-2 mt-1">
+              <div className="flex gap-2 items-center mt-1">
                 <div 
                   className="w-6 h-6 rounded-full border"
                   style={{ backgroundColor: formData.template?.primaryColor }}
@@ -115,9 +121,9 @@ export default function ReviewPage() {
         </div>
 
         {/* Products Section */}
-        <div className="border rounded-lg p-6">
+        <div className="p-6 rounded-lg border">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="font-medium text-lg">Produtos</h3>
+            <h3 className="text-lg font-medium">Produtos</h3>
             <Button
               type="button"
               variant="ghost"
@@ -128,10 +134,10 @@ export default function ReviewPage() {
             </Button>
           </div>
           
-          {formData.products?.products?.length > 0 ? (
+          {Array.isArray(formData.products?.products) && formData.products.products.length > 0 ? (
             <div className="space-y-4">
               {formData.products.products.map((product: any, index: number) => (
-                <div key={index} className="border-b pb-4 last:border-0 last:pb-0">
+                <div key={index} className="pb-4 border-b last:border-0 last:pb-0">
                   <div className="flex justify-between">
                     <h4 className="font-medium">{product.name}</h4>
                     <p className="text-muted-foreground">
@@ -147,7 +153,7 @@ export default function ReviewPage() {
                     </p>
                   )}
                   {product.description && (
-                    <p className="text-sm mt-1">{product.description}</p>
+                    <p className="mt-1 text-sm">{product.description}</p>
                   )}
                 </div>
               ))}
@@ -174,7 +180,7 @@ export default function ReviewPage() {
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                <Loader2 className="mr-2 w-4 h-4 animate-spin" />
                 Finalizando...
               </>
             ) : (
@@ -184,5 +190,5 @@ export default function ReviewPage() {
         </div>
       </div>
     </OnboardingContainer>
-  )
+  );
 }
