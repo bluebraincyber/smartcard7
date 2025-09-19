@@ -323,20 +323,8 @@ export default function NewItemPage() {
                   </div>
 
                   {/* Toggles */}
-                  <div className="grid grid-cols-2 gap-4 pt-4">
-                    {/* Produto Ativo */}
-                    <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                      <div>
-                        <label className="text-sm font-medium text-gray-700">Produto Ativo</label>
-                        <p className="text-xs text-gray-500">Visível na loja</p>
-                      </div>
-                      <ToggleSwitch
-                        enabled={formData.isactive}
-                        onChange={() => handleToggleChange('isactive')}
-                      />
-                    </div>
-
-                    {/* Produto Disponível */}
+                  <div className="grid grid-cols-1 gap-4 pt-4">
+                    {/* Apenas Produto Disponível */}
                     <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
                       <div>
                         <label className="text-sm font-medium text-gray-700">Produto Disponível</label>

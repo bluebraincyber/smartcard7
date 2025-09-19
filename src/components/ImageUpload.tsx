@@ -4,6 +4,16 @@ import { useState, useRef } from 'react'
 import { Upload, X, Loader2, Image as ImageIcon } from 'lucide-react'
 import Image from 'next/image'
 
+type VariantType = 'large' | 'medium' | 'small' | 'compact'
+
+interface VariantClasses {
+  container: string
+  icon: string
+  text: string
+  subtext: string
+  button: string
+}
+
 interface ImageUploadProps {
   onUpload: (url: string) => void
   onRemove?: () => void
@@ -12,7 +22,7 @@ interface ImageUploadProps {
   storeid: string
   className?: string
   placeholder?: string
-  variant?: 'large' | 'medium' | 'small' | 'compact'
+  variant?: VariantType
 }
 
 export default function ImageUpload({
@@ -23,49 +33,54 @@ export default function ImageUpload({
   storeid,
   className = '',
   placeholder = 'Clique para adicionar uma imagem',
-  variant = 'medium'
+  variant = 'medium' as const
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false)
   const [dragOver, setDragOver] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   // Definir classes baseadas na variante
-  const getVariantClasses = () => {
+  const getVariantClasses = (): VariantClasses => {
     switch (variant) {
       case 'large':
         return {
           container: 'w-full aspect-square max-w-sm mx-auto',
           icon: 'h-12 w-12',
           text: 'text-base',
-          subtext: 'text-sm'
+          subtext: 'text-sm',
+          button: 'px-4 py-2 text-sm'
         }
       case 'medium':
         return {
-          container: 'w-full aspect-square max-w-xs mx-auto',
+          container: 'w-full aspect-square max-w-[180px] sm:max-w-[220px]',
           icon: 'h-8 w-8',
           text: 'text-sm',
-          subtext: 'text-xs'
+          subtext: 'text-xs',
+          button: 'px-3 py-1.5 text-xs'
         }
       case 'small':
         return {
-          container: 'w-full aspect-square max-w-[120px] mx-auto',
+          container: 'w-full aspect-square max-w-[100px]',
           icon: 'h-6 w-6',
           text: 'text-xs',
-          subtext: 'text-xs'
+          subtext: 'text-xs',
+          button: 'px-2.5 py-1 text-xs'
         }
       case 'compact':
         return {
-          container: 'w-full aspect-square max-w-[80px] mx-auto',
+          container: 'w-full aspect-square max-w-[80px]',
           icon: 'h-4 w-4',
           text: 'text-xs',
-          subtext: 'text-xs'
+          subtext: 'text-[10px]',
+          button: 'px-2 py-1 text-xs'
         }
       default:
         return {
           container: 'w-full aspect-square',
           icon: 'h-8 w-8',
           text: 'text-sm',
-          subtext: 'text-xs'
+          subtext: 'text-xs',
+          button: 'px-3 py-1.5 text-sm'
         }
     }
   }
@@ -190,40 +205,43 @@ export default function ImageUpload({
       />
       
       {currentImage ? (
-        <div className="relative group">
-          <div className={`relative ${variantClasses.container} rounded-lg overflow-hidden border-2 border-gray-200`}>
+        <div className="relative group w-full h-full">
+          <div className={`relative ${variantClasses.container} rounded-lg overflow-hidden border border-gray-200 shadow-sm`}>
             <Image
               src={currentImage || '/images/placeholder.png'}
               alt="Current product image"
               fill={true}
-              className="object-cover"
+              className="object-cover transition-transform duration-200 group-hover:scale-105"
+              sizes="(max-width: 640px) 200px, 280px"
               priority={true}
             />
             
             {/* Overlay com botões - dentro do container da imagem */}
-            <div className={`absolute inset-0 flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${
-              variant === 'compact' || variant === 'small' ? 'hidden sm:flex' : 'flex'
-            }`}>
-              <div className="flex space-x-2">
+            <div 
+              className={`absolute inset-0 flex items-end sm:items-center justify-center bg-gradient-to-t sm:bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-200 ${
+                variant === 'compact' || variant === 'small' ? 'pb-2' : 'pb-3 sm:pb-0'
+              }`}
+            >
+              <div className={`flex flex-col sm:flex-row gap-2 p-2 w-full ${variant === 'medium' || variant === 'large' ? 'sm:px-4' : ''} justify-center`}>
                 <button
                   onClick={handleClick}
-                  className={`bg-white text-gray-700 rounded text-xs font-medium hover:bg-gray-50 flex items-center shadow-sm ${
-                    variant === 'compact' ? 'px-2 py-1' : 'px-3 py-1.5'
-                  }`}
+                  className={`bg-white text-gray-800 rounded-md font-medium hover:bg-gray-50 flex items-center justify-center shadow-sm ${variantClasses.button} transition-colors whitespace-nowrap`}
                   disabled={uploading}
                   type="button"
                 >
-                  <Upload className={`${variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
-                  Trocar
+                  {uploading ? (
+                    <Loader2 className="h-3 w-3 mr-1.5 animate-spin" />
+                  ) : (
+                    <Upload className="h-3 w-3 mr-1.5" />
+                  )}
+                  {uploading ? 'Enviando...' : 'Trocar'}
                 </button>
                 <button
                   onClick={handleRemove}
-                  className={`bg-brand-blue text-white rounded text-xs font-medium hover:bg-brand-blue/90 flex items-center shadow-sm ${
-                    variant === 'compact' ? 'px-2 py-1' : 'px-3 py-1.5'
-                  }`}
+                  className="bg-red-600 text-white rounded-md font-medium hover:bg-red-700 flex items-center justify-center shadow-sm transition-colors whitespace-nowrap text-xs px-3 py-1.5"
                   type="button"
                 >
-                  <X className={`${variant === 'compact' ? 'h-3 w-3' : 'h-4 w-4'} mr-1`} />
+                  <X className="h-3 w-3 mr-1.5" />
                   Remover
                 </button>
               </div>
@@ -232,8 +250,8 @@ export default function ImageUpload({
           
           {/* Indicador mobile para variantes pequenas */}
           {(variant === 'compact' || variant === 'small') && (
-            <div className="absolute top-1 right-1 bg-blue-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-xs sm:hidden">
-              <Upload className="h-2 w-2" />
+            <div className="absolute top-1 right-1 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs sm:hidden shadow-sm">
+              <Upload className="h-3 w-3" />
             </div>
           )}
         </div>
@@ -244,37 +262,49 @@ export default function ImageUpload({
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
           className={`
-            ${variantClasses.container} border-2 border-dashed rounded-lg cursor-pointer transition-colors
-            flex flex-col items-center justify-center space-y-1
-            ${dragOver
-              ? 'border-blue-500 bg-blue-50'
-              : 'border-gray-300 hover:border-gray-400 hover:bg-gray-50'
+            ${variantClasses.container} border-2 border-dashed rounded-lg cursor-pointer transition-all duration-200
+            flex flex-col items-center justify-center space-y-1.5 p-2
+            ${
+              dragOver
+                ? 'border-blue-500 bg-blue-50/50 ring-2 ring-blue-100'
+                : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50/50'
             }
-            ${uploading ? 'pointer-events-none opacity-50' : ''}
+            ${uploading ? 'pointer-events-none' : ''}
+            bg-white/50 backdrop-blur-sm
           `}
         >
           {uploading ? (
-            <>
+            <div className="flex flex-col items-center justify-center space-y-2 p-2 text-center">
               <Loader2 className={`${variantClasses.icon} text-blue-500 animate-spin`} />
-              <p className={`${variantClasses.text} text-gray-600`}>Fazendo upload...</p>
-            </>
+              <div className="space-y-0.5">
+                <p className={`${variantClasses.text} font-medium text-gray-700`}>Enviando imagem...</p>
+                <p className={`${variantClasses.subtext} text-gray-500`}>Aguarde um momento</p>
+              </div>
+            </div>
           ) : (
-            <>
-              <ImageIcon className={`${variantClasses.icon} text-gray-400`} />
-              <p className={`${variantClasses.text} text-gray-600 text-center px-2`}>
-                {variant === 'compact' ? 'Imagem' : placeholder}
+            <div className="flex flex-col items-center justify-center space-y-1.5 p-1 text-center">
+              <div className="relative">
+                <ImageIcon className={`${variantClasses.icon} text-gray-400 mb-1`} />
+                {dragOver && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-blue-50/50 rounded-full">
+                    <Upload className="h-4 w-4 text-blue-500" />
+                  </div>
+                )}
+              </div>
+              <p className={`${variantClasses.text} font-medium text-gray-700`}>
+                {variant === 'compact' ? 'Adicionar imagem' : placeholder}
               </p>
               {variant !== 'compact' && (
-                <>
-                  <p className={`${variantClasses.subtext} text-gray-500 text-center`}>
-                    {variant === 'small' ? 'Clique aqui' : 'Arraste e solte ou clique para selecionar'}
+                <div className="space-y-0.5">
+                  <p className={`${variantClasses.subtext} text-gray-500`}>
+                    {variant === 'small' ? 'Clique para selecionar' : 'Arraste e solte uma imagem'}
                   </p>
-                  <p className={`${variantClasses.subtext} text-gray-400 text-center`}>
-                    JPEG, PNG ou WebP (máx. 5MB)
+                  <p className={`${variantClasses.subtext} text-gray-400`}>
+                    {variant === 'small' ? 'JPEG, PNG, WebP' : 'Formatos: JPEG, PNG, WebP (máx. 5MB)'}
                   </p>
-                </>
+                </div>
               )}
-            </>
+            </div>
           )}
         </div>
       )}

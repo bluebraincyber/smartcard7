@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Trash2, Eye, ExternalLink, MoreVertical, Copy } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { ArrowLeft, Plus, Trash2, Edit, ExternalLink, MoreVertical, Copy, Eye } from 'lucide-react';
 import Image from 'next/image';
 import StoreHeader from '@/components/store/StoreHeader';
 
@@ -58,7 +58,7 @@ interface ToggleSwitchProps {
 
 const ToggleSwitch = ({ checked, onChange }: ToggleSwitchProps) => (
   <label className="relative inline-flex items-center cursor-pointer">
-    <input type="checkbox" checked={checked} onChange={() => onChange(!checked)} className="sr-only peer" />
+    <input type="checkbox" checked={checked} onChange={(e) => onChange(e.target.checked)} className="sr-only peer" />
     <div className="w-11 h-6 bg-muted peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-background after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-background after:border-border after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
   </label>
 );
@@ -68,29 +68,94 @@ interface AdminProductCardProps {
   onEdit: (productId: string) => void;
   onDelete: (productId: string) => void;
   onDuplicate: (product: Product) => void;
-  onToggleActive: (isActive: boolean) => void;
-  onTogglePause: (isPaused: boolean) => void;
+  onToggleActive?: () => void;
+  onTogglePause?: (isPaused: boolean) => void;
 }
 
-const AdminProductCard = ({ product, onEdit, onDelete, onDuplicate, onToggleActive }: AdminProductCardProps) => {
+const AdminProductCard: React.FC<AdminProductCardProps> = ({
+  product,
+  onEdit,
+  onDelete,
+  onDuplicate,
+  onToggleActive,
+  onTogglePause,
+}) => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (isMenuOpen) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [isMenuOpen]);
+
   return (
     <div className="relative bg-card/70 backdrop-blur-sm border border-border rounded-lg shadow-sm p-3 flex flex-col h-full">
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center space-x-2">
-          <ToggleSwitch checked={product.isactive} onChange={onToggleActive} />
-          <span className={`text-xs font-medium ${product.isactive ? 'text-success' : 'text-destructive'}`}>
-            {product.isactive ? 'Ativo' : 'Inativo'}
-          </span>
-        </div>
-        <button 
-          onClick={() => onDelete(product.id)} 
-          className="text-destructive hover:text-destructive/80 transition-colors p-1"
-          aria-label="Excluir produto"
+      {/* Status Indicator */}
+      <div
+        className={`absolute top-2 left-2 w-3 h-3 rounded-full ${product.isactive ? 'bg-green-500' : 'bg-red-500'} border-2 border-background`}
+        title={product.isactive ? 'Ativo' : 'Inativo'}
+      />
+
+      <div className="absolute top-2 right-2">
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            setIsMenuOpen(!isMenuOpen);
+          }}
+          className="text-muted-foreground hover:text-foreground p-1 rounded-full hover:bg-muted/50 transition-colors"
+          aria-label="Opções do produto"
+          type="button"
         >
-          <Trash2 size={14} />
+          <MoreVertical size={16} />
         </button>
+
+        {isMenuOpen && (
+          <div
+            className="absolute right-0 mt-1 w-40 bg-card border border-border rounded-md shadow-lg z-10 py-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => {
+                onEdit(product.id);
+                setIsMenuOpen(false);
+              }}
+              className="w-full text-left px-4 py-2 text-sm hover:bg-muted/50 flex items-center"
+              type="button"
+            >
+              <Edit size={14} className="mr-2" />
+              Editar
+            </button>
+            <button
+              onClick={() => {
+                onDuplicate(product);
+                setIsMenuOpen(false);
+              }}
+              className="w-full text-left px-4 py-2 text-sm hover:bg-muted/50 flex items-center"
+              type="button"
+            >
+              <Copy size={14} className="mr-2" />
+              Duplicar
+            </button>
+            <button
+              onClick={() => {
+                onDelete(product.id);
+                setIsMenuOpen(false);
+              }}
+              className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-destructive/10 flex items-center"
+              type="button"
+            >
+              <Trash2 size={14} className="mr-2" />
+              Excluir
+            </button>
+          </div>
+        )}
       </div>
-      
+
       <div className="flex flex-col items-center text-center flex-grow">
         <div className="relative w-16 h-16 rounded-full overflow-hidden mb-2 border-2 border-primary">
           <Image
@@ -107,33 +172,21 @@ const AdminProductCard = ({ product, onEdit, onDelete, onDuplicate, onToggleActi
             }}
           />
         </div>
-        
+
         <h3 className="text-sm font-bold line-clamp-1 mb-1 w-full">{product.name}</h3>
         {product.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2 mb-2 h-8 overflow-hidden w-full">
-            {product.description}
-          </p>
+          <p className="text-xs text-muted-foreground line-clamp-2 mb-2 h-8 overflow-hidden w-full">{product.description}</p>
         )}
-        <p className="text-base font-semibold text-primary mt-auto">R$ {product.price.toFixed(2)}</p>
       </div>
-      
-      <div className="mt-3 flex justify-between space-x-2">
-        <button
-          onClick={() => onEdit(product.id)}
-          className="flex-1 flex items-center justify-center px-2 py-1.5 bg-primary/10 text-primary text-xs rounded-md hover:bg-primary/20 transition-colors"
-          aria-label="Editar produto"
-        >
-          <Eye size={12} className="mr-1" />
-          <span className="truncate">Editar</span>
-        </button>
-        <button
-          onClick={() => onDuplicate(product)}
-          className="flex-1 flex items-center justify-center px-2 py-1.5 bg-muted text-foreground text-xs rounded-md hover:bg-muted/80 transition-colors"
-          aria-label="Duplicar produto"
-        >
-          <Copy size={12} className="mr-1" />
-          <span className="truncate">Duplicar</span>
-        </button>
+
+      {/* Price at the bottom */}
+      <div className="mt-3 pt-3 border-t border-border">
+        <p className="text-base font-semibold text-primary text-center">
+          {new Intl.NumberFormat('pt-BR', {
+            style: 'currency',
+            currency: 'BRL',
+          }).format(product.price)}
+        </p>
       </div>
     </div>
   );
@@ -165,58 +218,121 @@ const AddItemCard = ({ onClick }: AddItemCardProps) => (
 // COMPONENTE PRINCIPAL
 // -----------------------------------------------------------
 
-const StoreManager = ({ store: initialStore }: StoreManagerProps) => {
+const StoreManager: React.FC<StoreManagerProps> = ({ store: initialStore }) => {
   const [store, setStore] = useState<Store>(() => ({
     ...initialStore,
-    categories: initialStore.categories?.map((category) => ({
-      ...category,
-      items: category.items || [],
-    })) || [],
+    categories:
+      initialStore.categories?.map((category) => ({
+        ...category,
+        items: category.items || [],
+      })) || [],
   }));
 
   useEffect(() => {
     setStore({
       ...initialStore,
-      categories: initialStore.categories?.map((category) => ({
-        ...category,
-        items: category.items || [],
-      })) || [],
+      categories:
+        initialStore.categories?.map((category) => ({
+          ...category,
+          items: category.items || [],
+        })) || [],
     });
   }, [initialStore]);
 
   const [categoryActionsOpen, setCategoryActionsOpen] = useState<string | null>(null);
-  // Removida a variável saving não utilizada
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-  const toggleCategoryStatus = async (categoryId: string, isactive: boolean) => {
-    console.log(`Toggling category ${categoryId} to ${!isactive}`);
-    // Implementar lógica de toggle aqui
+  const toggleCategoryStatus = useCallback(async (categoryId: string, isactive: boolean) => {
+    try {
+      console.log(`Toggling category ${categoryId} to ${!isactive}`);
+      // TODO: Implement category status toggle
+    } catch (error) {
+      console.error('Error toggling category status:', error);
+      // TODO: Show error message to user
+    }
+  }, []);
+
+  const handleDeleteItem = useCallback((id: string) => {
+    if (window.confirm('Tem certeza que deseja excluir este produto?')) {
+      console.log(`Deleting item: ${id}`);
+      // TODO: Implement delete functionality
+    }
+  }, []);
+
+  const handleEditItem = useCallback(
+    (id: string) => {
+      const productToEdit = store.categories.flatMap((cat) => cat.items).find((item) => item.id === id);
+
+      if (productToEdit) {
+        setEditingProduct(productToEdit);
+        setIsEditModalOpen(true);
+      }
+    },
+    [store.categories],
+  );
+
+  const handleSaveProduct = async (updatedProduct: Product) => {
+    try {
+      console.log('Saving product:', updatedProduct);
+
+      setStore((prev) => ({
+        ...prev,
+        categories: prev.categories.map((cat) => ({
+          ...cat,
+          items: cat.items.map((item) => (item.id === updatedProduct.id ? updatedProduct : item)),
+        })),
+      }));
+
+      setIsEditModalOpen(false);
+      setEditingProduct(null);
+    } catch (error) {
+      console.error('Error saving product:', error);
+      // TODO: Show error message to user
+    }
   };
 
-  const handleDeleteItem = (id: string) => {
-    console.log(`Deleting item: ${id}`);
-  };
+  const handleDuplicateItem = useCallback(async (product: Product) => {
+    try {
+      console.log(`Duplicating product: ${product.name}`);
+      // TODO: Implement duplicate functionality
+    } catch (error) {
+      console.error('Error duplicating product:', error);
+      // TODO: Show error message to user
+    }
+  }, []);
 
-  const handleEditItem = (id: string) => {
-    console.log(`Editing item: ${id}`);
-  };
+  const handleToggleProductActive = useCallback(
+    (productId: string, categoryId: string, isActive: boolean) => {
+      try {
+        // Update local state optimistically
+        const updatedCategories = store.categories.map((cat) =>
+          cat.id === categoryId
+            ? {
+                ...cat,
+                items: cat.items.map((item) => (item.id === productId ? { ...item, isactive: isActive } : item)),
+              }
+            : cat,
+        );
 
-  const handleDuplicateItem = async (product: Product) => {
-    console.log(`Duplicating product: ${product.name}`);
-  };
+        setStore((prev) => ({ ...prev, categories: updatedCategories }));
 
-  const handleToggleProductActive = async (productId: string, categoryId: string, isActive: boolean) => {
-    const updatedCategories = store.categories.map((cat) =>
-      cat.id === categoryId
-        ? {
-            ...cat,
-            items: cat.items.map((item) =>
-              item.id === productId ? { ...item, isactive: isActive } : item
-            ),
-          }
-        : cat
-    );
-    setStore((prev) => ({ ...prev, categories: updatedCategories }));
-  };
+        // TODO: Add API call to update product status
+      } catch (error) {
+        console.error('Error toggling product status:', error);
+        // Revert state on error
+        setStore((prev) => ({
+          ...prev,
+          categories:
+            initialStore.categories?.map((category) => ({
+              ...category,
+              items: category.items || [],
+            })) || [],
+        }));
+      }
+    },
+    [store.categories, initialStore.categories],
+  );
 
   const duplicateCategory = (id: string) => {
     console.log(`Duplicando categoria com ID: ${id}`);
@@ -241,18 +357,16 @@ const StoreManager = ({ store: initialStore }: StoreManagerProps) => {
           accent="none"
           variant="stacked"
           onCoverImageUpdate={(url) => {
-            setStore(prev => ({ ...prev, coverImage: url }));
+            setStore((prev) => ({ ...prev, coverImage: url }));
             console.log('🖼️ Capa atualizada:', url);
           }}
           onProfileImageUpdate={(url) => {
-            setStore(prev => ({ ...prev, profileImage: url }));
+            setStore((prev) => ({ ...prev, profileImage: url }));
             console.log('🖼️ Perfil atualizado:', url);
           }}
           statusPill={
             store.isactive ? (
-              <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-400">
-                Ativa
-              </span>
+              <span className="inline-flex items-center rounded-full bg-emerald-500/15 px-2 py-0.5 text-xs font-medium text-emerald-400">Ativa</span>
             ) : null
           }
           actions={
@@ -294,15 +408,13 @@ const StoreManager = ({ store: initialStore }: StoreManagerProps) => {
                     <span className={`text-xs font-medium ${category.isactive ? 'text-success' : 'text-destructive'}`}>
                       {category.isactive ? 'Ativa' : 'Inativa'}
                     </span>
-                    <ToggleSwitch
-                      checked={category.isactive}
-                      onChange={() => toggleCategoryStatus(category.id, category.isactive)}
-                    />
+                    <ToggleSwitch checked={category.isactive} onChange={() => toggleCategoryStatus(category.id, category.isactive)} />
                   </div>
                   <div className="relative">
                     <button
                       onClick={() => setCategoryActionsOpen(categoryActionsOpen === category.id ? null : category.id)}
                       className="text-muted-foreground hover:text-foreground transition-colors"
+                      type="button"
                     >
                       <MoreVertical size={20} />
                     </button>
@@ -314,6 +426,7 @@ const StoreManager = ({ store: initialStore }: StoreManagerProps) => {
                             setCategoryActionsOpen(null);
                           }}
                           className="w-full text-left px-4 py-2 text-sm text-foreground hover:bg-muted/50 rounded-lg flex items-center"
+                          type="button"
                         >
                           <Copy size={16} className="mr-2" /> Duplicar Categoria
                         </button>
@@ -323,6 +436,7 @@ const StoreManager = ({ store: initialStore }: StoreManagerProps) => {
                             setCategoryActionsOpen(null);
                           }}
                           className="w-full text-left px-4 py-2 text-sm text-destructive hover:bg-muted/50 rounded-lg flex items-center"
+                          type="button"
                         >
                           <Trash2 size={16} className="mr-2" /> Excluir Categoria
                         </button>
@@ -339,7 +453,7 @@ const StoreManager = ({ store: initialStore }: StoreManagerProps) => {
                     onEdit={handleEditItem}
                     onDelete={handleDeleteItem}
                     onDuplicate={handleDuplicateItem}
-                    onToggleActive={(isActive) => handleToggleProductActive(product.id, category.id, isActive)}
+                    onToggleActive={() => handleToggleProductActive(product.id, category.id, !product.isactive)}
                     onTogglePause={() => {}}
                   />
                 ))}
@@ -352,6 +466,7 @@ const StoreManager = ({ store: initialStore }: StoreManagerProps) => {
               <button
                 onClick={() => console.log('Add new category')}
                 className="inline-flex items-center px-4 py-2 text-sm font-medium text-primary hover:text-primary-dark transition-colors"
+                type="button"
               >
                 <Plus className="mr-2 h-5 w-5" /> Adicionar Nova Categoria
               </button>
@@ -359,10 +474,105 @@ const StoreManager = ({ store: initialStore }: StoreManagerProps) => {
           </div>
         </div>
       </div>
+
+      {isEditModalOpen && editingProduct && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div
+            className="bg-background rounded-xl shadow-2xl max-w-md w-full p-6 relative max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+          >
+            <button
+              onClick={() => {
+                setIsEditModalOpen(false);
+                setEditingProduct(null);
+              }}
+              className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
+              type="button"
+              aria-label="Fechar modal de edição"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+
+            <h3 className="text-xl font-bold mb-6">Editar Produto</h3>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Nome do Produto</label>
+                <input
+                  type="text"
+                  value={editingProduct.name}
+                  onChange={(e) => setEditingProduct((prev) => (prev ? { ...prev, name: e.target.value } : null))}
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Descrição</label>
+                <textarea
+                  value={editingProduct.description || ''}
+                  onChange={(e) => setEditingProduct((prev) => (prev ? { ...prev, description: e.target.value } : null))}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-muted-foreground mb-1">Preço (R$)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={editingProduct.price}
+                  onChange={(e) => setEditingProduct((prev) => (prev ? { ...prev, price: parseFloat(e.target.value) || 0 } : null))}
+                  className="w-full px-3 py-2 border border-border rounded-md bg-background"
+                />
+              </div>
+
+              <div className="flex items-center justify-between pt-2">
+                <div className="flex items-center space-x-2">
+                  <span className="text-sm font-medium text-muted-foreground">Status:</span>
+                  <ToggleSwitch
+                    checked={editingProduct.isactive}
+                    onChange={(isActive) => setEditingProduct((prev) => (prev ? { ...prev, isactive: isActive } : null))}
+                  />
+                  <span className={`text-sm font-medium ${editingProduct.isactive ? 'text-success' : 'text-destructive'}`}>
+                    {editingProduct.isactive ? 'Ativo' : 'Inativo'}
+                  </span>
+                </div>
+
+                <button
+                  onClick={() => handleSaveProduct(editingProduct)}
+                  className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                  type="button"
+                >
+                  Salvar Alterações
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default function App({ store }: { store: StoreManagerProps['store'] }) {
+const App: React.FC<{ store: StoreManagerProps['store'] }> = ({ store }) => {
   return <StoreManager store={store} />;
-}
+};
+
+export default App;

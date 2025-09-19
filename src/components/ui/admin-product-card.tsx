@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { ImageThumb } from '@/components/ui/image-thumb';
@@ -42,6 +42,31 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
     ...props
   }, ref) => {
     const [isActionsOpen, setIsActionsOpen] = useState(false);
+    const actionsMenuRef = useRef<HTMLDivElement | null>(null);
+
+    useEffect(() => {
+      if (!isActionsOpen) return;
+
+      const handleClickOutside = (event: MouseEvent) => {
+        if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target as Node)) {
+          setIsActionsOpen(false);
+        }
+      };
+
+      const handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'Escape') {
+          setIsActionsOpen(false);
+        }
+      };
+
+      document.addEventListener('mousedown', handleClickOutside);
+      document.addEventListener('keydown', handleKeyDown);
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside);
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }, [isActionsOpen]);
 
     const formatPrice = (value: number) => {
       return new Intl.NumberFormat('pt-BR', {
@@ -89,6 +114,64 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
                   onCheckedChange={handleSwitchChange}
                 />
               </div>
+            </div>
+
+            {/* Menu de ações */}
+            <div className="absolute top-3 right-3 z-20">
+              <button
+                onClick={() => setIsActionsOpen(!isActionsOpen)}
+                className={cn(
+                  'inline-flex items-center justify-center w-9 h-9 rounded-full transition-colors border',
+                  'bg-card/90 text-muted-foreground border-border/70 hover:bg-card hover:text-foreground',
+                  'dark:bg-gray-900/90 dark:text-gray-300 dark:border-gray-700 dark:hover:bg-gray-900'
+                )}
+                aria-label="Mais ações do produto"
+              >
+                <MoreIcon size="sm" />
+              </button>
+
+              {isActionsOpen && (
+                <div
+                  ref={actionsMenuRef}
+                  className={cn(
+                    'absolute right-0 mt-2 z-20 rounded-lg shadow-lg border py-1 min-w-[160px]',
+                    'bg-white border-gray-200',
+                    'dark:bg-gray-900 dark:border-gray-700'
+                  )}
+                >
+                  <button
+                    onClick={() => {
+                      onDuplicate(id);
+                      setIsActionsOpen(false);
+                    }}
+                    className={cn(
+                      'flex items-center gap-3 w-full px-4 py-2 text-sm',
+                      'text-gray-700 hover:bg-gray-50',
+                      'dark:text-gray-300 dark:hover:bg-gray-800'
+                    )}
+                  >
+                    <CopyIcon size="sm" />
+                    Duplicar
+                  </button>
+
+                  <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
+
+                  <button
+                    onClick={() => {
+                      onDelete(id);
+                      setIsActionsOpen(false);
+                    }}
+                    className={cn(
+                      'flex items-center gap-3 w-full px-4 py-2 text-sm',
+                      'text-red-600 hover:bg-red-50',
+                      'dark:text-red-400 dark:hover:bg-red-900/20'
+                    )}
+                  >
+                    <TrashIcon size="sm" />
+                    Excluir
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Overlay de produto Indisponível */}
@@ -156,99 +239,31 @@ const AdminProductCard = React.forwardRef<HTMLDivElement, AdminProductCardProps>
           </div>
 
           {/* Barra de ações */}
-          <div className="flex items-center justify-between">
-            {/* Ações principais */}
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => onEdit(id)}
-                className={cn(
-                  'inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors',
-                  'bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600',
-                  'dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400'
-                )}
-                title="Editar produto"
-              >
-                <EditIcon size="sm" />
-              </button>
-
-              <button
-                onClick={handlePauseToggle}
-                className={cn(
-                  'inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors',
-                  isPaused
-                    ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50'
-                    : 'bg-gray-100 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-yellow-900/30 dark:hover:text-yellow-400'
-                )}
-                title={isPaused ? 'Retomar produto' : 'Pausar produto'}
-              >
-                {isPaused ? <PlayIcon size="sm" /> : <PauseIcon size="sm" />}
-              </button>
-            </div>
-
-            {/* Menu de ações secundárias */}
-            <div className="relative">
-              <button
-                onClick={() => setIsActionsOpen(!isActionsOpen)}
-                className={cn(
-                  'inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors',
-                  'bg-gray-100 text-gray-600 hover:bg-gray-200',
-                  'dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
-                )}
-                title="Mais ações"
-              >
-                <MoreIcon size="sm" />
-              </button>
-
-              {/* Dropdown de ações */}
-              {isActionsOpen && (
-                <>
-                  {/* Overlay para fechar o menu */}
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setIsActionsOpen(false)}
-                  />
-                  
-                  {/* Menu dropdown */}
-                  <div className={cn(
-                    'absolute right-0 bottom-full mb-2 z-20 rounded-lg shadow-lg border py-1 min-w-[160px]',
-                    'bg-white border-gray-200',
-                    'dark:bg-gray-900 dark:border-gray-700'
-                  )}>
-                    <button
-                      onClick={() => {
-                        onDuplicate(id);
-                        setIsActionsOpen(false);
-                      }}
-                      className={cn(
-                        'flex items-center gap-3 w-full px-4 py-2 text-sm',
-                        'text-gray-700 hover:bg-gray-50',
-                        'dark:text-gray-300 dark:hover:bg-gray-800'
-                      )}
-                    >
-                      <CopyIcon size="sm" />
-                      Duplicar
-                    </button>
-                    
-                    <div className="border-t border-gray-100 dark:border-gray-700 my-1" />
-                    
-                    <button
-                      onClick={() => {
-                        onDelete(id);
-                        setIsActionsOpen(false);
-                      }}
-                      className={cn(
-                        'flex items-center gap-3 w-full px-4 py-2 text-sm',
-                        'text-red-600 hover:bg-red-50',
-                        'dark:text-red-400 dark:hover:bg-red-900/20'
-                      )}
-                    >
-                      <TrashIcon size="sm" />
-                      Excluir
-                    </button>
-                  </div>
-                </>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => onEdit(id)}
+              className={cn(
+                'inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors',
+                'bg-gray-100 text-gray-600 hover:bg-blue-100 hover:text-blue-600',
+                'dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-blue-900/30 dark:hover:text-blue-400'
               )}
-            </div>
+              title="Editar produto"
+            >
+              <EditIcon size="sm" />
+            </button>
+
+            <button
+              onClick={handlePauseToggle}
+              className={cn(
+                'inline-flex items-center justify-center w-8 h-8 rounded-full transition-colors',
+                isPaused
+                  ? 'bg-yellow-100 text-yellow-600 hover:bg-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400 dark:hover:bg-yellow-900/50'
+                  : 'bg-gray-100 text-gray-600 hover:bg-yellow-100 hover:text-yellow-600 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-yellow-900/30 dark:hover:text-yellow-400'
+              )}
+              title={isPaused ? 'Retomar produto' : 'Pausar produto'}
+            >
+              {isPaused ? <PlayIcon size="sm" /> : <PauseIcon size="sm" />}
+            </button>
           </div>
         </div>
       </div>

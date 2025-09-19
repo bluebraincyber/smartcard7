@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useParams } from 'next/navigation'
+import { useParams, usePathname, useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
 import { ArrowLeft, Plus, Package, X, Upload, Camera, Trash2 } from 'lucide-react'
 import { AdminProductCard } from '@/components/ui/admin-product-card'
@@ -371,6 +371,10 @@ const ProductModal = ({
 
 export default function ItemsPage() {
   const params = useParams()
+  const router = useRouter()
+  const pathname = usePathname()
+  const searchParams = useSearchParams()
+  const searchParamsString = searchParams.toString()
   const [store, setStore] = useState<Store | null>(null)
   const [category, setCategory] = useState<Category | null>(null)
   const [items, setItems] = useState<Item[]>([])
@@ -387,6 +391,17 @@ export default function ItemsPage() {
     price: '',
     image: ''
   })
+
+  const startEdit = useCallback((item: Item) => {
+    setEditingItem(item)
+    setFormData({
+      name: item.name,
+      description: item.description || '',
+      price: item.price ? item.price.toString() : '',
+      image: item.image || ''
+    })
+    setModalOpen(true)
+  }, [])
 
   // Normaliza preço vindo do input (aceita vírgula) e evita NaN
   const normalizePrice = (value: string): number | null => {
@@ -443,6 +458,22 @@ export default function ItemsPage() {
     setModalOpen(false)
   }
 
+  const editItemParam = searchParams.get('editItem')
+
+  useEffect(() => {
+    if (!editItemParam || loading || items.length === 0 || modalOpen) return
+
+    const itemToEdit = items.find((item) => item.id === editItemParam)
+    if (!itemToEdit) return
+
+    startEdit(itemToEdit)
+
+    const paramsClone = new URLSearchParams(searchParamsString)
+    paramsClone.delete('editItem')
+    const nextUrl = paramsClone.toString() ? `${pathname}?${paramsClone.toString()}` : pathname
+    router.replace(nextUrl, { scroll: false })
+  }, [editItemParam, items, loading, modalOpen, pathname, router, searchParamsString, startEdit])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!formData.name.trim()) return
@@ -495,17 +526,6 @@ export default function ItemsPage() {
     } finally {
       setCreating(false)
     }
-  }
-
-  const startEdit = (item: Item) => {
-    setEditingItem(item)
-    setFormData({
-      name: item.name,
-      description: item.description || '',
-      price: item.price ? item.price.toString() : '',
-      image: item.image || ''
-    })
-    setModalOpen(true)
   }
 
   const openNewModal = () => {
