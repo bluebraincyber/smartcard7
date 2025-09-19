@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { saveFormFile } from "@/lib/upload";
 import pool from "@/lib/db";  // ✅ CORREÇÃO: Incluir acesso ao banco
+import { revalidatePath } from "next/cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -55,13 +56,26 @@ export async function POST(req: Request, { params }: { params: { id: string } })
     // ✅ CORREÇÃO: Salvar URL no banco de dados
     try {
       console.log('Atualizando URL da capa no banco de dados...');
-      const updateQuery = 'UPDATE stores SET cover_image = $1 WHERE id = $2';
+      const updateQuery = 'UPDATE stores SET coverimage = $1, updated_at = NOW() WHERE id = $2 RETURNING slug';
       const result = await pool.query(updateQuery, [saved.url, storeId]);
-      
+
       if (result.rowCount === 0) {
         console.warn('Nenhuma linha foi atualizada - loja pode não existir');
       } else {
         console.log('URL da capa atualizada no banco com sucesso!');
+        const slug = result.rows[0]?.slug;
+        if (slug) {
+          try {
+            revalidatePath(`/${slug}`);
+          } catch (revalidateError) {
+            console.warn('Falha ao revalidar página pública da loja:', revalidateError);
+          }
+        }
+        try {
+          revalidatePath(`/dashboard/store/${storeId}`);
+        } catch (revalidateError) {
+          console.warn('Falha ao revalidar página do dashboard da loja:', revalidateError);
+        }
       }
     } catch (dbError) {
       console.error('Erro ao atualizar banco de dados:', dbError);
