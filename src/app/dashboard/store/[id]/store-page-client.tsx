@@ -1,7 +1,7 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { ArrowLeft, Plus, Trash2, Edit, ExternalLink, MoreVertical, Copy, Eye } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { ArrowLeft, Plus, Trash2, Edit, ExternalLink, MoreVertical, Copy, Eye, Upload, X } from 'lucide-react';
 import Image from 'next/image';
 import StoreHeader from '@/components/store/StoreHeader';
 
@@ -275,12 +275,32 @@ const StoreManager: React.FC<StoreManagerProps> = ({ store: initialStore }) => {
   const handleSaveProduct = async (updatedProduct: Product) => {
     try {
       console.log('Saving product:', updatedProduct);
+      
+      // Here you would typically upload the image to your server if it's a new one
+      // and get back the URL to save with the product
+      let imageUrl = updatedProduct.image;
+      
+      if (updatedProduct.image && updatedProduct.image.startsWith('data:image')) {
+        // This is a base64 image that needs to be uploaded
+        // TODO: Implement actual image upload to your server
+        // const formData = new FormData();
+        // formData.append('image', updatedProduct.image);
+        // const response = await fetch('/api/upload', { method: 'POST', body: formData });
+        // const data = await response.json();
+        // imageUrl = data.url;
+        console.log('Would upload image to server here');
+      }
+
+      const finalProduct = {
+        ...updatedProduct,
+        image: imageUrl
+      };
 
       setStore((prev) => ({
         ...prev,
         categories: prev.categories.map((cat) => ({
           ...cat,
-          items: cat.items.map((item) => (item.id === updatedProduct.id ? updatedProduct : item)),
+          items: cat.items.map((item) => (item.id === finalProduct.id ? finalProduct : item)),
         })),
       }));
 
@@ -510,16 +530,78 @@ const StoreManager: React.FC<StoreManagerProps> = ({ store: initialStore }) => {
 
             <h3 className="text-xl font-bold mb-6">Editar Produto</h3>
 
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-1">Nome do Produto</label>
-                <input
-                  type="text"
-                  value={editingProduct.name}
-                  onChange={(e) => setEditingProduct((prev) => (prev ? { ...prev, name: e.target.value } : null))}
-                  className="w-full px-3 py-2 border border-border rounded-md bg-background"
-                />
+            <div className="space-y-6">
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2">Imagem do Produto</label>
+                <div className="flex items-center space-x-4">
+                  <div className="relative w-20 h-20 rounded-lg overflow-hidden border-2 border-dashed border-muted-foreground/30 flex-shrink-0">
+                    {editingProduct.image ? (
+                      <Image
+                        src={editingProduct.image}
+                        alt={editingProduct.name}
+                        fill
+                        className="object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-muted/50 flex items-center justify-center">
+                        <span className="text-muted-foreground text-2xl">+</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <div className="text-sm text-muted-foreground mb-2">
+                      {editingProduct.image ? 'Imagem selecionada' : 'Nenhuma imagem selecionada'}
+                    </div>
+                    <div className="flex space-x-2">
+                      <label className="inline-flex items-center justify-center px-3 py-1.5 border border-border rounded-md text-sm font-medium text-foreground bg-background hover:bg-accent cursor-pointer transition-colors">
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              const reader = new FileReader();
+                              reader.onload = (event) => {
+                                setEditingProduct(prev => 
+                                  prev ? { ...prev, image: event.target?.result as string } : null
+                                );
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
+                        />
+                        <span className="flex items-center">
+                          <Upload className="mr-1.5 h-3.5 w-3.5" />
+                          {editingProduct.image ? 'Alterar' : 'Adicionar'}
+                        </span>
+                      </label>
+                      {editingProduct.image && (
+                        <button
+                          type="button"
+                          onClick={() => setEditingProduct(prev => prev ? { ...prev, image: '' } : null)}
+                          className="px-3 py-1.5 text-sm font-medium text-destructive hover:bg-destructive/10 rounded-md transition-colors"
+                        >
+                          Remover
+                        </button>
+                      )}
+                    </div>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      Formatos: JPG, PNG, GIF. Tamanho máximo: 5MB
+                    </p>
+                  </div>
+                </div>
               </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-1">Nome do Produto</label>
+                  <input
+                    type="text"
+                    value={editingProduct.name}
+                    onChange={(e) => setEditingProduct((prev) => (prev ? { ...prev, name: e.target.value } : null))}
+                    className="w-full px-3 py-2 border border-border rounded-md bg-background"
+                  />
+                </div>
 
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-1">Descrição</label>
