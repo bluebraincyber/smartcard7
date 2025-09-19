@@ -18,7 +18,7 @@
   --ring:          218 90% 71%;   /* focus ring com cor oficial #3072F9 */
 
   /* Brand */
-  --primary:       218 90% 46.1%;   /* Azul oficial #0c59df */
+  --primary:       218 90% 56%;   /* #3072F9 - Azul oficial vibrante */
   --primary-fg:    0 0% 100%;
 
   --secondary:     266 66% 50%;   /* Roxo #6D28D9 */
@@ -66,8 +66,8 @@
   --input:         215 14% 22%;
   --ring:          218 90% 71%;   /* ring com cor oficial #3072F9 */
 
-  /* Brand (mantendo cor oficial no dark) */
-  --primary:       218 90% 71%;   /* Azul oficial #3072F9 */
+  /* Brand (mantendo cor oficial IGUAL ao light theme) */
+  --primary:       218 90% 56%;   /* #3072F9 - MESMA COR DO LIGHT */
   --primary-fg:    0 0% 100%;
 
   --secondary:     228 39% 58%;   /* Azul petróleo clareado */

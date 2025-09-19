@@ -195,10 +195,10 @@ export default function DashboardClient({ session }: DashboardClientProps) {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="relative mb-8">
-            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-primary shadow-lg mb-6">
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-primary shadow-lg mb-6 relative z-10">
               <BarChart3 className="h-10 w-10 text-primary-foreground" />
             </div>
-            <div className="absolute inset-0 bg-primary/20 rounded-full blur-3xl -z-10 scale-150"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-40 h-40 bg-primary/50 dark:bg-primary/60 rounded-full blur-3xl animate-pulse"></div>
           </div>
           <h1 className="text-4xl font-bold text-foreground mb-4">
             Dashboard

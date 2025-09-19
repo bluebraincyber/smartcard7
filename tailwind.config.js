@@ -27,21 +27,27 @@ export default {
 
         primary:   "hsl(var(--primary) / <alpha-value>)",
         "primary-fg":"hsl(var(--primary-fg) / <alpha-value>)",
+        "primary-foreground":"hsl(var(--primary-fg) / <alpha-value>)",  // ✅ CORREÇÃO: Adicionar mapeamento
 
         secondary: "hsl(var(--secondary) / <alpha-value>)",
         "secondary-fg":"hsl(var(--secondary-fg) / <alpha-value>)",
+        "secondary-foreground":"hsl(var(--secondary-fg) / <alpha-value>)",  // ✅ CORREÇÃO
 
         accent:    "hsl(var(--accent) / <alpha-value>)",
         "accent-fg":"hsl(var(--accent-fg) / <alpha-value>)",
+        "accent-foreground":"hsl(var(--accent-fg) / <alpha-value>)",  // ✅ CORREÇÃO
 
         success:   "hsl(var(--success) / <alpha-value>)",
         "success-fg":"hsl(var(--success-fg) / <alpha-value>)",
+        "success-foreground":"hsl(var(--success-fg) / <alpha-value>)",  // ✅ CORREÇÃO
 
         warning:   "hsl(var(--warning) / <alpha-value>)",
         "warning-fg":"hsl(var(--warning-fg) / <alpha-value>)",
+        "warning-foreground":"hsl(var(--warning-fg) / <alpha-value>)",  // ✅ CORREÇÃO
 
         destructive:"hsl(var(--destructive) / <alpha-value>)",
         "destructive-fg":"hsl(var(--destructive-fg) / <alpha-value>)",
+        "destructive-foreground":"hsl(var(--destructive-fg) / <alpha-value>)",  // ✅ CORREÇÃO
 
         info:      "hsl(var(--info) / <alpha-value>)",
         "info-fg": "hsl(var(--info-fg) / <alpha-value>)",

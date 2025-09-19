@@ -192,8 +192,8 @@ export default function AnalyticsPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex flex-col items-center justify-center h-64">
             <div className="relative">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-border border-t-accent"></div>
-              <div className="absolute inset-0 rounded-full bg-accent opacity-20 animate-pulse"></div>
+              <div className="animate-spin rounded-full h-12 w-12 border-4 border-border border-t-warning"></div>
+              <div className="absolute inset-0 rounded-full bg-warning opacity-20 animate-pulse"></div>
             </div>
             <span className="mt-4 text-foreground font-medium">Carregando analytics...</span>
           </div>
@@ -223,10 +223,10 @@ export default function AnalyticsPage() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="relative mb-8">
-            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-accent shadow-lg mb-6">
-              <BarChart3 className="h-10 w-10 text-accent-foreground" />
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-warning shadow-lg mb-6 relative z-10">
+              <BarChart3 className="h-10 w-10 text-warning-foreground" />
             </div>
-            <div className="absolute inset-0 bg-accent opacity-20 rounded-full blur-xl scale-150"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-warning/30 dark:bg-warning/40 rounded-full blur-2xl animate-pulse"></div>
           </div>
           <h1 className="text-4xl font-bold text-foreground mb-4">
             Analytics
@@ -250,7 +250,7 @@ export default function AnalyticsPage() {
                   onClick={() => setDateRange(option.value as '7' | '30' | '90')}
                   className={`px-6 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                     dateRange === option.value
-                      ? 'bg-accent text-accent-foreground shadow-md'
+                      ? 'bg-warning text-warning-foreground shadow-md'
                       : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                   }`}
                   disabled={isLoading}
@@ -321,8 +321,8 @@ export default function AnalyticsPage() {
           {/* Average Session */}
           <div className="bg-card backdrop-blur-sm rounded-2xl shadow-lg border border-border p-6 hover:shadow-xl transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center">
-                <Clock className="w-6 h-6 text-accent-foreground" />
+              <div className="w-12 h-12 rounded-xl bg-warning flex items-center justify-center">
+              <Clock className="w-6 h-6 text-warning-foreground" />
               </div>
               <div className={`flex items-center text-xs font-medium ${
                 analyticsData.metrics.avgSession.change >= 0 ? 'text-success' : 'text-destructive'
@@ -456,7 +456,7 @@ function PageViewsChart({ data }: { data: PageViewData[] }) {
           <div className="flex-1 flex items-center gap-3">
             <div className="flex-1 bg-border rounded-full h-3 overflow-hidden">
               <div 
-                className="bg-accent h-full rounded-full transition-all duration-500 ease-out"
+                className="bg-warning h-full rounded-full transition-all duration-500 ease-out"
                 style={{ width: `${(item.views / maxViews) * 100}%` }}
               />
             </div>

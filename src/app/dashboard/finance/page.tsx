@@ -135,10 +135,10 @@ export default function FinancePage() {
         {/* Hero Section */}
         <div className="text-center mb-12">
           <div className="relative mb-8">
-            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-secondary shadow-lg mb-6">
-              <DollarSign className="h-10 w-10 text-secondary-foreground" />
+            <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-2xl bg-success shadow-lg mb-6 relative z-10">
+              <DollarSign className="h-10 w-10 text-success-foreground" />
             </div>
-            <div className="absolute inset-0 bg-secondary opacity-20 rounded-full blur-xl scale-150"></div>
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-success/30 dark:bg-success/40 rounded-full blur-2xl animate-pulse"></div>
           </div>
           <h1 className="text-4xl font-bold text-foreground mb-4">
             Gestão Financeira
