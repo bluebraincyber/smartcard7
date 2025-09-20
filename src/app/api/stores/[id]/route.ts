@@ -151,7 +151,7 @@ export async function PATCH(
 
     if (body.isactive !== undefined) {
       paramCount++
-      setParts.push(`isactive = ${paramCount}`)
+      setParts.push(`isactive = $${paramCount}`)
       values.push(body.isactive)
       console.log(`📝 Atualizando isactive: ${body.isactive}`)
     }

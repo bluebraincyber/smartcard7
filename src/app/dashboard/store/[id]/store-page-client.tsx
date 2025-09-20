@@ -255,10 +255,33 @@ const StoreManager: React.FC<StoreManagerProps> = ({ store: initialStore }) => {
 
   const handleDeleteItem = useCallback((id: string) => {
     if (window.confirm('Tem certeza que deseja excluir este produto?')) {
-      console.log(`Deleting item: ${id}`);
-      // TODO: Implement delete functionality
+      setStore(prev => ({
+        ...prev,
+        categories: prev.categories.map(category => ({
+          ...category,
+          items: category.items.filter(item => item.id !== id)
+        }))
+      }));
+      
+      // TODO: Add API call to delete the item from the server
+      // Example:
+      // try {
+      //   await fetch(`/api/products/${id}`, { method: 'DELETE' });
+      // } catch (error) {
+      //   console.error('Error deleting product:', error);
+      //   // Optionally revert the state if the API call fails
+      //   setStore(prev => ({
+      //     ...prev,
+      //     categories: initialStore.categories?.map(category => ({
+      //       ...category,
+      //       items: category.items || []
+      //     })) || []
+      //   }));
+      //   // Show error message to user
+      //   alert('Não foi possível excluir o produto. Tente novamente.');
+      // }
     }
-  }, []);
+  }, [initialStore.categories]);
 
   const handleEditItem = useCallback(
     (id: string) => {
@@ -278,7 +301,7 @@ const StoreManager: React.FC<StoreManagerProps> = ({ store: initialStore }) => {
       
       // Here you would typically upload the image to your server if it's a new one
       // and get back the URL to save with the product
-      let imageUrl = updatedProduct.image;
+      const imageUrl = updatedProduct.image;
       
       if (updatedProduct.image && updatedProduct.image.startsWith('data:image')) {
         // This is a base64 image that needs to be uploaded
